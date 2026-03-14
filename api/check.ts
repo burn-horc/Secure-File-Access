@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import originalServerHelpers from "../server/original_server_helpers.cjs";
+const originalServerHelpers: any = require("../server/original_server_helpers.cjs");
 
 const {
   getCookieHeaders,
