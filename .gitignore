@@ -1,0 +1,6 @@
+node_modules
+.env
+.config
+.local
+attached_assets
+cookies_storage.txt
