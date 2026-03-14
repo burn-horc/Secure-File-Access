@@ -1,13 +1,14 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const originalServerHelpers: any = require("../server/original_server_helpers.cjs");
+const originalServerHelpers: any = await import("../server/original_server_helpers.cjs");
 
 const {
   getCookieHeaders,
   normalizeWorkerCount,
   normalizeBoolean,
   runDirectCheck,
-} = originalServerHelpers;
+} = originalServerHelpers.default ?? originalServerHelpers;
+
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
