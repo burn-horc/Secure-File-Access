@@ -11,19 +11,26 @@ const supabase = createClient(
     },
   }
 );
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ success: false, error: "Method not allowed" });
-  }
 
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    console.log("verify-passcode called");
-    console.log("body:", req.body);
+    console.log("verify-passcode method:", req.method);
+
+    if (req.method !== "POST") {
+      return res.status(405).json({
+        success: false,
+        error: "Method not allowed",
+      });
+    }
 
     const passcode = String(req.body?.passcode ?? "").trim();
+    console.log("verify-passcode received:", passcode ? "[present]" : "[missing]");
 
     if (!passcode) {
-      return res.status(400).json({ success: false, error: "Passcode is required." });
+      return res.status(400).json({
+        success: false,
+        error: "Passcode is required.",
+      });
     }
 
     const { data, error } = await supabase
@@ -37,18 +44,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log("supabase error:", error);
 
     if (error) {
-      return res.status(500).json({ success: false, error: error.message });
+      return res.status(500).json({
+        success: false,
+        error: error.message,
+      });
     }
 
     if (!data) {
-      return res.status(401).json({ success: false, error: "Incorrect passcode." });
+      return res.status(401).json({
+        success: false,
+        error: "Incorrect passcode.",
+      });
     }
 
     if (data.expires_at && new Date(data.expires_at) <= new Date()) {
-      return res.status(401).json({ success: false, error: "This passcode has expired." });
+      return res.status(401).json({
+        success: false,
+        error: "This passcode has expired.",
+      });
     }
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({
+      success: true,
+    });
   } catch (error: any) {
     console.error("verify-passcode crash:", error);
     return res.status(500).json({
