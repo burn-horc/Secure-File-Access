@@ -1008,7 +1008,9 @@ export default function App() {
 
   try {
     await new Promise((resolve) => window.setTimeout(resolve, 0));
-    if (abortController.signal.aborted) throw new DOMException("Check aborted", "AbortError");
+    if (abortController.signal.aborted) {
+      throw new DOMException("Check aborted", "AbortError");
+    }
 
     if (!passcodeArg) {
       throw new Error("Passcode is required.");
@@ -1022,7 +1024,6 @@ export default function App() {
       headers: { "Content-Type": "application/json" },
       signal: abortController.signal,
       body: JSON.stringify({
-        stream: true,
         passcode: passcodeArg,
       }),
     });
@@ -1031,16 +1032,14 @@ export default function App() {
       setSessionUnlocked(false);
       setVerifiedPasscode("");
       setIsPasscodeModalOpen(true);
-      setIsLoading(false);
-      activeCheckAbortControllerRef.current = null;
       return;
     }
 
     if (response.status === 429) {
       const data = await response.json().catch(() => ({}));
-      const msg = data.error || "You have reached the 3 daily limit for Generate Account. Try again tomorrow.";
-      setIsLoading(false);
-      activeCheckAbortControllerRef.current = null;
+      const msg =
+        data.error ||
+        "You have reached the 3 daily limit for Generate Account. Try again tomorrow.";
       appendCheckLog("error", msg);
       toast({ status: "error", title: msg, isClosable: true });
       return;
@@ -1051,85 +1050,60 @@ export default function App() {
       throw new Error(msg);
     }
 
-    const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
-    if (!contentType.includes("text/event-stream") || !response.body) {
-      throw new Error("Server did not return a stream.");
-    }
+    const data = await response.json();
+    const results = Array.isArray(data?.results) ? data.results : [];
 
-    let completed = 0;
-    let total = null;
-
-    await consumeCheckStream(
-      response.body,
-      {
-        onStart: (payload) => {
-          total = Number.isFinite(payload?.total) ? payload.total : null;
-          appendCheckLog("info", total ? `Starting check for ${total} cookie(s)...` : "Starting check...");
-          setCheckProgress({ completed: 0, total });
-        },
-        onResult: (payload) => {
-          const result = payload.result;
-          completed++;
-          latestPartialResultsRef.current = [...latestPartialResultsRef.current, result];
-          setCheckProgress({ completed, total });
-
-          const planLabel = result.plan?.trim() || "Unknown Plan";
-          const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
-
-          if (result.valid) {
-            setLiveValidCount((prev) => prev + 1);
-            const ck = result.cookieHeader || String(Date.now());
-            setLiveResultIds((prev) => new Set([...prev, ck]));
-            setTimeout(
-              () =>
-                setLiveResultIds((prev) => {
-                  const next = new Set(prev);
-                  next.delete(ck);
-                  return next;
-                }),
-              30000
-            );
-            setBulkValidResults((prev) => [...prev, result]);
-            appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
-            if (soundEnabled) playSuccessChime();
-            abortController.abort();
-          } else {
-            setLiveInvalidCount((prev) => prev + 1);
-            const reason = friendlyReason(result.reason?.trim() || "Unknown error");
-            appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`);
-          }
-        },
-        onDone: (payload) => {
-          const doneTotal = payload.stats?.total ?? completed;
-          setCheckProgress({ completed: doneTotal, total: doneTotal });
-        },
-      },
-      abortController.signal
-    );
-
-    upsertStoredCookieChecksFromResults(latestPartialResultsRef.current);
-    const validCount = latestPartialResultsRef.current.filter((r) => r.valid).length;
-    const invalidCount = latestPartialResultsRef.current.filter((r) => !r.valid).length;
-
-    const allHttp500 =
-      invalidCount > 0 &&
-      validCount === 0 &&
-      latestPartialResultsRef.current.every((r) => !r.valid && String(r.reason ?? "").includes("500"));
-
-    if (allHttp500 && findAccountRetryRef.current < 3) {
-      findAccountRetryRef.current += 1;
-      appendCheckLog(
-        "info",
-        `All results returned HTTP 500. Retrying in 3 seconds... (attempt ${findAccountRetryRef.current}/3)`
-      );
-      window.setTimeout(() => runFindAccountScan(passcodeArg), 3000);
+    if (!results.length) {
+      appendCheckLog("invalid", "No account result returned.");
       return;
     }
 
-    if (allHttp500 && findAccountRetryRef.current >= 3) {
-      appendCheckLog("info", "All retries exhausted. The cookies may be expired or blocked by Netflix.");
-    } else {
-      appendCheckLog("info", `Completed: ${validCount} valid, ${invalidCount} invalid.`);
+    latestPartialResultsRef.current = results;
+    setCheckProgress({ completed: results.length, total: results.length });
+
+    const validResults = results.filter((r) => r.valid);
+    const invalidResults = results.filter((r) => !r.valid);
+
+    setLiveValidCount(validResults.length);
+    setLiveInvalidCount(invalidResults.length);
+    setBulkValidResults(validResults);
+
+    validResults.forEach((result) => {
+      const ck = result.cookieHeader || String(Date.now());
+      setLiveResultIds((prev) => new Set([...prev, ck]));
+      setTimeout(() => {
+        setLiveResultIds((prev) => {
+          const next = new Set(prev);
+          next.delete(ck);
+          return next;
+        });
+      }, 30000);
+    });
+
+    results.forEach((result) => {
+      const planLabel = result.plan?.trim() || "Unknown Plan";
+      const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
+
+      if (result.valid) {
+        appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
+      } else {
+        const reason = friendlyReason(result.reason?.trim() || "Unknown error");
+        appendCheckLog(
+          "invalid",
+          `INVALID - ${planLabel} - ${countryLabel} - ${reason}`
+        );
+      }
+    });
+
+    upsertStoredCookieChecksFromResults(results);
+
+    appendCheckLog(
+      "info",
+      `Completed: ${validResults.length} valid, ${invalidResults.length} invalid.`
+    );
+
+    if (validResults.length > 0 && soundEnabled) {
+      playSuccessChime();
     }
   } catch (caughtError) {
     if (isAbortError(caughtError)) {
@@ -1142,73 +1116,14 @@ export default function App() {
       }
       return;
     }
-    const message = caughtError instanceof Error ? caughtError.message : "Unexpected client error";
+
+    const message =
+      caughtError instanceof Error ? caughtError.message : "Unexpected client error";
     appendCheckLog("invalid", `Error: ${message}`);
     showToast(message);
   } finally {
     activeCheckAbortControllerRef.current = null;
     setIsLoading(false);
-  }
-};
-
-  const runFindAccount = () => {
-  if (isLoading) return;
-  findAccountRetryRef.current = 0;
-
-  if (sessionUnlocked) {
-    if (!verifiedPasscode) {
-      setSessionUnlocked(false);
-      setPasscodeError("");
-      setIsPasscodeModalOpen(true);
-      return;
-    }
-    runFindAccountScan(verifiedPasscode);
-  } else {
-    setPasscodeInput("");
-    setPasscodeError("");
-    setIsPasscodeModalOpen(true);
-  }
-};
-
-const handlePasscodeSubmit = async () => {
-  const code = passcodeInput.trim();
-  if (!code) return;
-
-  setPasscodeLoading(true);
-  setPasscodeError("");
-
-  try {
-    const res = await fetch("/api/find-account/verify-passcode", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ passcode: code }),
-    });
-
-    let data = {};
-    try {
-      data = await res.json();
-    } catch {
-      data = { error: "Server returned invalid response." };
-    }
-
-    if (res.ok && data.success) {
-      setVerifiedPasscode(code);
-      setSessionUnlocked(true);
-      setIsPasscodeModalOpen(false);
-      setPasscodeInput("");
-      findAccountRetryRef.current = 0;
-      runFindAccountScan(code);
-    } else {
-      setPasscodeError(data.error || "Incorrect passcode.");
-    }
-  } catch (err) {
-    console.error("handlePasscodeSubmit error:", err);
-    setPasscodeError(
-      err instanceof Error ? err.message : "Network error. Try again."
-    );
-  } finally {
-    setPasscodeLoading(false);
   }
 };
   
