@@ -1,4 +1,4 @@
-import { type User, type InsertUser } from "@shared/schema";
+import { type User, type InsertUser } from "../shared/schema";
 import { settings, passcodes, generateUsage, abuseLog, cookieStorage, type Passcode } from "../shared/schema";
 import { db } from "./db";
 import { eq, sql, ne, desc } from "drizzle-orm";
