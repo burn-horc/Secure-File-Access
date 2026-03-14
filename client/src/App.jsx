@@ -1130,16 +1130,23 @@ export default function App() {
   };
 
   const runFindAccount = () => {
-    if (isLoading) return;
-    findAccountRetryRef.current = 0;
-    if (sessionUnlocked) {
-      runFindAccountScan();
-    } else {
-      setPasscodeInput("");
+  if (isLoading) return;
+  findAccountRetryRef.current = 0;
+
+  if (sessionUnlocked) {
+    if (!verifiedPasscode) {
+      setSessionUnlocked(false);
       setPasscodeError("");
       setIsPasscodeModalOpen(true);
+      return;
     }
-  };
+    runFindAccountScan(verifiedPasscode);
+  } else {
+    setPasscodeInput("");
+    setPasscodeError("");
+    setIsPasscodeModalOpen(true);
+  }
+};
 
   const handlePasscodeSubmit = async () => {
     const code = passcodeInput.trim();
