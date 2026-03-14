@@ -25,7 +25,6 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { SiNetflix, SiFacebook, SiTelegram } from "react-icons/si";
-import crownImgSrc from "@assets/crown_premium.png";
 import AppCredits from "./AppCredits";
 import { showAppToast } from "./appToast.jsx";
 
@@ -975,17 +974,9 @@ export default function CheckerPage({
                       animation={shimmerAnimation}
                     />
                     <Box display="flex" flexDirection="column" alignItems="center" gap="2px" position="relative">
-                      <Box
-                        as="img"
-                        src={crownImgSrc}
-                        alt="crown"
-                        w="22px"
-                        h="22px"
-                        objectFit="contain"
-                        animation={crownFloatAnimation}
-                        style={{ filter: "drop-shadow(0 0 6px rgba(255,215,0,0.95)) drop-shadow(0 0 12px rgba(255,185,0,0.6))" }}
-                      />
-                      <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">GENERATE ACCOUNT</Box>
+                     <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
+    GENERATE ACCOUNT
+  </Box>
                     </Box>
                   </Button>
                 </Grid>
