@@ -1,0 +1,12 @@
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "installCommand": "npm install --only=dev"
+}
