@@ -47,3 +47,5 @@ export const checkRequestSchema = z.object({
 });
 
 export type CheckRequest = z.infer<typeof checkRequestSchema>;
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
