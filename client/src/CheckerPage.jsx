@@ -25,7 +25,6 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { SiNetflix, SiFacebook, SiTelegram } from "react-icons/si";
-import logo from "@assets/phcorner_logo.png";
 import crownImgSrc from "@assets/crown_premium.png";
 import AppCredits from "./AppCredits";
 import { showAppToast } from "./appToast.jsx";
