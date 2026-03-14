@@ -58,20 +58,23 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
-  async createUser(insertUser: UpsertUser): Promise<User> {
-    const now = new Date();
-    const user: User = {
-      id: insertUser.id ?? randomUUID(),
-      email: insertUser.email ?? "",
-      firstName: insertUser.firstName ?? "",
-      lastName: insertUser.lastName ?? "",
-      profileImageUrl: insertUser.profileImageUrl ?? "",
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.users.set(user.id, user);
-    return user;
-  }
+ async createUser(insertUser: UpsertUser): Promise<User> {
+  const data = insertUser as any;
+  const now = new Date();
+
+  const user: User = {
+    id: data.id ?? randomUUID(),
+    email: data.email ?? "",
+    firstName: data.firstName ?? "",
+    lastName: data.lastName ?? "",
+    profileImageUrl: data.profileImageUrl ?? "",
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  this.users.set(user.id, user);
+  return user;
+}
 
   async getSetting(key: string): Promise<string | null> {
     const rows = await db.select().from(settings).where(eq(settings.key, key));
