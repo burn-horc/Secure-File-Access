@@ -126,6 +126,32 @@ async appendAbuseEntry(entry: AbuseEntry): Promise<void> {
     dailyCount: entry.dailyCount,
   } as any);
 
+    async deletePasscode(id: number): Promise<void> {
+    await db.delete(passcodes).where(eq(passcodes.id, id));
+  }
+
+  async findValidPasscode(code: string): Promise<Passcode | null> {
+    const rows = await db
+      .select()
+      .from(passcodes)
+      .where(
+        sql`${passcodes.code} = ${code} AND (${passcodes.expiresAt} IS NULL OR ${passcodes.expiresAt} > NOW())`
+      );
+    return rows[0] ?? null;
+  }
+
+  async getGenerateUsage(ip: string, date: string): Promise<number> {
+    const rows = await db
+      .select({ count: generateUsage.count })
+      .from(generateUsage)
+      .where(sql`${generateUsage.ip} = ${ip} AND ${generateUsage.date} = ${date}`);
+    return rows[0]?.count ?? 0;
+  }
+
+  async pruneOldGenerateUsage(today: string): Promise<void> {
+    await db.delete(generateUsage).where(ne(generateUsage.date, today));
+  }
+  
   await db.execute(
     sql`DELETE FROM abuse_log WHERE id NOT IN (SELECT id FROM abuse_log ORDER BY id DESC LIMIT 1000)`
   );
