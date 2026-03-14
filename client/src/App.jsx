@@ -1144,6 +1144,67 @@ export default function App() {
     setInput(nextValue);
   };
 
+  const runFindAccount = () => {
+  if (isLoading) return;
+  findAccountRetryRef.current = 0;
+
+  if (sessionUnlocked) {
+    if (!verifiedPasscode) {
+      setSessionUnlocked(false);
+      setPasscodeError("");
+      setIsPasscodeModalOpen(true);
+      return;
+    }
+    runFindAccountScan(verifiedPasscode);
+  } else {
+    setPasscodeInput("");
+    setPasscodeError("");
+    setIsPasscodeModalOpen(true);
+  }
+};
+
+const handlePasscodeSubmit = async () => {
+  const code = passcodeInput.trim();
+  if (!code) return;
+
+  setPasscodeLoading(true);
+  setPasscodeError("");
+
+  try {
+    const res = await fetch("/api/find-account/verify-passcode", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ passcode: code }),
+    });
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch {
+      data = { error: "Server returned invalid response." };
+    }
+
+    if (res.ok && data.success) {
+      setVerifiedPasscode(code);
+      setSessionUnlocked(true);
+      setIsPasscodeModalOpen(false);
+      setPasscodeInput("");
+      findAccountRetryRef.current = 0;
+      runFindAccountScan(code);
+    } else {
+      setPasscodeError(data.error || "Incorrect passcode.");
+    }
+  } catch (err) {
+    console.error("handlePasscodeSubmit error:", err);
+    setPasscodeError(
+      err instanceof Error ? err.message : "Network error. Try again."
+    );
+  } finally {
+    setPasscodeLoading(false);
+  }
+};
+
   const decrementWorkerCount = () => {
     setWorkerCount((current) => clampWorkerCount(current - 1));
   };
