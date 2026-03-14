@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { supabase } from "../lib/supabase";
 import { storage } from "../server/storage";
 
+// @ts-ignore
 const originalServerHelpers: any = await import("../server/original_server_helpers.cjs");
 const {
   getCookieHeaders,
