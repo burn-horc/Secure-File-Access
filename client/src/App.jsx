@@ -989,145 +989,166 @@ export default function App() {
     uploadInputRef.current?.click();
   };
 
-  const runFindAccountScan = async () => {
-    if (isLoading) return;
+  const runFindAccountScan = async (passcodeArg = verifiedPasscode) => {
+  if (isLoading) return;
 
-    const abortController = new AbortController();
-    activeCheckAbortControllerRef.current = abortController;
-    nextCheckLogIdRef.current = 1;
-    setCheckLogs([]);
-    setIsLoading(true);
-    toast.closeAll();
-    setBulkValidResults([]);
-    latestPartialResultsRef.current = [];
-    setCheckProgress({ completed: 0, total: null });
-    setLiveValidCount(0);
-    setLiveInvalidCount(0);
-    setLiveResultIds(new Set());
+  const abortController = new AbortController();
+  activeCheckAbortControllerRef.current = abortController;
+  nextCheckLogIdRef.current = 1;
+  setCheckLogs([]);
+  setIsLoading(true);
+  toast.closeAll();
+  setBulkValidResults([]);
+  latestPartialResultsRef.current = [];
+  setCheckProgress({ completed: 0, total: null });
+  setLiveValidCount(0);
+  setLiveInvalidCount(0);
+  setLiveResultIds(new Set());
 
-    try {
-      await new Promise((resolve) => window.setTimeout(resolve, 0));
-      if (abortController.signal.aborted) throw new DOMException("Check aborted", "AbortError");
+  try {
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    if (abortController.signal.aborted) throw new DOMException("Check aborted", "AbortError");
 
-      appendCheckLog("info", "Loading cookies from storage...");
-
-      const response = await fetch("/api/find-account", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        signal: abortController.signal,
-        body: JSON.stringify({ stream: true }),
-      });
-
-      if (response.status === 401) {
-        setSessionUnlocked(false);
-        setIsPasscodeModalOpen(true);
-        setIsLoading(false);
-        activeCheckAbortControllerRef.current = null;
-        return;
-      }
-
-      if (response.status === 429) {
-        const data = await response.json().catch(() => ({}));
-        const msg = data.error || "You have reached the 3 daily limit for Generate Account. Try again tomorrow.";
-        setIsLoading(false);
-        activeCheckAbortControllerRef.current = null;
-        appendCheckLog("error", msg);
-        toast({ status: "error", title: msg, isClosable: true });
-        return;
-      }
-
-      if (!response.ok) {
-        const msg = await readApiErrorMessage(response);
-        throw new Error(msg);
-      }
-
-      const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
-      if (!contentType.includes("text/event-stream") || !response.body) {
-        throw new Error("Server did not return a stream.");
-      }
-
-      let completed = 0;
-      let total = null;
-
-      await consumeCheckStream(
-        response.body,
-        {
-          onStart: (payload) => {
-            total = Number.isFinite(payload?.total) ? payload.total : null;
-            appendCheckLog("info", total ? `Starting check for ${total} cookie(s)...` : "Starting check...");
-            setCheckProgress({ completed: 0, total });
-          },
-          onResult: (payload) => {
-            const result = payload.result;
-            completed++;
-            latestPartialResultsRef.current = [...latestPartialResultsRef.current, result];
-            setCheckProgress({ completed, total });
-
-            const planLabel = result.plan?.trim() || "Unknown Plan";
-            const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
-
-            if (result.valid) {
-              setLiveValidCount(prev => prev + 1);
-              const ck = result.cookieHeader || String(Date.now());
-              setLiveResultIds(prev => new Set([...prev, ck]));
-              setTimeout(() => setLiveResultIds(prev => { const next = new Set(prev); next.delete(ck); return next; }), 30000);
-              setBulkValidResults((prev) => [...prev, result]);
-              appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
-              if (soundEnabled) playSuccessChime();
-              abortController.abort();
-            } else {
-              setLiveInvalidCount(prev => prev + 1);
-              const reason = friendlyReason(result.reason?.trim() || "Unknown error");
-              appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`);
-            }
-          },
-          onDone: (payload) => {
-            const doneTotal = payload.stats?.total ?? completed;
-            setCheckProgress({ completed: doneTotal, total: doneTotal });
-          },
-        },
-        abortController.signal
-      );
-
-      upsertStoredCookieChecksFromResults(latestPartialResultsRef.current);
-      const validCount = latestPartialResultsRef.current.filter((r) => r.valid).length;
-      const invalidCount = latestPartialResultsRef.current.filter((r) => !r.valid).length;
-
-      const allHttp500 = invalidCount > 0 && validCount === 0 &&
-        latestPartialResultsRef.current.every((r) => !r.valid && String(r.reason ?? "").includes("500"));
-
-      if (allHttp500 && findAccountRetryRef.current < 3) {
-        findAccountRetryRef.current += 1;
-        appendCheckLog("info", `All results returned HTTP 500. Retrying in 3 seconds... (attempt ${findAccountRetryRef.current}/3)`);
-        window.setTimeout(() => runFindAccountScan(), 3000);
-        return;
-      }
-
-      if (allHttp500 && findAccountRetryRef.current >= 3) {
-        appendCheckLog("info", "All retries exhausted. The cookies may be expired or blocked by Netflix.");
-      } else {
-        appendCheckLog("info", `Completed: ${validCount} valid, ${invalidCount} invalid.`);
-      }
-    } catch (caughtError) {
-      if (isAbortError(caughtError)) {
-        upsertStoredCookieChecksFromResults(latestPartialResultsRef.current);
-        const foundValid = latestPartialResultsRef.current.filter((r) => r.valid).length;
-        if (foundValid > 0) {
-          appendCheckLog("info", "Found 1 live account.");
-        } else {
-          appendCheckLog("info", "Stopped. No live account found yet.");
-        }
-        return;
-      }
-      const message = caughtError instanceof Error ? caughtError.message : "Unexpected client error";
-      appendCheckLog("invalid", `Error: ${message}`);
-      showToast(message);
-    } finally {
-      activeCheckAbortControllerRef.current = null;
-      setIsLoading(false);
+    if (!passcodeArg) {
+      throw new Error("Passcode is required.");
     }
-  };
+
+    appendCheckLog("info", "Loading cookies from storage...");
+
+    const response = await fetch("/api/find-account", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      signal: abortController.signal,
+      body: JSON.stringify({
+        stream: true,
+        passcode: passcodeArg,
+      }),
+    });
+
+    if (response.status === 401) {
+      setSessionUnlocked(false);
+      setVerifiedPasscode("");
+      setIsPasscodeModalOpen(true);
+      setIsLoading(false);
+      activeCheckAbortControllerRef.current = null;
+      return;
+    }
+
+    if (response.status === 429) {
+      const data = await response.json().catch(() => ({}));
+      const msg = data.error || "You have reached the 3 daily limit for Generate Account. Try again tomorrow.";
+      setIsLoading(false);
+      activeCheckAbortControllerRef.current = null;
+      appendCheckLog("error", msg);
+      toast({ status: "error", title: msg, isClosable: true });
+      return;
+    }
+
+    if (!response.ok) {
+      const msg = await readApiErrorMessage(response);
+      throw new Error(msg);
+    }
+
+    const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
+    if (!contentType.includes("text/event-stream") || !response.body) {
+      throw new Error("Server did not return a stream.");
+    }
+
+    let completed = 0;
+    let total = null;
+
+    await consumeCheckStream(
+      response.body,
+      {
+        onStart: (payload) => {
+          total = Number.isFinite(payload?.total) ? payload.total : null;
+          appendCheckLog("info", total ? `Starting check for ${total} cookie(s)...` : "Starting check...");
+          setCheckProgress({ completed: 0, total });
+        },
+        onResult: (payload) => {
+          const result = payload.result;
+          completed++;
+          latestPartialResultsRef.current = [...latestPartialResultsRef.current, result];
+          setCheckProgress({ completed, total });
+
+          const planLabel = result.plan?.trim() || "Unknown Plan";
+          const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
+
+          if (result.valid) {
+            setLiveValidCount((prev) => prev + 1);
+            const ck = result.cookieHeader || String(Date.now());
+            setLiveResultIds((prev) => new Set([...prev, ck]));
+            setTimeout(
+              () =>
+                setLiveResultIds((prev) => {
+                  const next = new Set(prev);
+                  next.delete(ck);
+                  return next;
+                }),
+              30000
+            );
+            setBulkValidResults((prev) => [...prev, result]);
+            appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
+            if (soundEnabled) playSuccessChime();
+            abortController.abort();
+          } else {
+            setLiveInvalidCount((prev) => prev + 1);
+            const reason = friendlyReason(result.reason?.trim() || "Unknown error");
+            appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`);
+          }
+        },
+        onDone: (payload) => {
+          const doneTotal = payload.stats?.total ?? completed;
+          setCheckProgress({ completed: doneTotal, total: doneTotal });
+        },
+      },
+      abortController.signal
+    );
+
+    upsertStoredCookieChecksFromResults(latestPartialResultsRef.current);
+    const validCount = latestPartialResultsRef.current.filter((r) => r.valid).length;
+    const invalidCount = latestPartialResultsRef.current.filter((r) => !r.valid).length;
+
+    const allHttp500 =
+      invalidCount > 0 &&
+      validCount === 0 &&
+      latestPartialResultsRef.current.every((r) => !r.valid && String(r.reason ?? "").includes("500"));
+
+    if (allHttp500 && findAccountRetryRef.current < 3) {
+      findAccountRetryRef.current += 1;
+      appendCheckLog(
+        "info",
+        `All results returned HTTP 500. Retrying in 3 seconds... (attempt ${findAccountRetryRef.current}/3)`
+      );
+      window.setTimeout(() => runFindAccountScan(passcodeArg), 3000);
+      return;
+    }
+
+    if (allHttp500 && findAccountRetryRef.current >= 3) {
+      appendCheckLog("info", "All retries exhausted. The cookies may be expired or blocked by Netflix.");
+    } else {
+      appendCheckLog("info", `Completed: ${validCount} valid, ${invalidCount} invalid.`);
+    }
+  } catch (caughtError) {
+    if (isAbortError(caughtError)) {
+      upsertStoredCookieChecksFromResults(latestPartialResultsRef.current);
+      const foundValid = latestPartialResultsRef.current.filter((r) => r.valid).length;
+      if (foundValid > 0) {
+        appendCheckLog("info", "Found 1 live account.");
+      } else {
+        appendCheckLog("info", "Stopped. No live account found yet.");
+      }
+      return;
+    }
+    const message = caughtError instanceof Error ? caughtError.message : "Unexpected client error";
+    appendCheckLog("invalid", `Error: ${message}`);
+    showToast(message);
+  } finally {
+    activeCheckAbortControllerRef.current = null;
+    setIsLoading(false);
+  }
+};
 
   const runFindAccount = () => {
   if (isLoading) return;
@@ -1148,35 +1169,39 @@ export default function App() {
   }
 };
 
-  const handlePasscodeSubmit = async () => {
-    const code = passcodeInput.trim();
-    if (!code) return;
-    setPasscodeLoading(true);
-    setPasscodeError("");
-    try {
-      const res = await fetch("/api/find-account/verify-passcode", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ passcode: code }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setSessionUnlocked(true);
-        setIsPasscodeModalOpen(false);
-        setPasscodeInput("");
-        findAccountRetryRef.current = 0;
-        runFindAccountScan();
-      } else {
-        setPasscodeError(data.error || "Incorrect passcode.");
-      }
-    } catch {
-      setPasscodeError("Network error. Try again.");
-    } finally {
-      setPasscodeLoading(false);
-    }
-  };
+const handlePasscodeSubmit = async () => {
+  const code = passcodeInput.trim();
+  if (!code) return;
 
+  setPasscodeLoading(true);
+  setPasscodeError("");
+
+  try {
+    const res = await fetch("/api/find-account/verify-passcode", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ passcode: code }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      setVerifiedPasscode(code);
+      setSessionUnlocked(true);
+      setIsPasscodeModalOpen(false);
+      setPasscodeInput("");
+      findAccountRetryRef.current = 0;
+      runFindAccountScan(code);
+    } else {
+      setPasscodeError(data.error || "Incorrect passcode.");
+    }
+  } catch {
+    setPasscodeError("Network error. Try again.");
+  } finally {
+    setPasscodeLoading(false);
+  }
+};
   const handleCookieInputChange = (event) => {
     const nextValue = event.target.value;
 
