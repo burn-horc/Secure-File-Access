@@ -1125,7 +1125,7 @@ export default function CheckerPage({
               aria-label="PHCorner"
               data-testid="icon-phcorner"
             >
-              <img src={phcornerLogoSrc} alt="PHCorner" style={{ width: "34px", height: "auto", objectFit: "contain" }} />
+              
             </Box>
           </Box>
 
