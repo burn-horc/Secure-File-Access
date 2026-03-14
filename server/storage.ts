@@ -58,23 +58,23 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
- async createUser(insertUser: UpsertUser): Promise<User> {
-  const data = insertUser as any;
-  const now = new Date();
+  async createUser(insertUser: UpsertUser): Promise<User> {
+    const data = insertUser as any;
+    const now = new Date();
 
-  const user: User = {
-    id: data.id ?? randomUUID(),
-    email: data.email ?? "",
-    firstName: data.firstName ?? "",
-    lastName: data.lastName ?? "",
-    profileImageUrl: data.profileImageUrl ?? "",
-    createdAt: now,
-    updatedAt: now,
-  };
+    const user: User = {
+      id: data.id ?? randomUUID(),
+      email: data.email ?? "",
+      firstName: data.firstName ?? "",
+      lastName: data.lastName ?? "",
+      profileImageUrl: data.profileImageUrl ?? "",
+      createdAt: now,
+      updatedAt: now,
+    };
 
-  this.users.set(user.id, user);
-  return user;
-}
+    this.users.set(user.id, user);
+    return user;
+  }
 
   async getSetting(key: string): Promise<string | null> {
     const rows = await db.select().from(settings).where(eq(settings.key, key));
@@ -98,35 +98,14 @@ export class MemStorage implements IStorage {
   }
 
   async createPasscode(code: string, expiresAt: Date | null): Promise<Passcode> {
-  const rows = await db
-    .insert(passcodes)
-    .values({ code, expiresAt } as any)
-    .returning();
-  return rows[0];
-}
+    const rows = await db
+      .insert(passcodes)
+      .values({ code, expiresAt } as any)
+      .returning();
+    return rows[0];
+  }
 
-async incrementGenerateUsage(ip: string, date: string): Promise<number> {
-  const rows = await db
-    .insert(generateUsage)
-    .values({ ip, date, count: 1 } as any)
-    .onConflictDoUpdate({
-      target: [generateUsage.ip, generateUsage.date],
-      set: { count: sql`${generateUsage.count} + 1` } as any,
-    })
-    .returning({ count: generateUsage.count });
-  return rows[0]?.count ?? 1;
-}
-
-async appendAbuseEntry(entry: AbuseEntry): Promise<void> {
-  await db.insert(abuseLog).values({
-    ip: entry.ip,
-    timestamp: new Date(entry.timestamp),
-    userAgent: entry.userAgent,
-    allowed: entry.allowed,
-    dailyCount: entry.dailyCount,
-  } as any);
-
-    async deletePasscode(id: number): Promise<void> {
+  async deletePasscode(id: number): Promise<void> {
     await db.delete(passcodes).where(eq(passcodes.id, id));
   }
 
@@ -148,14 +127,35 @@ async appendAbuseEntry(entry: AbuseEntry): Promise<void> {
     return rows[0]?.count ?? 0;
   }
 
+  async incrementGenerateUsage(ip: string, date: string): Promise<number> {
+    const rows = await db
+      .insert(generateUsage)
+      .values({ ip, date, count: 1 } as any)
+      .onConflictDoUpdate({
+        target: [generateUsage.ip, generateUsage.date],
+        set: { count: sql`${generateUsage.count} + 1` } as any,
+      })
+      .returning({ count: generateUsage.count });
+    return rows[0]?.count ?? 1;
+  }
+
   async pruneOldGenerateUsage(today: string): Promise<void> {
     await db.delete(generateUsage).where(ne(generateUsage.date, today));
   }
-  
-  await db.execute(
-    sql`DELETE FROM abuse_log WHERE id NOT IN (SELECT id FROM abuse_log ORDER BY id DESC LIMIT 1000)`
-  );
-}
+
+  async appendAbuseEntry(entry: AbuseEntry): Promise<void> {
+    await db.insert(abuseLog).values({
+      ip: entry.ip,
+      timestamp: new Date(entry.timestamp),
+      userAgent: entry.userAgent,
+      allowed: entry.allowed,
+      dailyCount: entry.dailyCount,
+    } as any);
+
+    await db.execute(
+      sql`DELETE FROM abuse_log WHERE id NOT IN (SELECT id FROM abuse_log ORDER BY id DESC LIMIT 1000)`
+    );
+  }
 
   async getAbuseLog(): Promise<AbuseEntry[]> {
     const rows = await db
