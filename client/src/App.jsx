@@ -718,6 +718,7 @@ export default function App() {
   const [liveInvalidCount, setLiveInvalidCount] = useState(0);
   const [liveResultIds, setLiveResultIds] = useState(new Set());
   const [vpnBlocked, setVpnBlocked] = useState(false);
+  const [verifiedPasscode, setVerifiedPasscode] = useState("");
 
   const toggleSound = () => setSoundEnabled(prev => {
     const next = !prev;
@@ -1202,8 +1203,10 @@ const handlePasscodeSubmit = async () => {
       setPasscodeError(data.error || "Incorrect passcode.");
     }
 
-  } catch {
-    setPasscodeError("Network error. Try again.");
+  } catch (err) {
+  console.error("handlePasscodeSubmit error:", err);
+  setPasscodeError(err instanceof Error ? err.message : "Network error. Try again.");
+}
   } finally {
     setPasscodeLoading(false);
   }
