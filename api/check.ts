@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { storage } from "../server/storage";
 import originalServerHelpers from "../server/original_server_helpers.cjs";
 
 const {
@@ -10,19 +9,8 @@ const {
   runDirectCheck,
 } = originalServerHelpers;
 
-async function autoSaveCookie(cookieHeader: string): Promise<void> {
-  if (!cookieHeader || !cookieHeader.includes("=")) {
-    console.warn("[auto-save] skipped — invalid cookieHeader format");
-    return;
-  }
-
-  try {
-    await storage.saveCookie(cookieHeader);
-    const total = await storage.countCookies();
-    console.log(`[auto-save] saved valid cookie to DB (total: ${total})`);
-  } catch (err) {
-    console.error("[auto-save] ERROR saving cookie to DB:", err);
-  }
+async function autoSaveCookie(_cookieHeader: string): Promise<void> {
+  // Temporarily disabled on Vercel until storage.ts is fixed
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -51,16 +39,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!Array.isArray(cookies) || cookies.length === 0) {
       return res.status(400).json({
         success: false,
-        error:
-          "No cookies were provided. Paste Netscape rows, JSON cookie data, or raw/header cookie strings.",
+        error: "No cookies were provided. Paste Netscape rows, JSON cookie data, or raw/header cookie strings.",
       });
     }
 
     const workerCount = Math.max(1, Math.min(1, requestedWorkerCount));
 
     if (body.stream === true) {
-      // This keeps your original behavior, but streaming on Vercel may need extra tuning
-      // depending on how runStreamedCheck writes to the response.
       await runStreamedCheck(req as any, res as any, cookies, workerCount, checkOptions);
       return;
     }
@@ -68,8 +53,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const result = await runDirectCheck(cookies, workerCount, checkOptions);
     return res.status(200).json(result);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unexpected server error";
+    const message = error instanceof Error ? error.message : "Unexpected server error";
     return res.status(500).json({ success: false, error: message });
   }
 }
