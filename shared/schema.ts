@@ -1,3 +1,4 @@
+import { users } from "./models/auth";
 import { boolean, integer, pgTable, primaryKey, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { z } from "zod";
 
