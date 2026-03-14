@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
+// @ts-ignore
 const originalServerHelpers: any = await import("../server/original_server_helpers.cjs");
-
 const {
   getCookieHeaders,
   normalizeWorkerCount,
