@@ -1183,19 +1183,24 @@ const handlePasscodeSubmit = async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ passcode: code }),
     });
+let data = {};
+try {
+  data = await res.json();
+} catch {
+  data = { error: "Server returned invalid response." };
+}
 
-    const data = await res.json();
-
-    if (res.ok && data.success) {
-      setVerifiedPasscode(code);
-      setSessionUnlocked(true);
-      setIsPasscodeModalOpen(false);
-      setPasscodeInput("");
-      findAccountRetryRef.current = 0;
-      runFindAccountScan(code);
-    } else {
-      setPasscodeError(data.error || "Incorrect passcode.");
-    }
+if (res.ok && data.success) {
+  setVerifiedPasscode(code);
+  setSessionUnlocked(true);
+  setIsPasscodeModalOpen(false);
+  setPasscodeInput("");
+  findAccountRetryRef.current = 0;
+  runFindAccountScan(code);
+} else {
+  setPasscodeError(data.error || "Incorrect passcode.");
+}
+    
   } catch {
     setPasscodeError("Network error. Try again.");
   } finally {
