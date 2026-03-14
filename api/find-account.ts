@@ -1,13 +1,16 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { supabase } from "./supabase";
-import { storage } from "../server/storage";
+import { createClient } from "@supabase/supabase-js";
 
-// @ts-ignore
-const originalServerHelpers: any = await import("../server/original_server_helpers.cjs");
-const {
-  getCookieHeaders,
-  runDirectCheck,
-} = originalServerHelpers.default ?? originalServerHelpers;
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  }
+);
 
 async function isPasscodeValid(passcode: string) {
   const { data, error } = await supabase
@@ -42,12 +45,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ success: false, error: passcodeCheck.error });
     }
 
-    const storedCookies = await storage.getCookies();
+    const helpersModule: any = await import("../server/original_server_helpers.cjs");
+    const helpers = helpersModule.default ?? helpersModule;
+    const { getCookieHeaders, runDirectCheck } = helpers;
+
+    const { data: cookieRows, error: cookieError } = await supabase
+      .from("cookies")
+      .select("*");
+
+    if (cookieError) {
+      throw new Error(cookieError.message);
+    }
+
+    if (!cookieRows || !cookieRows.length) {
+      return res.status(400).json({
+        success: false,
+        error: "Cookie pool is empty. No cookies available yet.",
+      });
+    }
+
+    const storedCookies = cookieRows
+      .map((row: any) => row.cookie_header ?? row.cookieHeader ?? row.cookie ?? "")
+      .filter(Boolean);
 
     if (!storedCookies.length) {
       return res.status(400).json({
         success: false,
-        error: "Cookie pool is empty. No cookies available yet.",
+        error: "No usable cookies found in database.",
       });
     }
 
@@ -59,7 +83,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const cookies = parsedInput.cookies;
     if (!Array.isArray(cookies) || !cookies.length) {
-      return res.status(400).json({ success: false, error: "No valid cookies found in the pool." });
+      return res.status(400).json({
+        success: false,
+        error: "No valid cookies found in the pool.",
+      });
     }
 
     for (let i = cookies.length - 1; i > 0; i--) {
@@ -77,6 +104,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json(result);
   } catch (error: any) {
+    console.error("find-account error:", error);
     return res.status(500).json({
       success: false,
       error: error?.message || "Unexpected server error",
