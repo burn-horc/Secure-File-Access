@@ -1202,11 +1202,11 @@ const handlePasscodeSubmit = async () => {
     } else {
       setPasscodeError(data.error || "Incorrect passcode.");
     }
-
   } catch (err) {
-  console.error("handlePasscodeSubmit error:", err);
-  setPasscodeError(err instanceof Error ? err.message : "Network error. Try again.");
-}
+    console.error("handlePasscodeSubmit error:", err);
+    setPasscodeError(
+      err instanceof Error ? err.message : "Network error. Try again."
+    );
   } finally {
     setPasscodeLoading(false);
   }
