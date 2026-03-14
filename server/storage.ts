@@ -1,5 +1,12 @@
-import { type User, type InsertUser } from "../shared/schema";
-import { settings, passcodes, generateUsage, abuseLog, cookieStorage, type Passcode } from "../shared/schema";
+import { type User, type UpsertUser } from "../shared/models/auth";
+import {
+  settings,
+  passcodes,
+  generateUsage,
+  abuseLog,
+  cookieStorage,
+  type Passcode,
+} from "../shared/schema";
 import { db } from "./db";
 import { eq, sql, ne, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -15,7 +22,7 @@ export type AbuseEntry = {
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createUser(user: UpsertUser): Promise<User>;
   getSetting(key: string): Promise<string | null>;
   setSetting(key: string, value: string): Promise<void>;
   listPasscodes(): Promise<Passcode[]>;
@@ -47,16 +54,22 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async getUserByUsername(_username: string): Promise<User | undefined> {
+    return undefined;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+  async createUser(insertUser: UpsertUser): Promise<User> {
+    const now = new Date();
+    const user: User = {
+      id: insertUser.id ?? randomUUID(),
+      email: insertUser.email ?? "",
+      firstName: insertUser.firstName ?? "",
+      lastName: insertUser.lastName ?? "",
+      profileImageUrl: insertUser.profileImageUrl ?? "",
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.users.set(user.id, user);
     return user;
   }
 
@@ -130,11 +143,12 @@ export class MemStorage implements IStorage {
   async appendAbuseEntry(entry: AbuseEntry): Promise<void> {
     await db.insert(abuseLog).values({
       ip: entry.ip,
+      timestamp: new Date(entry.timestamp),
       userAgent: entry.userAgent,
       allowed: entry.allowed,
       dailyCount: entry.dailyCount,
     });
-    // Keep only the newest 1000 rows
+
     await db.execute(
       sql`DELETE FROM abuse_log WHERE id NOT IN (SELECT id FROM abuse_log ORDER BY id DESC LIMIT 1000)`
     );
@@ -146,6 +160,7 @@ export class MemStorage implements IStorage {
       .from(abuseLog)
       .orderBy(desc(abuseLog.id))
       .limit(1000);
+
     return rows.map((r) => ({
       ip: r.ip,
       timestamp: r.timestamp.toISOString(),
