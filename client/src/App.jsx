@@ -1183,30 +1183,32 @@ const handlePasscodeSubmit = async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ passcode: code }),
     });
-let data = {};
-try {
-  data = await res.json();
-} catch {
-  data = { error: "Server returned invalid response." };
-}
 
-if (res.ok && data.success) {
-  setVerifiedPasscode(code);
-  setSessionUnlocked(true);
-  setIsPasscodeModalOpen(false);
-  setPasscodeInput("");
-  findAccountRetryRef.current = 0;
-  runFindAccountScan(code);
-} else {
-  setPasscodeError(data.error || "Incorrect passcode.");
-}
-    
+    let data = {};
+    try {
+      data = await res.json();
+    } catch {
+      data = { error: "Server returned invalid response." };
+    }
+
+    if (res.ok && data.success) {
+      setVerifiedPasscode(code);
+      setSessionUnlocked(true);
+      setIsPasscodeModalOpen(false);
+      setPasscodeInput("");
+      findAccountRetryRef.current = 0;
+      runFindAccountScan(code);
+    } else {
+      setPasscodeError(data.error || "Incorrect passcode.");
+    }
+
   } catch {
     setPasscodeError("Network error. Try again.");
   } finally {
     setPasscodeLoading(false);
   }
 };
+  
   const handleCookieInputChange = (event) => {
     const nextValue = event.target.value;
 
