@@ -7,6 +7,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    console.log("verify-passcode called");
+    console.log("body:", req.body);
+
     const passcode = String(req.body?.passcode ?? "").trim();
 
     if (!passcode) {
@@ -19,6 +22,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .eq("code", passcode)
       .eq("is_active", true)
       .maybeSingle();
+
+    console.log("supabase data:", data);
+    console.log("supabase error:", error);
 
     if (error) {
       return res.status(500).json({ success: false, error: error.message });
@@ -34,6 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({ success: true });
   } catch (error: any) {
+    console.error("verify-passcode crash:", error);
     return res.status(500).json({
       success: false,
       error: error?.message || "Unexpected server error",
