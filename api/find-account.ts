@@ -137,22 +137,26 @@ for (let i = cookies.length - 1; i > 0; i--) {
 
 console.log("starting scan:", cookies.length);
 
-// scan entire list until one passes
-for (const item of cookies) {
+for (const cookie of cookies) {
 
-  const result = await checkItem(item); // your check function
+  const result = await runDirectCheck([cookie], 1, {
+    skipNFToken: false,
+    delayMs: 0,
+    randomJitter: false,
+    staggerMs: 0,
+    onValidCookie: async () => {},
+  });
 
-  const first = result?.results?.[0];
+  await savePassedCheckAudits(result.results || []);
 
-  if (first?.valid) {
-    console.log("valid item found");
+  const valid = result?.results?.find((r: any) => r.valid);
 
+  if (valid) {
+    console.log("valid cookie found");
     return res.status(200).json(result);
   }
 
-  // otherwise continue
 }
-
 return res.status(200).json({
   success: false,
   error: "...",
