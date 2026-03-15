@@ -1035,9 +1035,6 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
 
   const abortController = new AbortController();
   activeCheckAbortControllerRef.current = abortController;
-
-  let noResultTimer;
-
   nextCheckLogIdRef.current = 1;
   setCheckLogs([]);
   setIsLoading(true);
@@ -1059,18 +1056,22 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
       throw new Error("Passcode is required.");
     }
 
-    appendCheckLog("info", "Finding account...");
+    appendCheckLog("info", "Finding Valid NETFLIX Account...");
 
-    noResultTimer = setTimeout(() => {
-      appendCheckLog("invalid", "No result found. Please try again.");
-    }, 15000);
+// timeout if nothing happens
+const noResultTimer = setTimeout(() => {
+  appendCheckLog("invalid", "No valid account found. Please generate account again.");
+  setIsLoading(false);
+}, 15000);
 
     const response = await fetch("/api/find-account", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       signal: abortController.signal,
-      body: JSON.stringify({ passcode: passcodeArg }),
+      body: JSON.stringify({
+        passcode: passcodeArg,
+      }),
     });
 
     if (response.status === 401) {
@@ -1082,8 +1083,10 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
 
     if (response.status === 429) {
       const data = await response.json().catch(() => ({}));
-      const msg = data.error || "Daily limit reached.";
-      appendCheckLog("invalid", msg);
+      const msg =
+        data.error ||
+        "You have reached the 3 daily limit for Generate Account. Try again tomorrow.";
+      appendCheckLog("error", msg);
       toast({ status: "error", title: msg, isClosable: true });
       return;
     }
@@ -1094,18 +1097,85 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     }
 
     const data = await response.json();
+    clearTimeout(noResultTimer);
     const results = Array.isArray(data?.results) ? data.results : [];
 
     if (!results.length) {
-      appendCheckLog("invalid", "No result returned.");
+      appendCheckLog("invalid", "No account result returned.");
       return;
     }
 
-    // ...handle results...
+    latestPartialResultsRef.current = results;
+    setCheckProgress({ completed: results.length, total: results.length });
+
+    const validResults = results.filter((r) => r.valid);
+    const invalidResults = results.filter((r) => !r.valid);
+
+    setLiveValidCount(validResults.length);
+    setLiveInvalidCount(invalidResults.length);
+    setBulkValidResults(validResults);
+
+    validResults.forEach((result) => {
+      const ck = result.cookieHeader || String(Date.now());
+      setLiveResultIds((prev) => new Set([...prev, ck]));
+      setTimeout(() => {
+        setLiveResultIds((prev) => {
+          const next = new Set(prev);
+          next.delete(ck);
+          return next;
+        });
+      }, 30000);
+    });
+
+    results.forEach((result) => {
+      const planLabel = result.plan?.trim() || "Unknown Plan";
+      const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
+
+      if (result.valid) {
+        appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
+      } else {
+        
+        const reasonText = String(result.reason || "").toLowerCase();
+
+let reason = "Unknown error";
+
+if (reasonText.includes("timeout")) reason = "Request timeout";
+else if (reasonText.includes("429")) reason = "Rate limited";
+else if (reasonText.includes("network")) reason = "Network error";
+else if (reasonText.includes("http 5")) reason = "Server error";
+else if (result.reason) reason = result.reason;
+
+appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`);
+    }
+    });
+
+    upsertStoredCookieChecksFromResults(results);
+
+    appendCheckLog(
+      "info",
+      `Completed: ${validResults.length} valid, ${invalidResults.length} invalid.`
+    );
+
+    if (validResults.length > 0 && soundEnabled) {
+      playSuccessChime();
+    }
   } catch (caughtError) {
-    // ...existing catch...
+    if (isAbortError(caughtError)) {
+      upsertStoredCookieChecksFromResults(latestPartialResultsRef.current);
+      const foundValid = latestPartialResultsRef.current.filter((r) => r.valid).length;
+      if (foundValid > 0) {
+        appendCheckLog("info", "Found 1 live account.");
+      } else {
+        appendCheckLog("info", "Stopped. No live account found yet.");
+      }
+      return;
+    }
+
+    const message =
+      caughtError instanceof Error ? caughtError.message : "Unexpected client error";
+    appendCheckLog("invalid", `Error: ${message}`);
+    showToast(message);
   } finally {
-    if (noResultTimer) clearTimeout(noResultTimer);
     activeCheckAbortControllerRef.current = null;
     setIsLoading(false);
   }
@@ -1298,7 +1368,6 @@ const handlePasscodeSubmit = async () => {
     </Switch>
   );
 }
-
 
 
 
