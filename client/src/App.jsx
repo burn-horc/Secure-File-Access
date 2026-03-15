@@ -16,6 +16,25 @@ const MAX_CHECK_LOG_LINES = 1000;
 const FILE_PICKER_ACCEPT = ".json,.txt,.csv";
 const STORAGE_KEY = "netflix-checker:checked-cookies:v1";
 
+function extractCookies(text) {
+  return text
+    .split("\n")                // split file into lines
+    .map(line => {
+      const parts = line.split("cookies:");
+      if (parts.length < 2) return null;
+
+      const cookie = parts[1].trim();   // take right side and trim spaces
+
+      // ignore invalid lines
+      if (!cookie.includes("NetflixId=") || !cookie.includes("SecureNetflixId=")) {
+        return null;
+      }
+
+      return cookie;
+    })
+    .filter(Boolean);           // remove null values
+}
+
 const payloadSizeEncoder = new TextEncoder();
 const COOKIE_ATTRIBUTE_NAMES = new Set([
   "path",
