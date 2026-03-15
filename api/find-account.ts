@@ -63,10 +63,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const { data: cookieRows, error: cookieError } = await supabase
-      .from("cookies")
-      .select("cookie_header")
-      .order("id", { ascending: false });
-
+  .from("cookies")
+  .select("cookie")
+  .order("created_at", { ascending: false });
+    
     console.log("cookie query error:", cookieError);
     console.log("cookie row count:", cookieRows?.length ?? 0);
 
@@ -78,8 +78,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const storedCookies = (cookieRows ?? [])
-      .map((row: any) => row.cookie_header)
-      .filter(Boolean);
+  .map((row: any) => row.cookie)
+  .filter(Boolean);
 
     console.log("storedCookies count:", storedCookies.length);
 
