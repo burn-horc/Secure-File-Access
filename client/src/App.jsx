@@ -1097,6 +1097,7 @@ const noResultTimer = setTimeout(() => {
     }
 
     const data = await response.json();
+    clearTimeout(noResultTimer);
     const results = Array.isArray(data?.results) ? data.results : [];
 
     if (!results.length) {
