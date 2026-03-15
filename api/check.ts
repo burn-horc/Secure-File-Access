@@ -42,7 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const requestedWorkerCount = normalizeWorkerCount(body.concurrency);
-    const workerCount = Math.max(1, Math.min(3, requestedWorkerCount));
+    const workerCount = Math.max(1, Math.min(2, requestedWorkerCount));
     const shouldStream = body.stream === true;
 
     const checkOptions = {
