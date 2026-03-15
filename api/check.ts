@@ -105,9 +105,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // small stagger between workers
   staggerMs: 300,
 
-  onValidCookie: async (_cookieHeader: string) => {},
-};
+  onValidCookie: async (_cookieHeader: string) => {
+  const { error } = await supabase.from("live_checks").insert([
+    {
+      status: "passed",
+      source: cookies.length > 1 ? "bulk-check" : "single-check",
+      plan: null,
+      country: null,
+      checked_at: new Date().toISOString(),
+    },
+  ]);
 
+  if (error) {
+    console.error("stream audit insert error:", error.message);
+  }
+},
+      
     console.log("Worker count:", workerCount);
     console.log("Stream mode:", shouldStream);
 
