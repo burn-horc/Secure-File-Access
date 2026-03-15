@@ -1,6 +1,17 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { supabase } from "./supabase.ts";
+import { createClient } from "@supabase/supabase-js";
 import { createRequire } from "module";
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  }
+);
 
 const require = createRequire(import.meta.url);
 const originalServerHelpers = require("./original_server_helpers.cjs");
