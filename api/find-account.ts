@@ -24,9 +24,7 @@ async function saveSuccessfulChecks(results: any[]) {
     checked_at: new Date().toISOString(),
   }));
 
-  const { error } = await supabase
-    .from("session_checks")
-    .insert(rows);
+  const { error } = await supabase.from("live_checks").insert(rows);
 
   if (error) {
     console.error("saveSuccessfulChecks error:", error.message);
