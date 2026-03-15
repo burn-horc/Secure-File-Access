@@ -46,12 +46,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const shouldStream = body.stream === true;
 
     const checkOptions = {
-      skipNFToken: normalizeBoolean(body.skipNFToken),
-      delayMs: 0,
-      randomJitter: false,
-      staggerMs: 0,
-      onValidCookie: async (_cookieHeader: string) => {},
-    };
+  skipNFToken: normalizeBoolean(body.skipNFToken),
+
+  // slow requests slightly so they don't fail instantly
+  delayMs: 500,
+
+  // randomize delay to avoid rate limits
+  randomJitter: true,
+
+  // small stagger between workers
+  staggerMs: 300,
+
+  onValidCookie: async (_cookieHeader: string) => {},
+};
 
     console.log("Worker count:", workerCount);
     console.log("Stream mode:", shouldStream);
