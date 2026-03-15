@@ -1,14 +1,16 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { createRequire } from "module";
 
-// @ts-ignore
-const originalServerHelpers: any = await import("../server/original_server_helpers.cjs");
+const require = createRequire(import.meta.url);
+const originalServerHelpers = require("./original_server_helpers.cjs");
+
 const {
   getCookieHeaders,
   normalizeWorkerCount,
   normalizeBoolean,
+  runStreamedCheck,
   runDirectCheck,
 } = originalServerHelpers.default ?? originalServerHelpers;
-
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -25,16 +27,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const parsedInput = getCookieHeaders(body);
     console.log("Parsed input result keys:", parsedInput ? Object.keys(parsedInput) : null);
 
-    const requestedWorkerCount = normalizeWorkerCount(body.concurrency);
-
-    const checkOptions = {
-      skipNFToken: normalizeBoolean(body.skipNFToken),
-      delayMs: 1200,
-      randomJitter: true,
-      staggerMs: 800,
-      onValidCookie: async (_cookieHeader: string) => {},
-    };
-
     if (parsedInput?.error) {
       return res.status(400).json({ success: false, error: parsedInput.error });
     }
@@ -49,10 +41,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const workerCount = Math.max(1, Math.min(1, requestedWorkerCount));
-    console.log("Worker count:", workerCount);
-    console.log("About to run runDirectCheck");
+    const requestedWorkerCount = normalizeWorkerCount(body.concurrency);
+    const workerCount = Math.max(1, Math.min(3, requestedWorkerCount));
+    const shouldStream = body.stream === true;
 
+    const checkOptions = {
+      skipNFToken: normalizeBoolean(body.skipNFToken),
+      delayMs: 0,
+      randomJitter: false,
+      staggerMs: 0,
+      onValidCookie: async (_cookieHeader: string) => {},
+    };
+
+    console.log("Worker count:", workerCount);
+    console.log("Stream mode:", shouldStream);
+
+    if (shouldStream) {
+      console.log("About to run runStreamedCheck");
+      return await runStreamedCheck(req, res, cookies, workerCount, checkOptions);
+    }
+
+    console.log("About to run runDirectCheck");
     const result = await runDirectCheck(cookies, workerCount, checkOptions);
 
     console.log("runDirectCheck finished");
