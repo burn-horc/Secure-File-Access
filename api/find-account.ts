@@ -137,6 +137,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log("starting cookie scan:", cookies.length);
 
     for (const cookie of cookies.slice(0, 3)) {
+      
       const result = await runDirectCheck([cookie], 1, {
         skipNFToken: false,
         delayMs: 0,
