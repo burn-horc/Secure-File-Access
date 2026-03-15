@@ -136,29 +136,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       [cookies[i], cookies[j]] = [cookies[j], cookies[i]];
     }
 
-    console.log("starting cookie scan:", cookies.length);
+        console.log("starting cookie scan:", cookies.length);
 
-for (const cookie of cookies.slice(0, 3)) {
-  const result = await runDirectCheck([cookie], 1, {
-    skipNFToken: false,
-    delayMs: 0,
-    randomJitter: false,
-    staggerMs: 0,
-    onValidCookie: async () => {},
-  });
+    for (const cookie of cookies.slice(0, 3)) {
+      const result = await runDirectCheck([cookie], 1, {
+        skipNFToken: false,
+        delayMs: 0,
+        randomJitter: false,
+        staggerMs: 0,
+        onValidCookie: async () => {},
+      });
 
-  await saveSuccessfulChecks(result.results || []);
+      await saveSuccessfulChecks(result.results || []);
 
-  const valid = result?.results?.find((r: any) => r.valid);
-  if (valid) {
-    console.log("valid cookie found");
-    return res.status(200).json(result);
-  }
-}
+      const valid = result?.results?.find((r: any) => r.valid);
+      if (valid) {
+        console.log("valid cookie found");
+        return res.status(200).json(result);
+      }
+    }
 
-return res.status(200).json({
-  success: false,
-  error: "No valid cookies found",
-});
+    return res.status(200).json({
+      success: false,
+      error: "No valid cookies found",
+    });
+  } catch (error: any) {
+    console.error("find-account crash:", error);
+    return res.status(500).json({
+      success: false,
+      error: error?.message || "Unexpected server error",
+    });
   }
 }
