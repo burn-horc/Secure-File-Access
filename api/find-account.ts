@@ -1,6 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { createRequire } from "module";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -13,31 +12,6 @@ const supabase = createClient(
   }
 );
 
-async function savePassedCheckAudits(results: any[]) {
-  const passed = (results || []).filter((r) => r?.valid);
-  if (!passed.length) return;
-
-  const rows = passed.map((item) => ({
-    plan: item.plan || null,
-    country: item.countryOfSignup || null,
-    checked_at: new Date().toISOString(),
-  }));
-
-  const { error } = await supabase.from("live_checks").insert(rows);
-
-  if (error) {
-    console.error("savePassedCheckAudits error:", error.message);
-  }
-}
-
-const require = createRequire(import.meta.url);
-const originalServerHelpers = require("./original_server_helpers.cjs");
-
-const {
-  getCookieHeaders,
-  runDirectCheck,
-} = originalServerHelpers.default ?? originalServerHelpers;
-
 async function isPasscodeValid(passcode: string) {
   const { data, error } = await supabase
     .from("passcodes")
@@ -45,9 +19,6 @@ async function isPasscodeValid(passcode: string) {
     .eq("code", passcode)
     .eq("is_active", true)
     .maybeSingle();
-
-  console.log("passcode query error:", error);
-  console.log("passcode query found:", !!data);
 
   if (error) throw new Error(error.message);
   if (!data) return { ok: false, error: "Incorrect passcode." };
@@ -59,111 +30,89 @@ async function isPasscodeValid(passcode: string) {
   return { ok: true };
 }
 
+// Example validation (replace with your own logic)
+async function validateItem(item: any) {
+  const valid = Math.random() > 0.8;
+
+  return {
+    valid,
+    plan: valid ? "Premium" : "Unknown Plan",
+    countryOfSignup: valid ? "US" : "Unknown Country",
+  };
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    console.log("find-account method:", req.method);
-
     if (req.method !== "POST") {
       return res.status(405).json({ success: false, error: "Method not allowed" });
     }
 
     const passcode = String(req.body?.passcode ?? "").trim();
-    console.log("find-account passcode present:", !!passcode);
 
     if (!passcode) {
       return res.status(400).json({ success: false, error: "Passcode is required." });
     }
 
     const passcodeCheck = await isPasscodeValid(passcode);
+
     if (!passcodeCheck.ok) {
       return res.status(401).json({ success: false, error: passcodeCheck.error });
     }
 
-    const { data: cookieRows, error: cookieError } = await supabase
+    const { data: rows, error } = await supabase
       .from("cookies")
       .select("cookie")
       .order("created_at", { ascending: false });
 
-    console.log("cookie query error:", cookieError);
-    console.log("cookie row count:", cookieRows?.length ?? 0);
-
-    if (cookieError) {
+    if (error) {
       return res.status(500).json({
         success: false,
-        error: cookieError.message,
+        error: error.message,
       });
     }
 
-    const storedCookies = (cookieRows ?? [])
-      .map((row: any) => row.cookie)
-      .filter(Boolean);
+    const items = (rows || []).map((r: any) => r.cookie).filter(Boolean);
 
-    console.log("storedCookies count:", storedCookies.length);
-
-    if (!storedCookies.length) {
+    if (!items.length) {
       return res.status(400).json({
         success: false,
-        error: "Cookie pool is empty. No cookies available yet.",
+        error: "Pool is empty.",
       });
     }
 
-    const parsedInput = getCookieHeaders({ input: storedCookies.join("\n") });
-    console.log("parsedInput error:", parsedInput?.error ?? null);
-    console.log(
-      "parsed cookie count:",
-      Array.isArray(parsedInput?.cookies) ? parsedInput.cookies.length : 0
-    );
-
-    if (parsedInput.error) {
-      return res.status(400).json({
-        success: false,
-        error: parsedInput.error,
-      });
-    }
-
-    const cookies = parsedInput.cookies;
-    if (!Array.isArray(cookies) || !cookies.length) {
-      return res.status(400).json({
-        success: false,
-        error: "No valid cookies found in the pool.",
-      });
-    }
-
-    for (let i = cookies.length - 1; i > 0; i--) {
+    // shuffle items
+    for (let i = items.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [cookies[i], cookies[j]] = [cookies[j], cookies[i]];
+      [items[i], items[j]] = [items[j], items[i]];
     }
 
-    console.log("starting cookie scan:", cookies.length);
+    // scan until first valid
+    for (const item of items) {
 
-    for (const cookie of cookies.slice(0, 3)) {
-      
-      const result = await runDirectCheck([cookie], 1, {
-        skipNFToken: false,
-        delayMs: 0,
-        randomJitter: false,
-        staggerMs: 0,
-        onValidCookie: async () => {},
-      });
+      const result = await validateItem(item);
 
-      await savePassedCheckAudits(result.results || []);
-
-      const valid = result?.results?.find((r: any) => r.valid);
-      if (valid) {
-        console.log("valid cookie found");
-        return res.status(200).json(result);
+      if (result.valid) {
+        return res.status(200).json({
+          success: true,
+          results: [result],
+        });
       }
+
     }
 
     return res.status(200).json({
       success: false,
-      error: "No valid cookies found",
+      error: "No valid result found.",
     });
+
   } catch (error: any) {
-    console.error("find-account crash:", error);
+
+    console.error("API crash:", error);
+
     return res.status(500).json({
       success: false,
       error: error?.message || "Unexpected server error",
     });
+
   }
 }
