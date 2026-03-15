@@ -24,7 +24,7 @@ async function savePassedCheckAudits(
   const rows = passed.map((item) => ({
     account_id: item.accountId || crypto.randomUUID(),
     status: "passed",
-    plant: item.plan || null, // keep "plant" only if that's your real column name
+    plan: item.plan || null, // keep "plant" only if that's your real column name
     country: item.countryOfSignup || null,
     checked_at: new Date().toISOString(),
     expires_at: item.nextBillingRaw || item.membershipEndRaw || null,
@@ -105,7 +105,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           {
             account_id: crypto.randomUUID(),
             status: "passed",
-            plant: null, // keep "plant" only if that's your real column name
+            plan: null, // keep "plant" only if that's your real column name
             country: null,
             checked_at: new Date().toISOString(),
             expires_at: null,
