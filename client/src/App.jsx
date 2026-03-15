@@ -1057,6 +1057,11 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     }
 
     appendCheckLog("info", "Finding Valid NETFLIX Account...");
+    // timeout if nothing happens
+const noResultTimer = setTimeout(() => {
+  appendCheckLog("invalid", "No valid account found. Please generate account again.");
+  setIsLoading(false);
+}, 10000);
 
     const response = await fetch("/api/find-account", {
       method: "POST",
