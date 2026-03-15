@@ -129,41 +129,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    for (let i = cookies.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [cookies[i], cookies[j]] = [cookies[j], cookies[i]];
-    }
+    // shuffle items first
+for (let i = cookies.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [cookies[i], cookies[j]] = [cookies[j], cookies[i]];
+}
 
-    console.log("starting cookie scan:", cookies.length);
+console.log("starting scan:", cookies.length);
 
-    for (const cookie of cookies.slice(0, 3)) {
-      
-      const result = await runDirectCheck([cookie], 1, {
-        skipNFToken: false,
-        delayMs: 0,
-        randomJitter: false,
-        staggerMs: 0,
-        onValidCookie: async () => {},
-      });
+// scan entire list until one passes
+for (const item of cookies) {
 
-      await savePassedCheckAudits(result.results || []);
+  const result = await checkItem(item); // your check function
 
-      const valid = result?.results?.find((r: any) => r.valid);
-      if (valid) {
-        console.log("valid cookie found");
-        return res.status(200).json(result);
-      }
-    }
+  const first = result?.results?.[0];
 
-    return res.status(200).json({
-      success: false,
-      error: "No valid cookies found",
-    });
-  } catch (error: any) {
-    console.error("find-account crash:", error);
-    return res.status(500).json({
-      success: false,
-      error: error?.message || "Unexpected server error",
-    });
+  if (first?.valid) {
+    console.log("valid item found");
+
+    return res.status(200).json(result);
+  }
+
+  // otherwise continue
+}
+
+return res.status(200).json({
+  success: false,
+  error: "No valid item found",
+});
   }
 }
