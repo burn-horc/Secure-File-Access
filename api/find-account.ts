@@ -116,29 +116,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     console.log("starting cookie scan:", cookies.length);
 
-for (const cookie of cookies.slice(0, 10)) {
-
+for (const cookie of cookies.slice(0, 3)) {
   const result = await runDirectCheck([cookie], 1, {
     skipNFToken: false,
     delayMs: 0,
     randomJitter: false,
     staggerMs: 0,
-    onValidCookie: async () => {}
+    onValidCookie: async () => {},
   });
 
   const valid = result?.results?.find((r: any) => r.valid);
-
   if (valid) {
     console.log("valid cookie found");
     return res.status(200).json(result);
   }
 }
 
-console.log("no valid cookie found");
-
 return res.status(200).json({
   success: false,
-  error: "No valid cookies found"
+  error: "No valid cookies found",
 });
   }
 }
