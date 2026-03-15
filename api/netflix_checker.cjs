@@ -8,9 +8,9 @@ const NETFLIX_ACCOUNT_URL = 'https://www.netflix.com/account?locale=en-US';
 const NETFLIX_PROFILE_SWITCH_URL =
   'https://www.netflix.com/nq/website/memberapi/release/profiles/switch';
 const NFTOKEN_API_URL = 'https://android13.prod.ftl.netflix.com/graphql';
-const DIRECT_TIMEOUT_MS = 12000;
-const MAX_DIRECT_ATTEMPTS_PER_REQUEST = 3;
-const TOKEN_TIMEOUT_MS = 12000;
+const DIRECT_TIMEOUT_MS = 6000;
+const MAX_DIRECT_ATTEMPTS_PER_REQUEST = 1;
+const TOKEN_TIMEOUT_MS = 6000;
 const DIRECT_RETRYABLE_STATUS_CODES = new Set([408, 429]);
 
 const USER_AGENT_POOL = [
