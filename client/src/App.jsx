@@ -18,21 +18,24 @@ const STORAGE_KEY = "netflix-checker:checked-cookies:v1";
 
 function extractCookies(text) {
   return text
-    .split("\n")                // split file into lines
-    .map(line => {
-      const parts = line.split("cookies:");
-      if (parts.length < 2) return null;
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const match =
+        line.match(/cookies\s*:\s*(.+)$/i) ||
+        line.match(/\|\s*cookie\s*=\s*(.+)$/i) ||
+        line.match(/\|\s*cookies\s*=\s*(.+)$/i);
 
-      const cookie = parts[1].trim();   // take right side and trim spaces
+      const cookie = match?.[1]?.trim() || line;
 
-      // ignore invalid lines
       if (!cookie.includes("NetflixId=") || !cookie.includes("SecureNetflixId=")) {
         return null;
       }
 
       return cookie;
     })
-    .filter(Boolean);           // remove null values
+    .filter(Boolean);
 }
 
 const payloadSizeEncoder = new TextEncoder();
