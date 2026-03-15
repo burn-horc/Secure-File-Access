@@ -1073,10 +1073,18 @@ export default function App() {
       if (result.valid) {
         appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
       } else {
-        const reason = friendlyReason(result.reason?.trim() || "Unknown error");
-        appendCheckLog(
-          "invalid",
-          `INVALID - ${planLabel} - ${countryLabel} - ${reason}`
+        
+        const reasonText = String(result.reason || "").toLowerCase();
+
+let reason = "Unknown error";
+
+if (reasonText.includes("timeout")) reason = "Request timeout";
+else if (reasonText.includes("429")) reason = "Rate limited";
+else if (reasonText.includes("network")) reason = "Network error";
+else if (reasonText.includes("http 5")) reason = "Server error";
+else if (result.reason) reason = result.reason;
+
+appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`);
         );
       }
     });
