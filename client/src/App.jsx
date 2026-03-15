@@ -882,58 +882,60 @@ export default function App() {
       setCheckProgress({ completed: 0, total: knownTotal });
 
       const orderedResults = await runCheckPayloads(
-        requestPayloads,
-        {
-          onPartialResults: (partialResults) => {
-            latestPartialResultsRef.current = partialResults;
-          },
-          onProgress: (progress) => {
-            setCheckProgress(progress);
-          },
-          onResult: (streamEvent) => {
-            const planLabel = streamEvent.result.plan?.trim() || "Unknown Plan";
-            const countryLabel = streamEvent.result.countryOfSignup?.trim() || "Unknown Country";
+  requestPayloads,
+  {
+    onPartialResults: (partialResults) => {
+      latestPartialResultsRef.current = partialResults;
+    },
+    onProgress: (progress) => {
+      setCheckProgress(progress);
+    },
+    onResult: (streamEvent) => {
+      const result = streamEvent.result;
+      const planLabel = result.plan?.trim() || "Unknown Plan";
+      const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
 
-            if (streamEvent.result.valid) {
-              setLiveValidCount(prev => prev + 1);
-              const ck = streamEvent.result.cookieHeader || String(Date.now());
-              setLiveResultIds(prev => new Set([...prev, ck]));
-              setTimeout(() => setLiveResultIds(prev => { const next = new Set(prev); next.delete(ck); return next; }), 30000);
-              if (soundEnabled) playSuccessChime();
-              setBulkValidResults((prev) => [...prev, streamEvent.result]);
-              const tokenWasSkipped =
-                streamEvent.result.nftokenStage === "skipped" ||
-                streamEvent.result.nftokenError === "Skipped by user option" ||
-                !checkNFToken;
-              const hasToken = Boolean(
-                streamEvent.result.hasTokenLink ||
-                  (typeof streamEvent.result.nftokenLink === "string" &&
-                    streamEvent.result.nftokenLink.trim())
-              );
-              const tokenStage = toCompactLogText(streamEvent.result.nftokenStage, 36);
-              const tokenError = toCompactLogText(streamEvent.result.nftokenError, 150);
-              const tokenStatus = tokenWasSkipped
-                ? "NFTOKEN SKIPPED"
-                : hasToken
-                  ? "NFTOKEN READY"
-                  : `NFTOKEN MISSING${
-                      tokenStage || tokenError
-                        ? ` (${[tokenStage ? `stage=${tokenStage}` : "", tokenError]
-                            .filter(Boolean)
-                            .join(" | ")})`
-                        : ""
-                    }`;
-              appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel} - ${tokenStatus}`);
-              return;
-            }
+      if (result.valid) {
+        setLiveValidCount((prev) => prev + 1);
+        const ck = result.cookieHeader || String(Date.now());
+        setLiveResultIds((prev) => new Set([...prev, ck]));
+        setTimeout(() => {
+          setLiveResultIds((prev) => {
+            const next = new Set(prev);
+            next.delete(ck);
+            return next;
+          });
+        }, 30000);
 
-            setLiveInvalidCount(prev => prev + 1);
-            const reason = friendlyReason(streamEvent.result.reason?.trim() || "Unknown error");
-            appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`);
-          },
-        },
-        abortController.signal
-      );
+        if (soundEnabled) playSuccessChime();
+        setBulkValidResults((prev) => [...prev, result]);
+
+        const tokenWasSkipped =
+          result.nftokenStage === "skipped" ||
+          result.nftokenError === "Skipped by user option" ||
+          !checkNFToken;
+
+        const hasToken = Boolean(
+          result.hasTokenLink ||
+          (typeof result.nftokenLink === "string" && result.nftokenLink.trim())
+        );
+
+        const tokenStatus = tokenWasSkipped
+          ? "NFTOKEN SKIPPED"
+          : hasToken
+            ? "NFTOKEN READY"
+            : "NFTOKEN MISSING";
+
+        appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel} - ${tokenStatus}`);
+      } else {
+        setLiveInvalidCount((prev) => prev + 1);
+        const reason = friendlyReason(result.reason?.trim() || "Unknown error");
+        appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`);
+      }
+    },
+  },
+  abortController.signal
+);
 
       setCheckProgress({
         completed: orderedResults.length,
