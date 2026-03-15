@@ -885,10 +885,9 @@ export default function App() {
         setWorkerCount(normalizedWorkerCount);
       }
 
-      const normalizedInput =
-  activeInput.includes("cookies:")
-    ? extractCookies(activeInput).join("\n")
-    : activeInput;
+      const normalizedInput = activeInput.includes("NetflixId=")
+  ? extractCookies(activeInput).join("\n") || activeInput
+  : activeInput;
 
 const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWorkerCount).map(
         (payload) => ({
