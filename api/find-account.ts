@@ -1,16 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "./supabase";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  }
-);
+// @ts-ignore
+const originalServerHelpers: any = await import("../server/original_server_helpers.cjs");
+const {
+  getCookieHeaders,
+  runDirectCheck,
+} = originalServerHelpers.default ?? originalServerHelpers;
 
 async function isPasscodeValid(passcode: string) {
   const { data, error } = await supabase
@@ -22,9 +18,11 @@ async function isPasscodeValid(passcode: string) {
 
   if (error) throw new Error(error.message);
   if (!data) return { ok: false, error: "Incorrect passcode." };
+
   if (data.expires_at && new Date(data.expires_at) <= new Date()) {
     return { ok: false, error: "This passcode has expired." };
   }
+
   return { ok: true };
 }
 
@@ -45,40 +43,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ success: false, error: passcodeCheck.error });
     }
 
-    const helpersModule: any = await import("../server/original_server_helpers.cjs");
-    const helpers = helpersModule.default ?? helpersModule;
-    const { getCookieHeaders, runDirectCheck } = helpers;
-
     const { data: cookieRows, error: cookieError } = await supabase
       .from("cookies")
-      .select("*");
+      .select("cookie_header")
+      .order("id", { ascending: false });
 
     if (cookieError) {
-      throw new Error(cookieError.message);
+      return res.status(500).json({
+        success: false,
+        error: cookieError.message,
+      });
     }
 
-    if (!cookieRows || !cookieRows.length) {
+    const storedCookies = (cookieRows ?? [])
+      .map((row) => row.cookie_header)
+      .filter(Boolean);
+
+    if (!storedCookies.length) {
       return res.status(400).json({
         success: false,
         error: "Cookie pool is empty. No cookies available yet.",
       });
     }
 
-    const storedCookies = cookieRows
-      .map((row: any) => row.cookie_header ?? row.cookieHeader ?? row.cookie ?? "")
-      .filter(Boolean);
-
-    if (!storedCookies.length) {
-      return res.status(400).json({
-        success: false,
-        error: "No usable cookies found in database.",
-      });
-    }
-
     const parsedInput = getCookieHeaders({ input: storedCookies.join("\n") });
 
     if (parsedInput.error) {
-      return res.status(400).json({ success: false, error: parsedInput.error });
+      return res.status(400).json({
+        success: false,
+        error: parsedInput.error,
+      });
     }
 
     const cookies = parsedInput.cookies;
