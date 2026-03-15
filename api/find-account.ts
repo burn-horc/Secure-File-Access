@@ -1,12 +1,15 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { supabase } from "./supabase";
-// @ts-ignore
-import originalServerHelpers from "./original_server_helpers.cjs";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
+const originalServerHelpers = require("./original_server_helpers.cjs");
 
 const {
   getCookieHeaders,
   runDirectCheck,
 } = originalServerHelpers.default ?? originalServerHelpers;
+
 async function isPasscodeValid(passcode: string) {
   const { data, error } = await supabase
     .from("passcodes")
