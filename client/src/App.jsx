@@ -427,7 +427,7 @@ async function runCheckPayloads(requestPayloads, handlers = {}, abortSignal) {
       headers: { "Content-Type": "application/json" },
       signal: abortSignal,
       body: JSON.stringify(requestPayload),
-      input: cleanedCookies.join("\n")
+      
     });
 
     const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
@@ -882,7 +882,7 @@ export default function App() {
         setWorkerCount(normalizedWorkerCount);
       }
 
-      const requestPayloads = buildCheckRequestPayloads(activeInput, normalizedWorkerCount).map(
+      const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWorkerCount).map(
         (payload) => ({
           ...payload,
           skipNFToken: !checkNFToken,
