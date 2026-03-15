@@ -427,6 +427,7 @@ async function runCheckPayloads(requestPayloads, handlers = {}, abortSignal) {
       headers: { "Content-Type": "application/json" },
       signal: abortSignal,
       body: JSON.stringify(requestPayload),
+      input: cleanedCookies.join("\n")
     });
 
     const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
