@@ -16,6 +16,9 @@ async function isPasscodeValid(passcode: string) {
     .eq("is_active", true)
     .maybeSingle();
 
+  console.log("passcode query error:", error);
+  console.log("passcode query found:", !!data);
+
   if (error) throw new Error(error.message);
   if (!data) return { ok: false, error: "Incorrect passcode." };
 
@@ -27,12 +30,15 @@ async function isPasscodeValid(passcode: string) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ success: false, error: "Method not allowed" });
-  }
-
   try {
+    console.log("find-account method:", req.method);
+
+    if (req.method !== "POST") {
+      return res.status(405).json({ success: false, error: "Method not allowed" });
+    }
+
     const passcode = String(req.body?.passcode ?? "").trim();
+    console.log("find-account passcode present:", !!passcode);
 
     if (!passcode) {
       return res.status(400).json({ success: false, error: "Passcode is required." });
@@ -48,6 +54,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .select("cookie_header")
       .order("id", { ascending: false });
 
+    console.log("cookie query error:", cookieError);
+    console.log("cookie row count:", cookieRows?.length ?? 0);
+
     if (cookieError) {
       return res.status(500).json({
         success: false,
@@ -56,8 +65,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const storedCookies = (cookieRows ?? [])
-      .map((row) => row.cookie_header)
+      .map((row: any) => row.cookie_header)
       .filter(Boolean);
+
+    console.log("storedCookies count:", storedCookies.length);
 
     if (!storedCookies.length) {
       return res.status(400).json({
@@ -67,6 +78,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const parsedInput = getCookieHeaders({ input: storedCookies.join("\n") });
+    console.log("parsedInput error:", parsedInput?.error ?? null);
+    console.log("parsed cookie count:", Array.isArray(parsedInput?.cookies) ? parsedInput.cookies.length : 0);
 
     if (parsedInput.error) {
       return res.status(400).json({
@@ -88,6 +101,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       [cookies[i], cookies[j]] = [cookies[j], cookies[i]];
     }
 
+    console.log("starting runDirectCheck with cookies:", cookies.length);
+
     const result = await runDirectCheck(cookies, 1, {
       skipNFToken: false,
       delayMs: 350,
@@ -96,9 +111,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       onValidCookie: async () => {},
     });
 
+    console.log("runDirectCheck success");
+
     return res.status(200).json(result);
   } catch (error: any) {
-    console.error("find-account error:", error);
+    console.error("find-account crash:", error);
     return res.status(500).json({
       success: false,
       error: error?.message || "Unexpected server error",
