@@ -21,11 +21,12 @@ async function savePassedCheckAudits(
   if (!passed.length) return;
 
   const rows = passed.map((item) => ({
+    account_id: item.accountId || crypto.randomUUID(),
     status: "passed",
-    source,
-    plan: item.plan || null,
+    plant: item.plan || null,
     country: item.countryOfSignup || null,
     checked_at: new Date().toISOString(),
+    expires_at: item.nextBillingRaw || item.membershipEndRaw || null,
   }));
 
   const { error } = await supabase.from("live_checks").insert(rows);
