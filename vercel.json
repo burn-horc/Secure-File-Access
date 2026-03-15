@@ -1,4 +1,10 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/public"
+  "functions": {
+    "api/find-account.ts": {
+      "includeFiles": [
+        "api/original_server_helpers.cjs",
+        "api/netflix_checker.cjs"
+      ]
+    }
+  }
 }
