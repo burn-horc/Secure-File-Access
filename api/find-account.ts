@@ -13,12 +13,11 @@ const supabase = createClient(
   }
 );
 
-async function saveSuccessfulChecks(results: any[]) {
-  const successful = (results || []).filter((r) => r?.valid);
-  if (!successful.length) return;
+async function savePassedCheckAudits(results: any[]) {
+  const passed = (results || []).filter((r) => r?.valid);
+  if (!passed.length) return;
 
-  const rows = successful.map((item) => ({
-    cookie_header: item.cookieHeader || null,
+  const rows = passed.map((item) => ({
     plan: item.plan || null,
     country: item.countryOfSignup || null,
     checked_at: new Date().toISOString(),
@@ -27,7 +26,7 @@ async function saveSuccessfulChecks(results: any[]) {
   const { error } = await supabase.from("live_checks").insert(rows);
 
   if (error) {
-    console.error("saveSuccessfulChecks error:", error.message);
+    console.error("savePassedCheckAudits error:", error.message);
   }
 }
 
