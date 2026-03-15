@@ -114,24 +114,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       [cookies[i], cookies[j]] = [cookies[j], cookies[i]];
     }
 
-    console.log("starting runDirectCheck with cookies:", cookies.length);
+    console.log("starting cookie scan:", cookies.length);
 
-    const result = await runDirectCheck(cookies.slice(0, 10), 1, {
-  skipNFToken: false,
-  delayMs: 0,
-  randomJitter: false,
-  staggerMs: 0,
-  onValidCookie: async () => {},
-});
+for (const cookie of cookies.slice(0, 10)) {
 
-    console.log("runDirectCheck success");
+  const result = await runDirectCheck([cookie], 1, {
+    skipNFToken: false,
+    delayMs: 0,
+    randomJitter: false,
+    staggerMs: 0,
+    onValidCookie: async () => {}
+  });
 
+  const valid = result?.results?.find((r: any) => r.valid);
+
+  if (valid) {
+    console.log("valid cookie found");
     return res.status(200).json(result);
-  } catch (error: any) {
-    console.error("find-account crash:", error);
-    return res.status(500).json({
-      success: false,
-      error: error?.message || "Unexpected server error",
-    });
+  }
+}
+
+console.log("no valid cookie found");
+
+return res.status(200).json({
+  success: false,
+  error: "No valid cookies found"
+});
   }
 }
