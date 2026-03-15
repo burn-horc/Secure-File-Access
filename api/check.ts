@@ -1,6 +1,20 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createRequire } from "module";
 
+function isRetryableFailure(result: any) {
+  const reason = String(result?.reason || result?.error || "").toLowerCase();
+  return (
+    reason.includes("timeout") ||
+    reason.includes("network") ||
+    reason.includes("socket") ||
+    reason.includes("econnreset") ||
+    reason.includes("http 500") ||
+    reason.includes("http 502") ||
+    reason.includes("http 503") ||
+    reason.includes("http 504")
+  );
+}
+
 const require = createRequire(import.meta.url);
 const originalServerHelpers = require("./original_server_helpers.cjs");
 
