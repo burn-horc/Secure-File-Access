@@ -156,7 +156,7 @@ console.log("insert error:", error);
         staggerMs: 0,
         onValidCookie: async () => {},
       });
-
+      await savePassedCheckAudits(result.results || [], "single-check");
       await saveSuccessfulChecks(result.results || []);
 
       const valid = result?.results?.find((r: any) => r.valid);
