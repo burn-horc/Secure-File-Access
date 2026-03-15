@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createRequire } from "module";
+import { createClient } from "@supabase/supabase-js";
 
 function isRetryableFailure(result: any) {
   const reason = String(result?.reason || result?.error || "").toLowerCase();
