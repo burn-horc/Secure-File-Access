@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { supabase } from "./supabase";
+import { supabase } from "./supabase.ts";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
