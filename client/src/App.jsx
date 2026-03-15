@@ -892,30 +892,57 @@ export default function App() {
     },
     onResult: (streamEvent) => {
       const result = streamEvent.result;
-      const label = result.label?.trim() || `Item ${streamEvent.index + 1}`;
+      const planLabel = result.plan?.trim() || "Unknown Plan";
+      const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
 
-      if (result.ok) {
+      if (result.valid) {
         setLiveValidCount((prev) => prev + 1);
-
-        const itemId = result.id || String(Date.now());
-        setLiveResultIds((prev) => new Set([...prev, itemId]));
-
+        const ck = result.cookieHeader || String(Date.now());
+        setLiveResultIds((prev) => new Set([...prev, ck]));
         setTimeout(() => {
           setLiveResultIds((prev) => {
             const next = new Set(prev);
-            next.delete(itemId);
+            next.delete(ck);
             return next;
           });
-        }, 3000);
+        }, 30000);
 
         if (soundEnabled) playSuccessChime();
+        setBulkValidResults((prev) => [...prev, result]);
 
-        appendCheckLog("valid", `PASSED - ${label}`);
+        const tokenWasSkipped =
+          result.nftokenStage === "skipped" ||
+          result.nftokenError === "Skipped by user option" ||
+          !checkNFToken;
+
+        const hasToken = Boolean(
+          result.hasTokenLink ||
+          (typeof result.nftokenLink === "string" && result.nftokenLink.trim())
+        );
+
+        const tokenStatus = tokenWasSkipped
+          ? "NFTOKEN SKIPPED"
+          : hasToken
+            ? "NFTOKEN READY"
+            : "NFTOKEN MISSING";
+
+        appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel} - ${tokenStatus}`);
       } else {
         setLiveInvalidCount((prev) => prev + 1);
 
-        const reason = result.error?.trim() || "Unknown error";
-        appendCheckLog("invalid", `FAILED - ${label} - ${reason}`);
+        const rawReason =
+          typeof result?.reason === "string" && result.reason.trim()
+            ? result.reason.trim()
+            : typeof streamEvent?.error === "string" && streamEvent.error.trim()
+              ? streamEvent.error.trim()
+              : "Unknown error";
+
+        const reason = friendlyReason(rawReason);
+
+        appendCheckLog(
+          "invalid",
+          `INVALID - ${planLabel} - ${countryLabel} - ${reason}`
+        );
       }
     },
   },
