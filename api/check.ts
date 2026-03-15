@@ -4,8 +4,36 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  }
 );
+
+async function saveSuccessfulChecks(results: any[]) {
+  const successful = (results || []).filter((r) => r?.valid);
+
+  if (!successful.length) return;
+
+  const rows = successful.map((item) => ({
+    session_id: item.sessionId || item.id || "unknown",
+    source: "generate-account",
+    status: "passed",
+    plan: item.plan || null,
+    country: item.countryOfSignup || null,
+    checked_at: new Date().toISOString(),
+    expires_at: item.nextBillingRaw || item.membershipEndRaw || null,
+  }));
+
+  const { error } = await supabase.from("session_checks").insert(rows);
+
+  if (error) {
+    console.error("saveSuccessfulChecks error:", error.message);
+  }
+}
 
 function isRetryableFailure(result: any) {
   const reason = String(result?.reason || result?.error || "").toLowerCase();
@@ -131,6 +159,7 @@ if (retriableCookies.length > 0) {
 }
 
     console.log("runDirectCheck finished");
+    await saveSuccessfulChecks(result.results || []);
     return res.status(200).json(result);
   } catch (error: any) {
     console.error("API /api/check runtime failure:", error);
