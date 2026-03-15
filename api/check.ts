@@ -14,7 +14,8 @@ const supabase = createClient(
   }
 );
 
-async function savePassedCheckAudits(results) {
+async function savePassedCheckAudits(
+  results: any[],
   source: "single-check" | "bulk-check"
 ) {
   const passed = (results || []).filter((r) => r?.valid);
@@ -23,7 +24,7 @@ async function savePassedCheckAudits(results) {
   const rows = passed.map((item) => ({
     account_id: item.accountId || crypto.randomUUID(),
     status: "passed",
-    plant: item.plan || null,
+    plant: item.plan || null, // keep "plant" only if that's your real column name
     country: item.countryOfSignup || null,
     checked_at: new Date().toISOString(),
     expires_at: item.nextBillingRaw || item.membershipEndRaw || null,
@@ -95,33 +96,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const shouldStream = body.stream === true;
 
     const checkOptions = {
-  skipNFToken: normalizeBoolean(body.skipNFToken),
+      skipNFToken: normalizeBoolean(body.skipNFToken),
+      delayMs: 500,
+      randomJitter: true,
+      staggerMs: 300,
+      onValidCookie: async (_cookieHeader: string) => {
+        const { error } = await supabase.from("live_checks").insert([
+          {
+            account_id: crypto.randomUUID(),
+            status: "passed",
+            plant: null, // keep "plant" only if that's your real column name
+            country: null,
+            checked_at: new Date().toISOString(),
+            expires_at: null,
+          },
+        ]);
 
-  // slow requests slightly so they don't fail instantly
-  delayMs: 500,
+        if (error) {
+          console.error("stream audit insert error:", error.message);
+        }
+      },
+    };
 
-  // randomize delay to avoid rate limits
-  randomJitter: true,
-
-  // small stagger between workers
-  staggerMs: 300,
-
-  onValidCookie: async (_cookieHeader) => {},
-  const { error } = await supabase.from("live_checks").insert([
-    {
-      status: "passed",
-      source: cookies.length > 1 ? "bulk-check" : "single-check",
-      plan: null,
-      country: null,
-      checked_at: new Date().toISOString(),
-    },
-  ]);
-
-  if (error) {
-    console.error("stream audit insert error:", error.message);
-  }
-},
-      
     console.log("Worker count:", workerCount);
     console.log("Stream mode:", shouldStream);
 
@@ -133,50 +129,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log("About to run runDirectCheck");
     let result = await runDirectCheck(cookies, workerCount, checkOptions);
 
-const retriableCookies: string[] = [];
-const firstResults = Array.isArray(result?.results) ? result.results : [];
+    const retriableCookies: string[] = [];
+    const firstResults = Array.isArray(result?.results) ? result.results : [];
 
-firstResults.forEach((item: any, index: number) => {
-  if (!item?.valid && isRetryableFailure(item) && cookies[index]) {
-    retriableCookies.push(cookies[index]);
-  }
-});
+    firstResults.forEach((item: any, index: number) => {
+      if (!item?.valid && isRetryableFailure(item) && cookies[index]) {
+        retriableCookies.push(cookies[index]);
+      }
+    });
 
-if (retriableCookies.length > 0) {
-  console.log("Retrying temporary failures:", retriableCookies.length);
+    if (retriableCookies.length > 0) {
+      console.log("Retrying temporary failures:", retriableCookies.length);
 
-  const retryResult = await runDirectCheck(retriableCookies, workerCount, {
-    ...checkOptions,
-    delayMs: 400,
-    randomJitter: false,
-    staggerMs: 150,
-  });
+      const retryResult = await runDirectCheck(retriableCookies, workerCount, {
+        ...checkOptions,
+        delayMs: 400,
+        randomJitter: false,
+        staggerMs: 150,
+      });
 
-  const retryResults = Array.isArray(retryResult?.results) ? retryResult.results : [];
-  let retryCursor = 0;
+      const retryResults = Array.isArray(retryResult?.results) ? retryResult.results : [];
+      let retryCursor = 0;
 
-  result.results = firstResults.map((item: any, index: number) => {
-    if (!item?.valid && isRetryableFailure(item) && cookies[index]) {
-      const retried = retryResults[retryCursor];
-      retryCursor += 1;
-      return retried || item;
+      result.results = firstResults.map((item: any, index: number) => {
+        if (!item?.valid && isRetryableFailure(item) && cookies[index]) {
+          const retried = retryResults[retryCursor];
+          retryCursor += 1;
+          return retried || item;
+        }
+        return item;
+      });
+
+      const valid = result.results.filter((r: any) => r?.valid).length;
+      result.stats = {
+        total: result.results.length,
+        valid,
+        invalid: result.results.length - valid,
+      };
     }
-    return item;
-  });
-
-  const valid = result.results.filter((r: any) => r?.valid).length;
-  result.stats = {
-    total: result.results.length,
-    valid,
-    invalid: result.results.length - valid,
-  };
-}
 
     console.log("runDirectCheck finished");
+
     await savePassedCheckAudits(
-  result.results || [],
-  cookies.length > 1 ? "bulk-check" : "single-check"
-);
+      result.results || [],
+      cookies.length > 1 ? "bulk-check" : "single-check"
+    );
+
     return res.status(200).json(result);
   } catch (error: any) {
     console.error("API /api/check runtime failure:", error);
