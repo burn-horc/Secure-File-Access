@@ -13,6 +13,28 @@ const supabase = createClient(
   }
 );
 
+async function saveSuccessfulChecks(results: any[]) {
+  const successful = (results || []).filter((r) => r?.valid);
+
+  if (!successful.length) return;
+
+  const rows = successful.map((item) => ({
+    session_id: item.sessionId || item.id || "unknown",
+    source: "generate-account",
+    status: "passed",
+    plan: item.plan || null,
+    country: item.countryOfSignup || null,
+    checked_at: new Date().toISOString(),
+    expires_at: item.nextBillingRaw || item.membershipEndRaw || null,
+  }));
+
+  const { error } = await supabase.from("session_checks").insert(rows);
+
+  if (error) {
+    console.error("saveSuccessfulChecks error:", error.message);
+  }
+}
+
 const require = createRequire(import.meta.url);
 const originalServerHelpers = require("./original_server_helpers.cjs");
 
@@ -124,6 +146,8 @@ for (const cookie of cookies.slice(0, 3)) {
     staggerMs: 0,
     onValidCookie: async () => {},
   });
+
+  await saveSuccessfulChecks(result.results || []);
 
   const valid = result?.results?.find((r: any) => r.valid);
   if (valid) {
