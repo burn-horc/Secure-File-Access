@@ -1,0 +1,137 @@
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+
+type BatchItem = {
+  id: string;
+  value: string;
+};
+
+type ProgressPayload = {
+  status: "working" | "done" | "complete" | "error";
+  completed: number;
+  remaining: number;
+  total: number;
+  itemId?: string;
+  ok?: boolean;
+  durationMs?: number;
+  error?: string;
+};
+
+function sendSse(res: VercelResponse, event: string, data: unknown) {
+  res.write(`event: ${event}\n`);
+  res.write(`data: ${JSON.stringify(data)}\n\n`);
+}
+
+async function processOneItem(item: BatchItem) {
+  await new Promise((resolve) => setTimeout(resolve, 1200 + Math.random() * 1200));
+
+  if (Math.random() < 0.2) {
+    throw new Error(`Failed to process item ${item.id}`);
+  }
+
+  return {
+    id: item.id,
+    normalizedValue: item.value.trim().toUpperCase(),
+  };
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ success: false, error: "Method not allowed" });
+  }
+
+  const items = Array.isArray(req.body?.items) ? (req.body.items as BatchItem[]) : [];
+
+  if (!items.length) {
+    return res.status(400).json({ success: false, error: "No items provided" });
+  }
+
+  res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+
+  let completed = 0;
+  const total = items.length;
+  const results: Array<{ id: string; ok: boolean; error?: string }> = [];
+
+  const heartbeat = setInterval(() => {
+    const payload: ProgressPayload = {
+      status: "working",
+      completed,
+      remaining: total - completed,
+      total,
+    };
+    sendSse(res, "progress", payload);
+  }, 1000);
+
+  try {
+    sendSse(res, "start", {
+      status: "working",
+      completed: 0,
+      remaining: total,
+      total,
+    });
+
+    for (const item of items) {
+      const startedAt = Date.now();
+
+      try {
+        await processOneItem(item);
+        completed += 1;
+
+        const payload: ProgressPayload = {
+          status: "done",
+          completed,
+          remaining: total - completed,
+          total,
+          itemId: item.id,
+          ok: true,
+          durationMs: Date.now() - startedAt,
+        };
+
+        results.push({ id: item.id, ok: true });
+        sendSse(res, "item", payload);
+      } catch (err) {
+        completed += 1;
+
+        const payload: ProgressPayload = {
+          status: "done",
+          completed,
+          remaining: total - completed,
+          total,
+          itemId: item.id,
+          ok: false,
+          durationMs: Date.now() - startedAt,
+          error: err instanceof Error ? err.message : String(err),
+        };
+
+        results.push({
+          id: item.id,
+          ok: false,
+          error: payload.error,
+        });
+        sendSse(res, "item", payload);
+      }
+    }
+
+    sendSse(res, "complete", {
+      status: "complete",
+      completed,
+      remaining: 0,
+      total,
+      results,
+    });
+
+    res.end();
+  } catch (err) {
+    sendSse(res, "error", {
+      status: "error",
+      completed,
+      remaining: total - completed,
+      total,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    res.end();
+  } finally {
+    clearInterval(heartbeat);
+  }
+}
