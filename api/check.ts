@@ -13,25 +13,25 @@ const supabase = createClient(
   }
 );
 
-async function saveSuccessfulChecks(results: any[]) {
-  const successful = (results || []).filter((r) => r?.valid);
+async function savePassedCheckAudits(
+  results: any[],
+  source: "single-check" | "bulk-check"
+) {
+  const passed = (results || []).filter((r) => r?.valid);
+  if (!passed.length) return;
 
-  if (!successful.length) return;
-
-  const rows = successful.map((item) => ({
-    session_id: item.sessionId || item.id || "unknown",
-    source: "generate-account",
+  const rows = passed.map((item) => ({
     status: "passed",
+    source,
     plan: item.plan || null,
     country: item.countryOfSignup || null,
     checked_at: new Date().toISOString(),
-    expires_at: item.nextBillingRaw || item.membershipEndRaw || null,
   }));
 
-  const { error } = await supabase.from("session_checks").insert(rows);
+  const { error } = await supabase.from("live_checks").insert(rows);
 
   if (error) {
-    console.error("saveSuccessfulChecks error:", error.message);
+    console.error("savePassedCheckAudits error:", error.message);
   }
 }
 
