@@ -79,25 +79,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ success: false, error: passcodeCheck.error });
     }
 
-    const { data, error } = await supabase
-  .from("live_checks")
-  .insert([
-    {
-      plan: "test",
-      country: "test",
-      checked_at: new Date().toISOString(),
-    },
-  ])
-  .select();
-
-console.log("insert data:", data);
-console.log("insert error:", error);
-
     const { data: cookieRows, error: cookieError } = await supabase
-  .from("cookies")
-  .select("cookie")
-  .order("created_at", { ascending: false });
-    
+      .from("cookies")
+      .select("cookie")
+      .order("created_at", { ascending: false });
+
     console.log("cookie query error:", cookieError);
     console.log("cookie row count:", cookieRows?.length ?? 0);
 
@@ -109,8 +95,8 @@ console.log("insert error:", error);
     }
 
     const storedCookies = (cookieRows ?? [])
-  .map((row: any) => row.cookie)
-  .filter(Boolean);
+      .map((row: any) => row.cookie)
+      .filter(Boolean);
 
     console.log("storedCookies count:", storedCookies.length);
 
@@ -123,7 +109,10 @@ console.log("insert error:", error);
 
     const parsedInput = getCookieHeaders({ input: storedCookies.join("\n") });
     console.log("parsedInput error:", parsedInput?.error ?? null);
-    console.log("parsed cookie count:", Array.isArray(parsedInput?.cookies) ? parsedInput.cookies.length : 0);
+    console.log(
+      "parsed cookie count:",
+      Array.isArray(parsedInput?.cookies) ? parsedInput.cookies.length : 0
+    );
 
     if (parsedInput.error) {
       return res.status(400).json({
@@ -145,7 +134,7 @@ console.log("insert error:", error);
       [cookies[i], cookies[j]] = [cookies[j], cookies[i]];
     }
 
-        console.log("starting cookie scan:", cookies.length);
+    console.log("starting cookie scan:", cookies.length);
 
     for (const cookie of cookies.slice(0, 3)) {
       const result = await runDirectCheck([cookie], 1, {
@@ -155,8 +144,8 @@ console.log("insert error:", error);
         staggerMs: 0,
         onValidCookie: async () => {},
       });
-      await savePassedCheckAudits(result.results || [], "single-check");
-      await saveSuccessfulChecks(result.results || []);
+
+      await savePassedCheckAudits(result.results || []);
 
       const valid = result?.results?.find((r: any) => r.valid);
       if (valid) {
