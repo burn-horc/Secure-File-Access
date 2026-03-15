@@ -1085,8 +1085,7 @@ else if (reasonText.includes("http 5")) reason = "Server error";
 else if (result.reason) reason = result.reason;
 
 appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`);
-        );
-      }
+    }
     });
 
     upsertStoredCookieChecksFromResults(results);
