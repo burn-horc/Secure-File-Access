@@ -83,7 +83,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     console.log("About to run runDirectCheck");
-    const result = await runDirectCheck(cookies, workerCount, checkOptions);
+    let result = await runDirectCheck(cookies, workerCount, checkOptions);
+
+const retriableCookies: string[] = [];
+const firstResults = Array.isArray(result?.results) ? result.results : [];
+
+firstResults.forEach((item: any, index: number) => {
+  if (!item?.valid && isRetryableFailure(item) && cookies[index]) {
+    retriableCookies.push(cookies[index]);
+  }
+});
+
+if (retriableCookies.length > 0) {
+  console.log("Retrying temporary failures:", retriableCookies.length);
+
+  const retryResult = await runDirectCheck(retriableCookies, workerCount, {
+    ...checkOptions,
+    delayMs: 400,
+    randomJitter: false,
+    staggerMs: 150,
+  });
+
+  const retryResults = Array.isArray(retryResult?.results) ? retryResult.results : [];
+  let retryCursor = 0;
+
+  result.results = firstResults.map((item: any, index: number) => {
+    if (!item?.valid && isRetryableFailure(item) && cookies[index]) {
+      const retried = retryResults[retryCursor];
+      retryCursor += 1;
+      return retried || item;
+    }
+    return item;
+  });
+
+  const valid = result.results.filter((r: any) => r?.valid).length;
+  result.stats = {
+    total: result.results.length,
+    valid,
+    invalid: result.results.length - valid,
+  };
+}
 
     console.log("runDirectCheck finished");
     return res.status(200).json(result);
