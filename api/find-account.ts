@@ -155,7 +155,13 @@ for (const item of cookies) {
 
 return res.status(200).json({
   success: false,
-  error: "No valid item found",
+  error: "...",
 });
-  }
+} catch (error: any) {
+  console.error("find-account crash:", error);
+  return res.status(500).json({
+    success: false,
+    error: error?.message || "Unexpected server error",
+  });
+}
 }
