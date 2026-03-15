@@ -882,7 +882,12 @@ export default function App() {
         setWorkerCount(normalizedWorkerCount);
       }
 
-      const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWorkerCount).map(
+      const normalizedInput =
+  activeInput.includes("cookies:")
+    ? extractCookies(activeInput).join("\n")
+    : activeInput;
+
+const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWorkerCount).map(
         (payload) => ({
           ...payload,
           skipNFToken: !checkNFToken,
