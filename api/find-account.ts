@@ -116,8 +116,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     console.log("starting runDirectCheck with cookies:", cookies.length);
 
-    const result = await runDirectCheck(cookies.slice(0, 5), 1, {
-  skipNFToken: true,
+    const result = await runDirectCheck(cookies.slice(0, 10), 1, {
+  skipNFToken: true,   // keep this true for speed
   delayMs: 0,
   randomJitter: false,
   staggerMs: 0,
