@@ -15,20 +15,18 @@ const supabase = createClient(
 
 async function saveSuccessfulChecks(results: any[]) {
   const successful = (results || []).filter((r) => r?.valid);
-
   if (!successful.length) return;
 
   const rows = successful.map((item) => ({
-    session_id: item.sessionId || item.id || "unknown",
-    source: "generate-account",
-    status: "passed",
+    cookie_header: item.cookieHeader || null,
     plan: item.plan || null,
     country: item.countryOfSignup || null,
     checked_at: new Date().toISOString(),
-    expires_at: item.nextBillingRaw || item.membershipEndRaw || null,
   }));
 
-  const { error } = await supabase.from("session_checks").insert(rows);
+  const { error } = await supabase
+    .from("session_checks")
+    .insert(rows);
 
   if (error) {
     console.error("saveSuccessfulChecks error:", error.message);
