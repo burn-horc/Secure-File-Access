@@ -14,8 +14,7 @@ const supabase = createClient(
   }
 );
 
-async function savePassedCheckAudits(
-  results: any[],
+async function savePassedCheckAudits(results) {
   source: "single-check" | "bulk-check"
 ) {
   const passed = (results || []).filter((r) => r?.valid);
@@ -107,7 +106,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // small stagger between workers
   staggerMs: 300,
 
-  onValidCookie: async (_cookieHeader: string) => {
+  onValidCookie: async (_cookieHeader) => {},
   const { error } = await supabase.from("live_checks").insert([
     {
       status: "passed",
