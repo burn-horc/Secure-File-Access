@@ -1056,7 +1056,7 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
       throw new Error("Passcode is required.");
     }
 
-    appendCheckLog("info", "Finding netflix account...");
+    appendCheckLog("info", "Finding Valid NETFLIX Account...");
 
     const response = await fetch("/api/find-account", {
       method: "POST",
