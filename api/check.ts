@@ -159,7 +159,10 @@ if (retriableCookies.length > 0) {
 }
 
     console.log("runDirectCheck finished");
-    await saveSuccessfulChecks(result.results || []);
+    await savePassedCheckAudits(
+  result.results || [],
+  cookies.length > 1 ? "bulk-check" : "single-check"
+);
     return res.status(200).json(result);
   } catch (error: any) {
     console.error("API /api/check runtime failure:", error);
