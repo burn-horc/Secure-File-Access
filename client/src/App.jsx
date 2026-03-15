@@ -892,51 +892,35 @@ export default function App() {
     },
     onResult: (streamEvent) => {
       const result = streamEvent.result;
-      const planLabel = result.plan?.trim() || "Unknown Plan";
-      const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
+      const label = result.label?.trim() || `Item ${streamEvent.index + 1}`;
 
-      if (result.valid) {
+      if (result.ok) {
         setLiveValidCount((prev) => prev + 1);
-        const ck = result.cookieHeader || String(Date.now());
-        setLiveResultIds((prev) => new Set([...prev, ck]));
+
+        const itemId = result.id || String(Date.now());
+        setLiveResultIds((prev) => new Set([...prev, itemId]));
+
         setTimeout(() => {
           setLiveResultIds((prev) => {
             const next = new Set(prev);
-            next.delete(ck);
+            next.delete(itemId);
             return next;
           });
-        }, 30000);
+        }, 3000);
 
         if (soundEnabled) playSuccessChime();
-        setBulkValidResults((prev) => [...prev, result]);
 
-        const tokenWasSkipped =
-          result.nftokenStage === "skipped" ||
-          result.nftokenError === "Skipped by user option" ||
-          !checkNFToken;
-
-        const hasToken = Boolean(
-          result.hasTokenLink ||
-          (typeof result.nftokenLink === "string" && result.nftokenLink.trim())
-        );
-
-        const tokenStatus = tokenWasSkipped
-          ? "NFTOKEN SKIPPED"
-          : hasToken
-            ? "NFTOKEN READY"
-            : "NFTOKEN MISSING";
-
-        appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel} - ${tokenStatus}`);
+        appendCheckLog("valid", `PASSED - ${label}`);
       } else {
         setLiveInvalidCount((prev) => prev + 1);
-        const reason = friendlyReason(result.reason?.trim() || "Unknown error");
-        appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`);
+
+        const reason = result.error?.trim() || "Unknown error";
+        appendCheckLog("invalid", `FAILED - ${label} - ${reason}`);
       }
     },
   },
   abortController.signal
 );
-
       setCheckProgress({
         completed: orderedResults.length,
         total: knownTotal ?? orderedResults.length,
