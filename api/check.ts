@@ -2,6 +2,11 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createRequire } from "module";
 import { createClient } from "@supabase/supabase-js";
 
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
 function isRetryableFailure(result: any) {
   const reason = String(result?.reason || result?.error || "").toLowerCase();
   return (
