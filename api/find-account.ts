@@ -82,6 +82,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ success: false, error: passcodeCheck.error });
     }
 
+    const { data, error } = await supabase
+  .from("live_checks")
+  .insert([
+    {
+      plan: "test",
+      country: "test",
+      checked_at: new Date().toISOString(),
+    },
+  ])
+  .select();
+
+console.log("insert data:", data);
+console.log("insert error:", error);
+
     const { data: cookieRows, error: cookieError } = await supabase
   .from("cookies")
   .select("cookie")
