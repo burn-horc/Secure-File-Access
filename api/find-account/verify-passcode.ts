@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
+import { ipRateLimit } from "../../lib/rateLimit.js";
+import { isLockedOut, recordFailure, clearFailures } from "../../lib/antiBruteforce.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -12,6 +14,20 @@ const supabase = createClient(
   }
 );
 
+function getClientIp(req: VercelRequest) {
+  const xff = req.headers["x-forwarded-for"];
+  if (typeof xff === "string" && xff.length > 0) {
+    return xff.split(",")[0].trim();
+  }
+
+  const realIp = req.headers["x-real-ip"];
+  if (typeof realIp === "string" && realIp.length > 0) {
+    return realIp;
+  }
+
+  return "unknown";
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     console.log("verify-passcode method:", req.method);
@@ -23,10 +39,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    const ip = getClientIp(req);
+
+    if (await isLockedOut(ip)) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many failed attempts. Try again later.",
+      });
+    }
+
+    const { success } = await ipRateLimit.limit(ip);
+    if (!success) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many requests. Please slow down.",
+      });
+    }
+
     const passcode = String(req.body?.passcode ?? "").trim();
     console.log("verify-passcode received:", passcode ? "[present]" : "[missing]");
 
     if (!passcode) {
+      await recordFailure(ip);
       return res.status(400).json({
         success: false,
         error: "Passcode is required.",
@@ -51,6 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (!data) {
+      await recordFailure(ip);
       return res.status(401).json({
         success: false,
         error: "Incorrect passcode.",
@@ -58,11 +93,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (data.expires_at && new Date(data.expires_at) <= new Date()) {
+      await recordFailure(ip);
       return res.status(401).json({
         success: false,
         error: "This passcode has expired.",
       });
     }
+
+    await clearFailures(ip);
 
     return res.status(200).json({
       success: true,
