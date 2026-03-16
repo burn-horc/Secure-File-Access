@@ -1,4 +1,4 @@
-import { redis } from "./rateLimit";
+import { redis } from "./rateLimit.js";
 
 const FAIL_WINDOW_SECONDS = 15 * 60;
 const MAX_FAILS = 5;
