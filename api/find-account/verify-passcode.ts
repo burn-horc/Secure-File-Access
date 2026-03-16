@@ -45,6 +45,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(429).json({
         success: false,
         error: "Too many failed attempts. Try again in 60 minutes.",
+         error: "Nice try diddy 😂",
       });
     }
 
