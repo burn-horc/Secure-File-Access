@@ -1,3 +1,8 @@
+const maintenanceMode = true;
+const previewAllowed =
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).get("preview") === "12345secret";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast, Box } from "@chakra-ui/react";
 import { Switch, Route } from "wouter";
@@ -1316,6 +1321,26 @@ const handlePasscodeSubmit = async () => {
       </Box>
     );
   }
+
+  if (maintenanceMode && !previewAllowed) {
+  return (
+    <Box minH="100vh" bg="#141414" display="flex" alignItems="center" justifyContent="center" p={6}>
+      <Box textAlign="center" maxW="420px">
+        <Box color="#e50914" fontSize="64px" fontWeight="900" letterSpacing="-2px" mb={6} lineHeight={1}>
+          N
+        </Box>
+        <Box color="#fff" fontSize="28px" fontWeight="700" mb={3}>
+          Under Maintenance
+        </Box>
+        <Box color="#aaa" fontSize="15px" lineHeight="1.7">
+          We’re updating the website right now.
+          <br />
+          Please check back soon.
+        </Box>
+      </Box>
+    </Box>
+  );
+}
 
   return (
     <Switch>
