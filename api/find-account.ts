@@ -81,7 +81,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { data: cookieRows, error: cookieError } = await supabase
       .from("cookies")
-      .select("cookie")
+      .select("Cookie")
       .order("created_at", { ascending: false });
 
     console.log("cookie query error:", cookieError);
