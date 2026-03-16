@@ -1,6 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createRequire } from "module";
 import { createClient } from "@supabase/supabase-js";
+import { ipRateLimit } from "../lib/rateLimit";
+import { isLockedOut, recordFailure, clearFailures } from "../lib/antiBruteforce";
+
 import crypto from "crypto";
 
 const supabase = createClient(
@@ -13,6 +16,39 @@ const supabase = createClient(
     },
   }
 );
+
+const require = createRequire(import.meta.url);
+const originalServerHelpers = require("./original_server_helpers.cjs");
+
+const { getCookieHeaders, runDirectCheck } =
+  originalServerHelpers.default ?? originalServerHelpers;
+
+async function isPasscodeValid(passcode: string) {
+  const { data, error } = await supabase
+    .from("passcodes")
+    .select("id, code, is_active, expires_at, uses, max_uses")
+    .eq("code", passcode)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) return { ok: false, error: "Invalid passcode." };
+
+  if (data.expires_at && new Date(data.expires_at) <= new Date()) {
+    return { ok: false, error: "Invalid passcode." };
+  }
+
+  if (
+    typeof data.max_uses === "number" &&
+    typeof data.uses === "number" &&
+    data.uses >= data.max_uses
+  ) {
+    return { ok: false, error: "Invalid passcode." };
+  }
+
+  return { ok: true, passcodeRow: data };
+}
+
 
 async function savePassedCheckAudits(
   results: any[],
