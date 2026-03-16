@@ -1,4 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { ipRateLimit } from "../lib/rateLimit";
+import { isLockedOut, recordFailure, clearFailures } from "../lib/antiBruteforce";
 import { createClient } from "@supabase/supabase-js";
 import { createRequire } from "module";
 
@@ -90,6 +92,23 @@ async function savePassedCheckAudits(results: any[]) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const ip = getClientIp(req);
+   const { success } = await ipRateLimit.limit(ip);
+
+if (!success) {
+  return res.status(429).json({
+    success: false,
+    error: "Too many requests. Try again later.",
+  });
+}
+const locked = await isLockedOut(ip);
+
+if (locked) {
+  return res.status(429).json({
+    success: false,
+    error: "Too many failed attempts. Try again later.",
+  });
+}
+    
     console.log("find-account method:", req.method);
 
     if (req.method !== "POST") {
@@ -111,6 +130,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const passcodeCheck = await isPasscodeValid(passcode);
     if (!passcodeCheck.ok) {
+    await clearFailures(ip);
+      
       return res.status(401).json({
         success: false,
         error: passcodeCheck.error,
