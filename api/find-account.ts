@@ -2,6 +2,20 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
 import { createRequire } from "module";
 
+function getClientIp(req: VercelRequest) {
+  const xff = req.headers["x-forwarded-for"];
+  if (typeof xff === "string" && xff.length > 0) {
+    return xff.split(",")[0].trim();
+  }
+
+  const realIp = req.headers["x-real-ip"];
+  if (typeof realIp === "string" && realIp.length > 0) {
+    return realIp;
+  }
+
+  return "unknown";
+}
+
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -75,6 +89,7 @@ async function savePassedCheckAudits(results: any[]) {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
+    const ip = getClientIp(req);
     console.log("find-account method:", req.method);
 
     if (req.method !== "POST") {
