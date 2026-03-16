@@ -3,6 +3,7 @@ const previewAllowed =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("preview") === "burnpogi";
 
+import { useLocation } from "wouter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast, Box } from "@chakra-ui/react";
 import { Switch, Route } from "wouter";
@@ -747,7 +748,11 @@ export default function App() {
   const [liveResultIds, setLiveResultIds] = useState(new Set());
   const [vpnBlocked, setVpnBlocked] = useState(false);
   const [verifiedPasscode, setVerifiedPasscode] = useState("");
+  const [location, setLocation] = useLocation();
 
+  const canAccessAdmin = sessionUnlocked; 
+
+  
   const toggleSound = () => setSoundEnabled(prev => {
     const next = !prev;
     localStorage.setItem('netflix-checker:sound', next ? 'on' : 'off');
@@ -853,6 +858,13 @@ export default function App() {
     if (!logNode) return;
     logNode.scrollTop = logNode.scrollHeight;
   }, [checkLogs, isLoading]);
+
+
+  useEffect(() => {
+  if (location === "/admin" && !sessionUnlocked) {
+    setLocation("/");
+  }
+}, [location, sessionUnlocked, setLocation]);
 
   const runCheckCore = async (activeInput, skipFormatValidation = false) => {
     if (!activeInput.trim() || isLoading) return;
@@ -1342,56 +1354,64 @@ const handlePasscodeSubmit = async () => {
   );
 }
 
-  return (
-    <Switch>
-      <Route path="/admin">
+return (
+  <Switch>
+    <Route path="/admin">
+      {canAccessAdmin ? (
         <AdminPage />
-      </Route>
-      <Route>
-        <Box position="relative">
-          <CheckerPage
-            input={input}
-            uploadedInputBanner={uploadedInputBanner}
-            isLoading={isLoading}
-            checkLogs={checkLogs}
-            checkLogRef={checkLogRef}
-            workerCount={workerCount}
-            checkProgress={checkProgress}
-            progressBarStyle={progressBarStyle}
-            isProgressIndeterminate={isProgressIndeterminate}
-            uploadInputRef={uploadInputRef}
-            filePickerAccept={FILE_PICKER_ACCEPT}
-            minWorkerCount={MIN_WORKER_COUNT}
-            maxWorkerCount={sessionUnlocked ? MAX_WORKER_COUNT : 1}
-            runCheck={runCheck}
-            stopCheck={stopCheck}
-            handleCookieInputChange={handleCookieInputChange}
-            decrementWorkerCount={decrementWorkerCount}
-            incrementWorkerCount={incrementWorkerCount}
-            checkNFToken={checkNFToken}
-            toggleCheckNFToken={handleCheckNFTokenChange}
-            openUploadPicker={openUploadPicker}
-            handleUploadFile={handleUploadFile}
-            runFindAccount={runFindAccount}
-            bulkValidResults={bulkValidResults}
-            isPasscodeModalOpen={isPasscodeModalOpen}
-            setIsPasscodeModalOpen={setIsPasscodeModalOpen}
-            passcodeInput={passcodeInput}
-            setPasscodeInput={setPasscodeInput}
-            passcodeError={passcodeError}
-            passcodeLoading={passcodeLoading}
-            handlePasscodeSubmit={handlePasscodeSubmit}
-            sessionUnlocked={sessionUnlocked}
-            soundEnabled={soundEnabled}
-            toggleSound={toggleSound}
-            liveValidCount={liveValidCount}
-            liveInvalidCount={liveInvalidCount}
-            liveResultIds={liveResultIds}
-          />
-        </Box>
-      </Route>
-    </Switch>
-  );
+      ) : (
+        (() => {
+          setLocation("/");
+          return null;
+        })()
+      )}
+    </Route>
+
+    <Route>
+      <Box position="relative">
+        <CheckerPage
+          input={input}
+          uploadedInputBanner={uploadedInputBanner}
+          isLoading={isLoading}
+          checkLogs={checkLogs}
+          checkLogRef={checkLogRef}
+          workerCount={workerCount}
+          checkProgress={checkProgress}
+          progressBarStyle={progressBarStyle}
+          isProgressIndeterminate={isProgressIndeterminate}
+          uploadInputRef={uploadInputRef}
+          filePickerAccept={FILE_PICKER_ACCEPT}
+          minWorkerCount={MIN_WORKER_COUNT}
+          maxWorkerCount={sessionUnlocked ? MAX_WORKER_COUNT : 1}
+          runCheck={runCheck}
+          stopCheck={stopCheck}
+          handleCookieInputChange={handleCookieInputChange}
+          decrementWorkerCount={decrementWorkerCount}
+          incrementWorkerCount={incrementWorkerCount}
+          checkNFToken={checkNFToken}
+          toggleCheckNFToken={handleCheckNFTokenChange}
+          openUploadPicker={openUploadPicker}
+          handleUploadFile={handleUploadFile}
+          runFindAccount={runFindAccount}
+          bulkValidResults={bulkValidResults}
+          isPasscodeModalOpen={isPasscodeModalOpen}
+          setIsPasscodeModalOpen={setIsPasscodeModalOpen}
+          passcodeInput={passcodeInput}
+          setPasscodeInput={setPasscodeInput}
+          passcodeError={passcodeError}
+          passcodeLoading={passcodeLoading}
+          handlePasscodeSubmit={handlePasscodeSubmit}
+          sessionUnlocked={sessionUnlocked}
+          soundEnabled={soundEnabled}
+          toggleSound={toggleSound}
+          liveValidCount={liveValidCount}
+          liveInvalidCount={liveInvalidCount}
+          liveResultIds={liveResultIds}
+        />
+      </Box>
+    </Route>
+  </Switch>
+);
 }
 
 
