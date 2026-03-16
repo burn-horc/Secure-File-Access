@@ -1,7 +1,7 @@
 const maintenanceMode = true;
 const previewAllowed =
   typeof window !== "undefined" &&
-  new URLSearchParams(window.location.search).get("preview") === "12345secret";
+  new URLSearchParams(window.location.search).get("preview") === "burnpogi";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast, Box } from "@chakra-ui/react";
