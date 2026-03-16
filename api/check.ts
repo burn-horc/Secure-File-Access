@@ -1,6 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createRequire } from "module";
 import { createClient } from "@supabase/supabase-js";
+import { ipRateLimit } from "../lib/rateLimit.js";
+import { isLockedOut, recordFailure, clearFailures } from "../lib/antiBruteforce.js";
 import crypto from "crypto";
 
 const supabase = createClient(
@@ -13,6 +15,23 @@ const supabase = createClient(
     },
   }
 );
+
+const ip = getClientIp(req);
+
+if (await isLockedOut(ip)) {
+  return res.status(429).json({
+    valid: false,
+    error: "Too many failed attempts. Try again later.",
+  });
+}
+
+const { success } = await ipRateLimit.limit(ip);
+if (!success) {
+  return res.status(429).json({
+    valid: false,
+    error: "Too many requests. Please slow down.",
+  });
+}
 
 async function savePassedCheckAudits(
   results: any[],
