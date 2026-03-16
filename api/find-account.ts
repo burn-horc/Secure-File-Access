@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ipRateLimit } from "../lib/rateLimit.js";
-import { isLockedOut, recordFailure, clearFailures } from "../lib/antiBruteforce";
+import { isLockedOut, recordFailure, clearFailures } from "../lib/antiBruteforce.js";
 import { createClient } from "@supabase/supabase-js";
 import { createRequire } from "module";
 
