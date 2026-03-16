@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (await isLockedOut(ip)) {
       return res.status(429).json({
         success: false,
-        error: "Too many failed attempts. Try again later.",
+        error: "Too many failed attempts. Try again in 60 minutes.",
       });
     }
 
