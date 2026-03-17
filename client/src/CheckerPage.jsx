@@ -1589,7 +1589,6 @@ export default function CheckerPage({
           </Box>
         </Box>
       );
-      );
     }
 
     const modalDetailItems = [
