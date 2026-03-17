@@ -1569,6 +1569,7 @@ export default function CheckerPage({
               </Box>
             </Box>
           </Box>
+      </Box>
       );
     }
 
