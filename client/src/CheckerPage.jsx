@@ -429,6 +429,7 @@ export default function CheckerPage({
     };
   };
 
+  const [showGuide, setShowGuide] = useState(false);
   const [copiedStates, setCopiedStates] = useState({});
   const [copyAllDone, setCopyAllDone] = useState(false);
   const handleCopyWithFeedback = (key, copyFn) => {
@@ -1522,54 +1523,70 @@ export default function CheckerPage({
           </HStack>
 
                     <Box px={4} pb={4}>
-            <Box
-              border="1px dashed rgba(255,255,255,0.22)"
-              borderRadius="10px"
-              p={4}
-              bg="rgba(0,0,0,0.3)"
-              color="rgba(255,255,255,0.85)"
-              fontSize="sm"
-            >
-              <Box textAlign="center" fontWeight="bold" mb={3}>
-                📡 ACCESS GUIDE
-              </Box>
+  <Button
+    variant="outline"
+    borderStyle="dashed"
+    borderColor="rgba(255,255,255,0.22)"
+    color="rgba(255,255,255,0.75)"
+    borderRadius="10px"
+    fontSize="sm"
+    w="full"
+    _hover={{ borderColor: theme.border, color: theme.accent }}
+    onClick={() => setShowGuide(!showGuide)}
+  >
+    📡 ACCESS GUIDE {showGuide ? "▲" : "▼"}
+  </Button>
 
-              <Box mb={3}>
-                <b>• 💻 PC WATCH</b><br />
-                Open your browser and paste the provided link to access the account.
-              </Box>
-
-              <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
-
-              <Box mb={3}>
-                <b>• 📱 MOBILE WATCH</b><br />
-                Make sure you have the Netflix app installed.<br />
-                Ensure there is no other Netflix account logged in on your app or browser.<br />
-                Paste the provided link into your main browser (Chrome/Safari).<br />
-                You will be redirected to Netflix — tap the “Open in App” button (usually red at the bottom).<br />
-                <i>Note: The language may vary depending on the account’s country.</i>
-              </Box>
-
-              <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
-
-              <Box mb={3}>
-                <b>• 📺 TV CONNECT</b><br />
-                Open the Netflix app on your Smart TV and choose <b>Login via Code</b>.<br />
-                Paste the link from the TV Connect button into your browser.<br />
-                Then replace the link with:<br />
-                <b>www.netflix.com/tv2</b><br />
-                Enter the code shown on your TV screen.
-              </Box>
-
-              <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
-
-              <Box>
-                <b>• 🔄 RE-CHECK</b><br />
-                Refresh and verify the account before using it.
-              </Box>
-            </Box>
-          </Box>
+  {showGuide && (
+    <Box
+      mt={3}
+      border="1px dashed rgba(255,255,255,0.22)"
+      borderRadius="10px"
+      p={4}
+      bg="rgba(0,0,0,0.3)"
+      color="rgba(255,255,255,0.85)"
+      fontSize="sm"
+    >
+      <Box textAlign="center" fontWeight="bold" mb={3}>
+        📡 ACCESS GUIDE
       </Box>
+
+      <Box mb={3}>
+        <b>• 💻 PC WATCH</b><br />
+        Open your browser and paste the provided link to access the account.
+      </Box>
+
+      <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
+
+      <Box mb={3}>
+        <b>• 📱 MOBILE WATCH</b><br />
+        Make sure you have the Netflix app installed.<br />
+        Ensure there is no other Netflix account logged in on your app or browser.<br />
+        Paste the provided link into your main browser (Chrome/Safari).<br />
+        You will be redirected to Netflix — tap the “Open in App” button.<br />
+        <i>Note: Language may vary depending on account country.</i>
+      </Box>
+
+      <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
+
+      <Box mb={3}>
+        <b>• 📺 TV CONNECT</b><br />
+        Open Netflix on your Smart TV → Login via Code.<br />
+        Paste the TV link into your browser.<br />
+        Replace it with:<br />
+        <b>www.netflix.com/tv2</b><br />
+        Enter the code from your TV.
+      </Box>
+
+      <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
+
+      <Box>
+        <b>• 🔄 RE-CHECK</b><br />
+        Refresh and verify the account before using it.
+      </Box>
+    </Box>
+  )}
+</Box>
       );
     }
 
