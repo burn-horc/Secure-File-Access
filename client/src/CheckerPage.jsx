@@ -1534,7 +1534,7 @@ export default function CheckerPage({
               _hover={{ borderColor: theme.border, color: theme.accent }}
               onClick={() => setShowGuide(!showGuide)}
             >
-              📡 ACCESS GUIDE {showGuide ? "▲" : "▼"}
+            click this  📡 ACCESS GUIDE {showGuide ? "▲" : "▼"}
             </Button>
 
             {showGuide && (
