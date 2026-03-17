@@ -1563,11 +1563,12 @@ export default function CheckerPage({
 
     <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
 
-    <Box>
+        <Box>
       <b>• 🔄 RE-CHECK</b><br />
       Refresh and verify the account before using it.
     </Box>
-        </Box>
+  </Box>
+</Box>
       );
     }
 
