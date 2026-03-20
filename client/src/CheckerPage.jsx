@@ -590,10 +590,10 @@ const isPremiumPage = mode === "premium";
                   fontWeight="700"
                   fontFamily="'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Menlo, Consolas, monospace"
                   letterSpacing="0.06em"
-                  color={sessionUnlocked ? "#e50914" : "#ff8a3d"}
-                  animation={sessionUnlocked ? premiumAnimation : undefined}
+                  color={isPremiumPage ? "#e50914" : isTrialPage ? "#38bdf8" : "#ff8a3d"}
+animation={isPremiumPage ? premiumAnimation : undefined}
                 >
-                  {sessionUnlocked ? "PREMIUM" : "FREE"}
+                  {isPremiumPage ? "PREMIUM" : isTrialPage ? "FREE TRIAL" : "FREE"}
                 </Text>
                 <Box aria-hidden="true" />
               </Grid>
