@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Badge,
@@ -169,7 +167,6 @@ async function copyTextToClipboard(value) {
 }
 
 export default function CheckerPage({
-  mode = "premium",
   input,
   uploadedInputBanner,
   isLoading,
@@ -207,7 +204,6 @@ export default function CheckerPage({
   liveValidCount,
   liveInvalidCount,
   liveResultIds,
-  runTrial,
 }) {
   const HISTORY_KEY = 'netflix-checker:history:v1';
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
@@ -219,9 +215,6 @@ export default function CheckerPage({
   });
   const [recheckStates, setRecheckStates] = useState({});
   const [isMinimized, setIsMinimized] = useState(false);
-
-  const isFreePage = mode === "free";
-const isPremiumPage = mode === "premium";
 
   useEffect(() => {
     if (bulkValidResults && bulkValidResults.length > 0) {
@@ -540,12 +533,9 @@ const isPremiumPage = mode === "premium";
             minH={0}
             borderRadius="24px"
             borderWidth="1px"
-            borderColor={isPremiumPage ? "rgba(255,185,0,0.38)" : "rgba(120,60,220,0.22)"}
-bg={isPremiumPage ? "linear-gradient(160deg, #1e1804 0%, #120f02 100%)" : "linear-gradient(160deg, #181e35 0%, #0f1220 100%)"}
-boxShadow={isPremiumPage
-  ? "0 0 0 1px rgba(255,185,0,0.14), 0 8px 32px rgba(0,0,0,0.8), 0 0 60px rgba(255,160,0,0.20)"
-  : "0 0 0 1px rgba(120,60,220,0.10), 0 8px 32px rgba(0,0,0,0.7), 0 0 60px rgba(90,30,180,0.12)"
-}
+            borderColor={sessionUnlocked ? "rgba(255,185,0,0.38)" : "rgba(120,60,220,0.22)"}
+            bg={sessionUnlocked ? "linear-gradient(160deg, #1e1804 0%, #120f02 100%)" : "linear-gradient(160deg, #181e35 0%, #0f1220 100%)"}
+            boxShadow={sessionUnlocked ? "0 0 0 1px rgba(255,185,0,0.14), 0 8px 32px rgba(0,0,0,0.8), 0 0 60px rgba(255,160,0,0.20)" : "0 0 0 1px rgba(120,60,220,0.10), 0 8px 32px rgba(0,0,0,0.7), 0 0 60px rgba(90,30,180,0.12)"}
             transition="border-color 0.6s ease, box-shadow 0.6s ease, background 0.6s ease"
             overflow="hidden"
           >
@@ -563,8 +553,9 @@ boxShadow={isPremiumPage
                 templateColumns="2.5rem 1fr 2.5rem"
                 alignItems="center"
                 borderBottomWidth="1px"
-                borderBottomColor={isPremiumPage ? "rgba(255,185,0,0.22)" : "rgba(120,60,220,0.18)"}
-bg={isPremiumPage ? "rgba(20,15,3,0.7)" : "rgba(10,10,24,0.7)"}
+                borderBottomColor={sessionUnlocked ? "rgba(255,185,0,0.22)" : "rgba(120,60,220,0.18)"}
+                bg={sessionUnlocked ? "rgba(20,15,3,0.7)" : "rgba(10,10,24,0.7)"}
+                px={3}
               >
                 <Box aria-hidden="true" display="flex" alignItems="center">
                   <SiNetflix color="#e50914" size="22px" />
@@ -577,10 +568,10 @@ bg={isPremiumPage ? "rgba(20,15,3,0.7)" : "rgba(10,10,24,0.7)"}
                   fontWeight="700"
                   fontFamily="'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Menlo, Consolas, monospace"
                   letterSpacing="0.06em"
-                  color={isPremiumPage ? "#e50914" : "#ff8a3d"}
-animation={isPremiumPage ? premiumAnimation : undefined}
+                  color={sessionUnlocked ? "#e50914" : "#ff8a3d"}
+                  animation={sessionUnlocked ? premiumAnimation : undefined}
                 >
-                  {isPremiumPage ? "PREMIUM" : "FREE TRIAL"}
+                  {sessionUnlocked ? "PREMIUM" : "FREE"}
                 </Text>
                 <Box aria-hidden="true" />
               </Grid>
@@ -946,56 +937,49 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                     Upload File
                   </Button>
 
-                 {/* GENERATE BUTTON (always visible) */}
-<Button
-  type="button"
-  gridColumn="span 2"
-  onClick={runFindAccount}
-  isDisabled={isLoading}
-  minH="3.4rem"
-  borderRadius="12px"
-  borderWidth="1px"
-  borderColor={
-    isPremiumPage
-      ? "rgba(255,200,30,0.7)"
-      : "rgba(168,85,247,0.65)"
-  }
-  bg={
-    isPremiumPage
-      ? "linear-gradient(100deg, #5a3800 0%, #c8860a 28%, #ffe066 50%, #c8860a 72%, #5a3800 100%)"
-      : "linear-gradient(100deg, #2d1066 0%, #6d28d9 28%, #a855f7 50%, #6d28d9 72%, #2d1066 100%)"
-  }
-  color={isPremiumPage ? "#fff8dc" : "#faf5ff"}
->
-  GENERATE ACCOUNT
-</Button>
-
-{/* FREE TRIAL BUTTON (always visible) */}
-<Button
-  type="button"
-  gridColumn="span 2"
-  onClick={runTrial}
-  isDisabled={isLoading}
-  minH="3.4rem"
-  borderRadius="12px"
-  borderWidth="1px"
-  borderColor={
-    isFreePage
-      ? "rgba(56,189,248,0.65)"
-      : "rgba(34,197,94,0.65)"
-  }
-  bg={
-    isFreePage
-      ? "linear-gradient(100deg, #082f49 0%, #0369a1 28%, #38bdf8 50%, #0369a1 72%, #082f49 100%)"
-      : "linear-gradient(100deg, #052e16 0%, #15803d 28%, #22c55e 50%, #15803d 72%, #052e16 100%)"
-  }
-  color={isFreePage ? "#eff6ff" : "#f0fdf4"}
->
-  FREE TRIAL
-</Button>
-
-
-                  
+                  <Button
+                    type="button"
+                    gridColumn="span 2"
+                    onClick={runFindAccount}
+                    isDisabled={isLoading}
+                    minH="3.4rem"
+                    borderRadius="12px"
+                    borderWidth="1px"
+                    borderColor="rgba(255,200,30,0.7)"
+                    bg="linear-gradient(100deg, #5a3800 0%, #c8860a 28%, #ffe066 50%, #c8860a 72%, #5a3800 100%)"
+                    color="#fff8dc"
+                    fontSize="sm"
+                    fontWeight="800"
+                    letterSpacing="0.12em"
+                    textTransform="uppercase"
+                    boxShadow="0 0 18px rgba(255,185,0,0.45), 0 2px 10px rgba(0,0,0,0.55)"
+                    position="relative"
+                    overflow="hidden"
+                    transition="transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease"
+                    _hover={{
+                      filter: "brightness(1.18)",
+                      boxShadow: "0 0 30px rgba(255,185,0,0.7), 0 2px 14px rgba(0,0,0,0.55)",
+                      ...hoverLift,
+                    }}
+                    _active={{ transform: "translateY(0)" }}
+                    _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
+                    data-testid="button-find-account"
+                  >
+                    <Box
+                      position="absolute"
+                      inset={0}
+                      pointerEvents="none"
+                      aria-hidden="true"
+                      background="linear-gradient(105deg, transparent 30%, rgba(255,255,220,0.38) 50%, transparent 70%)"
+                      backgroundSize="200% 100%"
+                      animation={shimmerAnimation}
+                    />
+                    <Box display="flex" flexDirection="column" alignItems="center" gap="2px" position="relative">
+                     <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
+    GENERATE ACCOUNT
+  </Box>
+                    </Box>
+                  </Button>
                 </Grid>
               </Box>
             </Flex>
@@ -1005,7 +989,6 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         </Grid>
       </Box>
 
-      {isPremiumPage && (
       <Box
         position="fixed"
         bottom={{ base: "14px", sm: "18px" }}
@@ -1141,8 +1124,6 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         </Box>
       </Box>
 
-      )}
-      
       <Modal
   isOpen={isBulkModalOpen && !isMinimized}
   onClose={() => setIsBulkModalOpen(false)}
@@ -1829,156 +1810,80 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </Box>
 )}
 
-{isPremiumPage && (
-  <Modal
-    isOpen={isPasscodeModalOpen}
-    onClose={() => setIsPasscodeModalOpen(false)}
-    isCentered
-    size="sm"
-  >
-    <ModalOverlay bg="rgba(0,0,0,0.75)" backdropFilter="blur(4px)" />
-    <ModalContent
-      bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
-      borderWidth="1px"
-      borderColor="rgba(120,60,220,0.3)"
-      borderRadius="20px"
-      boxShadow="0 0 0 1px rgba(120,60,220,0.12), 0 20px 60px rgba(0,0,0,0.9)"
-      overflow="hidden"
-      mx={4}
-    >
-      <Box h="3px" bg="linear-gradient(90deg, #e50914 0%, #7c3aed 50%, #1a56db 100%)" />
-      <ModalCloseButton color="rgba(255,255,255,0.5)" top={4} right={4} />
-      <ModalHeader
-        pt={6}
-        pb={0}
-        textAlign="center"
-        color="#c084fc"
-        fontSize="lg"
-        fontWeight="800"
-        letterSpacing="0.12em"
-        textTransform="uppercase"
+      <Modal
+        isOpen={isPasscodeModalOpen}
+        onClose={() => setIsPasscodeModalOpen(false)}
+        isCentered
+        size="sm"
       >
-        PREMIUM CODE
-      </ModalHeader>
-      <ModalBody pb={6} pt={4}>
-        <VStack spacing={4}>
-          <Input
-            type="password"
-            placeholder="Premium Code"
-            value={passcodeInput}
-            onChange={(e) => setPasscodeInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handlePasscodeSubmit()}
-            bg="rgba(255,255,255,0.05)"
-            borderColor="rgba(255,255,255,0.1)"
-            borderRadius="12px"
-            color="white"
-            _placeholder={{ color: "rgba(255,255,255,0.3)" }}
-            _focus={{ borderColor: "#7c3aed", boxShadow: "0 0 0 1px #7c3aed" }}
-            data-testid="input-find-passcode"
-            autoFocus
-          />
-          {passcodeError && (
-            <Text color="#e50914" fontSize="sm" textAlign="center" w="full">
-              {passcodeError}
-            </Text>
-          )}
-          <Button
-            w="full"
-            onClick={handlePasscodeSubmit}
-            isLoading={passcodeLoading}
-            isDisabled={!passcodeInput.trim()}
-            bg="linear-gradient(135deg, #6a35e8 0%, #a855f7 100%)"
-            color="white"
-            fontWeight="700"
-            letterSpacing="0.08em"
-            borderRadius="12px"
-            borderWidth="0"
-            _hover={{ filter: "brightness(1.15)" }}
-            _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-            data-testid="button-unlock-find-account"
-          >
-            Unlock
-          </Button>
-        </VStack>
-      </ModalBody>
-    </ModalContent>
-  </Modal>
-)}
-
-<Modal
-  isOpen={isTrialModalOpen}
-  onClose={() => setIsTrialModalOpen(false)}
-  isCentered
-  size="sm"
->
-  <ModalOverlay bg="rgba(0,0,0,0.75)" backdropFilter="blur(4px)" />
-  <ModalContent
-    bg="linear-gradient(160deg, #0b1d2a 0%, #07131d 100%)"
-    borderWidth="1px"
-    borderColor="rgba(56,189,248,0.35)"
-    borderRadius="20px"
-    boxShadow="0 0 0 1px rgba(56,189,248,0.12), 0 20px 60px rgba(0,0,0,0.9)"
-    overflow="hidden"
-    mx={4}
-  >
-    <Box h="3px" bg="linear-gradient(90deg, #0369a1 0%, #38bdf8 50%, #0ea5e9 100%)" />
-    <ModalCloseButton color="rgba(255,255,255,0.5)" top={4} right={4} />
-    <ModalHeader
-      pt={6}
-      pb={0}
-      textAlign="center"
-      color="#38bdf8"
-      fontSize="lg"
-      fontWeight="800"
-      letterSpacing="0.12em"
-      textTransform="uppercase"
-    >
-      FREE TRIAL
-    </ModalHeader>
-    <ModalBody pb={6} pt={4}>
-      <VStack spacing={4}>
-        <Input
-          type="password"
-          placeholder="Trial Code"
-          value={trialCodeInput}
-          onChange={(e) => setTrialCodeInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleTrialSubmit()}
-          bg="rgba(255,255,255,0.05)"
-          borderColor="rgba(255,255,255,0.1)"
-          borderRadius="12px"
-          color="white"
-          _placeholder={{ color: "rgba(255,255,255,0.3)" }}
-          _focus={{ borderColor: "#38bdf8", boxShadow: "0 0 0 1px #38bdf8" }}
-          data-testid="input-trial-code"
-        />
-        {trialCodeError && (
-          <Text color="#ff4d4d" fontSize="sm" textAlign="center" w="full">
-            {trialCodeError}
-          </Text>
-        )}
-        <Button
-          w="full"
-          onClick={handleTrialSubmit}
-          isLoading={trialLoading}
-          isDisabled={!trialCodeInput.trim()}
-          bg="linear-gradient(135deg, #0369a1 0%, #38bdf8 100%)"
-          color="white"
-          fontWeight="700"
-          letterSpacing="0.08em"
-          borderRadius="12px"
-          borderWidth="0"
-          _hover={{ filter: "brightness(1.15)" }}
-          _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-          data-testid="button-submit-trial"
+        <ModalOverlay bg="rgba(0,0,0,0.75)" backdropFilter="blur(4px)" />
+        <ModalContent
+          bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+          borderWidth="1px"
+          borderColor="rgba(120,60,220,0.3)"
+          borderRadius="20px"
+          boxShadow="0 0 0 1px rgba(120,60,220,0.12), 0 20px 60px rgba(0,0,0,0.9)"
+          overflow="hidden"
+          mx={4}
         >
-          Submit
-        </Button>
-      </VStack>
-    </ModalBody>
-  </ModalContent>
-</Modal>
-  
-)}
+          <Box h="3px" bg="linear-gradient(90deg, #e50914 0%, #7c3aed 50%, #1a56db 100%)" />
+          <ModalCloseButton color="rgba(255,255,255,0.5)" top={4} right={4} />
+          <ModalHeader
+            pt={6}
+            pb={0}
+            textAlign="center"
+            color="#c084fc"
+            fontSize="lg"
+            fontWeight="800"
+            letterSpacing="0.12em"
+            textTransform="uppercase"
+          >
+            PREMIUM CODE
+          </ModalHeader>
+          <ModalBody pb={6} pt={4}>
+            <VStack spacing={4}>
+              <Input
+                type="password"
+                placeholder="Premium Code"
+                value={passcodeInput}
+                onChange={(e) => setPasscodeInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handlePasscodeSubmit()}
+                bg="rgba(255,255,255,0.05)"
+                borderColor="rgba(255,255,255,0.1)"
+                borderRadius="12px"
+                color="white"
+                _placeholder={{ color: "rgba(255,255,255,0.3)" }}
+                _focus={{ borderColor: "#7c3aed", boxShadow: "0 0 0 1px #7c3aed" }}
+                data-testid="input-find-passcode"
+                autoFocus
+              />
+              {passcodeError && (
+                <Text color="#e50914" fontSize="sm" textAlign="center" w="full">
+                  {passcodeError}
+                </Text>
+              )}
+              <Button
+                w="full"
+                onClick={handlePasscodeSubmit}
+                isLoading={passcodeLoading}
+                isDisabled={!passcodeInput.trim()}
+                bg="linear-gradient(135deg, #6a35e8 0%, #a855f7 100%)"
+                color="white"
+                fontWeight="700"
+                letterSpacing="0.08em"
+                borderRadius="12px"
+                borderWidth="0"
+                _hover={{ filter: "brightness(1.15)" }}
+                _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
+                data-testid="button-unlock-find-account"
+              >
+                Unlock
+              </Button>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
 </Box>
 
 );
