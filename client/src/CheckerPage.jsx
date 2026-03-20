@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useLocation } from "wouter";
 import {
   Badge,
   Box,
@@ -218,8 +219,10 @@ export default function CheckerPage({
   trialLoading,
   handleTrialSubmit,
 }) {
+  const [, setLocation] = useLocation();
   const isFreePage = mode === "free";
 const isPremiumPage = mode === "premium";
+  const isTrialPage = mode === "trial";
   const HISTORY_KEY = 'netflix-checker:history:v1';
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -956,56 +959,57 @@ const isPremiumPage = mode === "premium";
                     Upload File
                   </Button>
 
-                  <Button
-                    type="button"
-                    gridColumn="span 2"
-                    onClick={runFindAccount}
-                    isDisabled={isLoading}
-                    minH="3.4rem"
-                    borderRadius="12px"
-                    borderWidth="1px"
-                    borderColor="rgba(255,200,30,0.7)"
-                    bg="linear-gradient(100deg, #5a3800 0%, #c8860a 28%, #ffe066 50%, #c8860a 72%, #5a3800 100%)"
-                    color="#fff8dc"
-                    fontSize="sm"
-                    fontWeight="800"
-                    letterSpacing="0.12em"
-                    textTransform="uppercase"
-                    boxShadow="0 0 18px rgba(255,185,0,0.45), 0 2px 10px rgba(0,0,0,0.55)"
-                    position="relative"
-                    overflow="hidden"
-                    transition="transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease"
-                    _hover={{
-                      filter: "brightness(1.18)",
-                      boxShadow: "0 0 30px rgba(255,185,0,0.7), 0 2px 14px rgba(0,0,0,0.55)",
-                      ...hoverLift,
-                    }}
-                    _active={{ transform: "translateY(0)" }}
-                    _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-                    data-testid="button-find-account"
-                  >
-                    <Box
-                      position="absolute"
-                      inset={0}
-                      pointerEvents="none"
-                      aria-hidden="true"
-                      background="linear-gradient(105deg, transparent 30%, rgba(255,255,220,0.38) 50%, transparent 70%)"
-                      backgroundSize="200% 100%"
-                      animation={shimmerAnimation}
-                    />
-                    <Box display="flex" flexDirection="column" alignItems="center" gap="2px" position="relative">
-                     <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
-    GENERATE ACCOUNT
-  </Box>
-                    </Box>
-                  </Button>
-
-
-{mode === "free" && (
+                  {(isFreePage || isPremiumPage) && (
   <Button
     type="button"
     gridColumn="span 2"
-    onClick={() => runTrial?.()}
+    onClick={isFreePage ? () => setLocation("/premium") : runFindAccount}
+    isDisabled={isLoading}
+    minH="3.4rem"
+    borderRadius="12px"
+    borderWidth="1px"
+    borderColor="rgba(255,200,30,0.7)"
+    bg="linear-gradient(100deg, #5a3800 0%, #c8860a 28%, #ffe066 50%, #c8860a 72%, #5a3800 100%)"
+    color="#fff8dc"
+    fontSize="sm"
+    fontWeight="800"
+    letterSpacing="0.12em"
+    textTransform="uppercase"
+    boxShadow="0 0 18px rgba(255,185,0,0.45), 0 2px 10px rgba(0,0,0,0.55)"
+    position="relative"
+    overflow="hidden"
+    transition="transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease"
+    _hover={{
+      filter: "brightness(1.18)",
+      boxShadow: "0 0 30px rgba(255,185,0,0.7), 0 2px 14px rgba(0,0,0,0.55)",
+      ...hoverLift,
+    }}
+    _active={{ transform: "translateY(0)" }}
+    _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
+    data-testid="button-find-account"
+  >
+    <Box
+      position="absolute"
+      inset={0}
+      pointerEvents="none"
+      aria-hidden="true"
+      background="linear-gradient(105deg, transparent 30%, rgba(255,255,220,0.38) 50%, transparent 70%)"
+      backgroundSize="200% 100%"
+      animation={shimmerAnimation}
+    />
+    <Box display="flex" flexDirection="column" alignItems="center" gap="2px" position="relative">
+      <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
+        GENERATE ACCOUNT
+      </Box>
+    </Box>
+  </Button>
+)}
+
+{(isFreePage || isTrialPage) && (
+  <Button
+    type="button"
+    gridColumn="span 2"
+    onClick={isFreePage ? () => setLocation("/trial") : () => runTrial?.()}
     isDisabled={isLoading}
     minH="3.4rem"
     borderRadius="12px"
