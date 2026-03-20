@@ -1829,80 +1829,81 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </Box>
 )}
 
-      {isPremiumPage && (
-      <Modal
-        isOpen={isPasscodeModalOpen}
-        onClose={() => setIsPasscodeModalOpen(false)}
-        isCentered
-        size="sm"
+{isPremiumPage && (
+  <Modal
+    isOpen={isPasscodeModalOpen}
+    onClose={() => setIsPasscodeModalOpen(false)}
+    isCentered
+    size="sm"
+  >
+    <ModalOverlay bg="rgba(0,0,0,0.75)" backdropFilter="blur(4px)" />
+    <ModalContent
+      bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+      borderWidth="1px"
+      borderColor="rgba(120,60,220,0.3)"
+      borderRadius="20px"
+      boxShadow="0 0 0 1px rgba(120,60,220,0.12), 0 20px 60px rgba(0,0,0,0.9)"
+      overflow="hidden"
+      mx={4}
+    >
+      <Box h="3px" bg="linear-gradient(90deg, #e50914 0%, #7c3aed 50%, #1a56db 100%)" />
+      <ModalCloseButton color="rgba(255,255,255,0.5)" top={4} right={4} />
+      <ModalHeader
+        pt={6}
+        pb={0}
+        textAlign="center"
+        color="#c084fc"
+        fontSize="lg"
+        fontWeight="800"
+        letterSpacing="0.12em"
+        textTransform="uppercase"
       >
-        <ModalOverlay bg="rgba(0,0,0,0.75)" backdropFilter="blur(4px)" />
-        <ModalContent
-          bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
-          borderWidth="1px"
-          borderColor="rgba(120,60,220,0.3)"
-          borderRadius="20px"
-          boxShadow="0 0 0 1px rgba(120,60,220,0.12), 0 20px 60px rgba(0,0,0,0.9)"
-          overflow="hidden"
-          mx={4}
-        >
-          <Box h="3px" bg="linear-gradient(90deg, #e50914 0%, #7c3aed 50%, #1a56db 100%)" />
-          <ModalCloseButton color="rgba(255,255,255,0.5)" top={4} right={4} />
-          <ModalHeader
-            pt={6}
-            pb={0}
-            textAlign="center"
-            color="#c084fc"
-            fontSize="lg"
-            fontWeight="800"
-            letterSpacing="0.12em"
-            textTransform="uppercase"
+        PREMIUM CODE
+      </ModalHeader>
+      <ModalBody pb={6} pt={4}>
+        <VStack spacing={4}>
+          <Input
+            type="password"
+            placeholder="Premium Code"
+            value={passcodeInput}
+            onChange={(e) => setPasscodeInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handlePasscodeSubmit()}
+            bg="rgba(255,255,255,0.05)"
+            borderColor="rgba(255,255,255,0.1)"
+            borderRadius="12px"
+            color="white"
+            _placeholder={{ color: "rgba(255,255,255,0.3)" }}
+            _focus={{ borderColor: "#7c3aed", boxShadow: "0 0 0 1px #7c3aed" }}
+            data-testid="input-find-passcode"
+            autoFocus
+          />
+          {passcodeError && (
+            <Text color="#e50914" fontSize="sm" textAlign="center" w="full">
+              {passcodeError}
+            </Text>
+          )}
+          <Button
+            w="full"
+            onClick={handlePasscodeSubmit}
+            isLoading={passcodeLoading}
+            isDisabled={!passcodeInput.trim()}
+            bg="linear-gradient(135deg, #6a35e8 0%, #a855f7 100%)"
+            color="white"
+            fontWeight="700"
+            letterSpacing="0.08em"
+            borderRadius="12px"
+            borderWidth="0"
+            _hover={{ filter: "brightness(1.15)" }}
+            _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
+            data-testid="button-unlock-find-account"
           >
-            PREMIUM CODE
-          </ModalHeader>
-          <ModalBody pb={6} pt={4}>
-            <VStack spacing={4}>
-              <Input
-                type="password"
-                placeholder="Premium Code"
-                value={passcodeInput}
-                onChange={(e) => setPasscodeInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handlePasscodeSubmit()}
-                bg="rgba(255,255,255,0.05)"
-                borderColor="rgba(255,255,255,0.1)"
-                borderRadius="12px"
-                color="white"
-                _placeholder={{ color: "rgba(255,255,255,0.3)" }}
-                _focus={{ borderColor: "#7c3aed", boxShadow: "0 0 0 1px #7c3aed" }}
-                data-testid="input-find-passcode"
-                autoFocus
-              />
-              {passcodeError && (
-                <Text color="#e50914" fontSize="sm" textAlign="center" w="full">
-                  {passcodeError}
-                </Text>
-              )}
-              <Button
-                w="full"
-                onClick={handlePasscodeSubmit}
-                isLoading={passcodeLoading}
-                isDisabled={!passcodeInput.trim()}
-                bg="linear-gradient(135deg, #6a35e8 0%, #a855f7 100%)"
-                color="white"
-                fontWeight="700"
-                letterSpacing="0.08em"
-                borderRadius="12px"
-                borderWidth="0"
-                _hover={{ filter: "brightness(1.15)" }}
-                _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-                data-testid="button-unlock-find-account"
-              >
-                Unlock
-              </Button>
-            </VStack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+            Unlock
+          </Button>
+        </VStack>
+      </ModalBody>
+    </ModalContent>
+  </Modal>
+)}
 
 <Modal
   isOpen={isTrialModalOpen}
@@ -1949,7 +1950,6 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           _placeholder={{ color: "rgba(255,255,255,0.3)" }}
           _focus={{ borderColor: "#38bdf8", boxShadow: "0 0 0 1px #38bdf8" }}
           data-testid="input-trial-code"
-          autoFocus
         />
         {trialCodeError && (
           <Text color="#ff4d4d" fontSize="sm" textAlign="center" w="full">
