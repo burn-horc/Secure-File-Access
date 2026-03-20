@@ -998,7 +998,7 @@ export default function CheckerPage({
 <Button
   type="button"
   gridColumn="span 2"
-  onClick={runTrial}
+  onClick={() => runTrial?.()}
   isDisabled={isLoading}
   minH="3.4rem"
   borderRadius="12px"
@@ -1032,13 +1032,18 @@ export default function CheckerPage({
     backgroundSize="200% 100%"
     animation={shimmerAnimation}
   />
-  <Box display="flex" flexDirection="column" alignItems="center" gap="2px" position="relative">
+  <Box
+    display="flex"
+    flexDirection="column"
+    alignItems="center"
+    gap="2px"
+    position="relative"
+  >
     <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
       FREE TRIAL
     </Box>
   </Box>
-</Button>
-                  
+</Button>      
                 </Grid>
               </Box>
             </Flex>
