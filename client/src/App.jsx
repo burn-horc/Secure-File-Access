@@ -1529,7 +1529,7 @@ return (
       </Box>
     </Route>
 
-    <Route path="/">
+        <Route path="/">
       <Box position="relative">
         <CheckerPage
           mode="free"
