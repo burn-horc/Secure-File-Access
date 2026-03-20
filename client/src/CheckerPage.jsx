@@ -1871,6 +1871,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </Box>
 )}
 
+      {isPremiumPage && (
       <Modal
         isOpen={isPasscodeModalOpen}
         onClose={() => setIsPasscodeModalOpen(false)}
@@ -1944,7 +1945,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           </ModalBody>
         </ModalContent>
       </Modal>
-
+)}
 </Box>
 
 );
