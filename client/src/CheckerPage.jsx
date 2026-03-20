@@ -1184,6 +1184,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         </Box>
       </Box>
 
+      )}
       
       <Modal
   isOpen={isBulkModalOpen && !isMinimized}
