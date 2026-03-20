@@ -1,3 +1,6 @@
+const isFreePage = mode === "free";
+const isPremiumPage = mode === "premium";
+
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Badge,
