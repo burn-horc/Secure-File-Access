@@ -1406,7 +1406,7 @@ return (
   <Switch>
     <Route path="/admin">
       {canAccessAdmin ? <AdminPage /> : <CheckerPage
-        mode="free"
+        mode="premium"
         input={input}
         uploadedInputBanner={uploadedInputBanner}
         isLoading={isLoading}
@@ -1419,7 +1419,7 @@ return (
         uploadInputRef={uploadInputRef}
         filePickerAccept={FILE_PICKER_ACCEPT}
         minWorkerCount={MIN_WORKER_COUNT}
-        maxWorkerCount={1}
+        maxWorkerCount={sessionUnlocked ? MAX_WORKER_COUNT : 1}
         runCheck={runCheck}
         stopCheck={stopCheck}
         handleCookieInputChange={handleCookieInputChange}
@@ -1438,23 +1438,12 @@ return (
         passcodeError={passcodeError}
         passcodeLoading={passcodeLoading}
         handlePasscodeSubmit={handlePasscodeSubmit}
-        sessionUnlocked={false}
+        sessionUnlocked={sessionUnlocked}
         soundEnabled={soundEnabled}
         toggleSound={toggleSound}
         liveValidCount={liveValidCount}
         liveInvalidCount={liveInvalidCount}
         liveResultIds={liveResultIds}
-        runTrial={runTrial}
-        trialResults={trialResults}
-        showTrialResults={showTrialResults}
-        setShowTrialResults={setShowTrialResults}
-        isTrialModalOpen={isTrialModalOpen}
-        setIsTrialModalOpen={setIsTrialModalOpen}
-        trialCodeInput={trialCodeInput}
-        setTrialCodeInput={setTrialCodeInput}
-        trialCodeError={trialCodeError}
-        trialLoading={trialLoading}
-        handleTrialSubmit={handleTrialSubmit}
       />}
     </Route>
 
@@ -1498,17 +1487,6 @@ return (
         liveValidCount={liveValidCount}
         liveInvalidCount={liveInvalidCount}
         liveResultIds={liveResultIds}
-        runTrial={runTrial}
-        trialResults={trialResults}
-        showTrialResults={showTrialResults}
-        setShowTrialResults={setShowTrialResults}
-        isTrialModalOpen={isTrialModalOpen}
-        setIsTrialModalOpen={setIsTrialModalOpen}
-        trialCodeInput={trialCodeInput}
-        setTrialCodeInput={setTrialCodeInput}
-        trialCodeError={trialCodeError}
-        trialLoading={trialLoading}
-        handleTrialSubmit={handleTrialSubmit}
       />
     </Route>
 
@@ -1552,23 +1530,12 @@ return (
         liveValidCount={liveValidCount}
         liveInvalidCount={liveInvalidCount}
         liveResultIds={liveResultIds}
-        runTrial={runTrial}
-        trialResults={trialResults}
-        showTrialResults={showTrialResults}
-        setShowTrialResults={setShowTrialResults}
-        isTrialModalOpen={isTrialModalOpen}
-        setIsTrialModalOpen={setIsTrialModalOpen}
-        trialCodeInput={trialCodeInput}
-        setTrialCodeInput={setTrialCodeInput}
-        trialCodeError={trialCodeError}
-        trialLoading={trialLoading}
-        handleTrialSubmit={handleTrialSubmit}
       />
     </Route>
 
     <Route>
       <CheckerPage
-        mode="free"
+        mode="premium"
         input={input}
         uploadedInputBanner={uploadedInputBanner}
         isLoading={isLoading}
@@ -1581,7 +1548,7 @@ return (
         uploadInputRef={uploadInputRef}
         filePickerAccept={FILE_PICKER_ACCEPT}
         minWorkerCount={MIN_WORKER_COUNT}
-        maxWorkerCount={1}
+        maxWorkerCount={sessionUnlocked ? MAX_WORKER_COUNT : 1}
         runCheck={runCheck}
         stopCheck={stopCheck}
         handleCookieInputChange={handleCookieInputChange}
@@ -1600,23 +1567,12 @@ return (
         passcodeError={passcodeError}
         passcodeLoading={passcodeLoading}
         handlePasscodeSubmit={handlePasscodeSubmit}
-        sessionUnlocked={false}
+        sessionUnlocked={sessionUnlocked}
         soundEnabled={soundEnabled}
         toggleSound={toggleSound}
         liveValidCount={liveValidCount}
         liveInvalidCount={liveInvalidCount}
         liveResultIds={liveResultIds}
-        runTrial={runTrial}
-        trialResults={trialResults}
-        showTrialResults={showTrialResults}
-        setShowTrialResults={setShowTrialResults}
-        isTrialModalOpen={isTrialModalOpen}
-        setIsTrialModalOpen={setIsTrialModalOpen}
-        trialCodeInput={trialCodeInput}
-        setTrialCodeInput={setTrialCodeInput}
-        trialCodeError={trialCodeError}
-        trialLoading={trialLoading}
-        handleTrialSubmit={handleTrialSubmit}
       />
     </Route>
   </Switch>
