@@ -868,10 +868,10 @@ const [showTrialResults, setShowTrialResults] = useState(false);
 
   useEffect(() => {
   if (location === "/admin" && !sessionUnlocked) {
-    setLocation("/");
+    setLocation("/free");
   }
 }, [location, sessionUnlocked, setLocation]);
-
+  
   const runCheckCore = async (activeInput, skipFormatValidation = false) => {
     if (!activeInput.trim() || isLoading) return;
 
