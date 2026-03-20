@@ -1,4 +1,4 @@
-const maintenanceMode = true;
+const maintenanceMode = false;
 const previewAllowed =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("preview") === "burnpogi";
@@ -6,7 +6,7 @@ const previewAllowed =
 import { useLocation } from "wouter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast, Box } from "@chakra-ui/react";
-
+import { Switch, Route } from "wouter";
 import CheckerPage from "./CheckerPage";
 import AdminPage from "./AdminPage";
 import { showAppToast } from "./appToast.jsx";
@@ -749,12 +749,6 @@ export default function App() {
   const [vpnBlocked, setVpnBlocked] = useState(false);
   const [verifiedPasscode, setVerifiedPasscode] = useState("");
   const [location, setLocation] = useLocation();
-  const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
-const [trialCodeInput, setTrialCodeInput] = useState("");
-const [trialCodeError, setTrialCodeError] = useState("");
-const [trialLoading, setTrialLoading] = useState(false);
-const [trialResults, setTrialResults] = useState([]);
-const [showTrialResults, setShowTrialResults] = useState(false);
 
   const canAccessAdmin = sessionUnlocked; 
 
@@ -868,10 +862,10 @@ const [showTrialResults, setShowTrialResults] = useState(false);
 
   useEffect(() => {
   if (location === "/admin" && !sessionUnlocked) {
-    setLocation("/free");
+    setLocation("/");
   }
 }, [location, sessionUnlocked, setLocation]);
-  
+
   const runCheckCore = async (activeInput, skipFormatValidation = false) => {
     if (!activeInput.trim() || isLoading) return;
 
@@ -1323,44 +1317,6 @@ const handlePasscodeSubmit = async () => {
     }
   };
 
-  const runTrial = () => {
-  if (isLoading) return;
-  setTrialCodeInput("");
-  setTrialCodeError("");
-  setIsTrialModalOpen(true);
-};
-
-  const handleTrialSubmit = async () => {
-  const code = trialCodeInput.trim();
-  if (!code) return;
-
-  setTrialLoading(true);
-  setTrialCodeError("");
-
-  try {
-    const res = await fetch("/api/trial/create", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || "Unable to create trial.");
-    }
-
-    setTrialResults((prev) => [data.result, ...prev]);
-    setShowTrialResults(true);
-    setIsTrialModalOpen(false);
-    setTrialCodeInput("");
-  } catch (err) {
-    setTrialCodeError(err instanceof Error ? err.message : "Trial request failed.");
-  } finally {
-    setTrialLoading(false);
-  }
-};
   
 
   if (vpnBlocked) {
@@ -1398,69 +1354,68 @@ const handlePasscodeSubmit = async () => {
   );
 }
 
-if (location === "/admin") {
-  return canAccessAdmin ? <AdminPage /> : <Box />;
-}
-
-const currentMode = location === "/premium" ? "premium" : "free";
-
 return (
-  <Box position="relative">
-    <CheckerPage
-      mode={currentMode}
-      input={input}
-      uploadedInputBanner={uploadedInputBanner}
-      isLoading={isLoading}
-      checkLogs={checkLogs}
-      checkLogRef={checkLogRef}
-      workerCount={workerCount}
-      checkProgress={checkProgress}
-      progressBarStyle={progressBarStyle}
-      isProgressIndeterminate={isProgressIndeterminate}
-      uploadInputRef={uploadInputRef}
-      filePickerAccept={FILE_PICKER_ACCEPT}
-      minWorkerCount={MIN_WORKER_COUNT}
-      maxWorkerCount={
-        currentMode === "premium"
-          ? (sessionUnlocked ? MAX_WORKER_COUNT : 1)
-          : 1
-      }
-      runCheck={runCheck}
-      stopCheck={stopCheck}
-      handleCookieInputChange={handleCookieInputChange}
-      decrementWorkerCount={decrementWorkerCount}
-      incrementWorkerCount={incrementWorkerCount}
-      checkNFToken={checkNFToken}
-      toggleCheckNFToken={handleCheckNFTokenChange}
-      openUploadPicker={openUploadPicker}
-      handleUploadFile={handleUploadFile}
-      runFindAccount={runFindAccount}
-      bulkValidResults={bulkValidResults}
-      isPasscodeModalOpen={isPasscodeModalOpen}
-      setIsPasscodeModalOpen={setIsPasscodeModalOpen}
-      passcodeInput={passcodeInput}
-      setPasscodeInput={setPasscodeInput}
-      passcodeError={passcodeError}
-      passcodeLoading={passcodeLoading}
-      handlePasscodeSubmit={handlePasscodeSubmit}
-      sessionUnlocked={currentMode === "premium" ? sessionUnlocked : false}
-      soundEnabled={soundEnabled}
-      toggleSound={toggleSound}
-      liveValidCount={liveValidCount}
-      liveInvalidCount={liveInvalidCount}
-      liveResultIds={liveResultIds}
-      runTrial={runTrial}
-      trialResults={trialResults}
-      showTrialResults={showTrialResults}
-      setShowTrialResults={setShowTrialResults}
-      isTrialModalOpen={isTrialModalOpen}
-      setIsTrialModalOpen={setIsTrialModalOpen}
-      trialCodeInput={trialCodeInput}
-      setTrialCodeInput={setTrialCodeInput}
-      trialCodeError={trialCodeError}
-      trialLoading={trialLoading}
-      handleTrialSubmit={handleTrialSubmit}
-    />
-  </Box>
+  <Switch>
+    <Route path="/admin">
+      {canAccessAdmin ? (
+        <AdminPage />
+      ) : (
+        (() => {
+          setLocation("/");
+          return null;
+        })()
+      )}
+    </Route>
+
+    <Route>
+      <Box position="relative">
+        <CheckerPage
+          input={input}
+          uploadedInputBanner={uploadedInputBanner}
+          isLoading={isLoading}
+          checkLogs={checkLogs}
+          checkLogRef={checkLogRef}
+          workerCount={workerCount}
+          checkProgress={checkProgress}
+          progressBarStyle={progressBarStyle}
+          isProgressIndeterminate={isProgressIndeterminate}
+          uploadInputRef={uploadInputRef}
+          filePickerAccept={FILE_PICKER_ACCEPT}
+          minWorkerCount={MIN_WORKER_COUNT}
+          maxWorkerCount={sessionUnlocked ? MAX_WORKER_COUNT : 1}
+          runCheck={runCheck}
+          stopCheck={stopCheck}
+          handleCookieInputChange={handleCookieInputChange}
+          decrementWorkerCount={decrementWorkerCount}
+          incrementWorkerCount={incrementWorkerCount}
+          checkNFToken={checkNFToken}
+          toggleCheckNFToken={handleCheckNFTokenChange}
+          openUploadPicker={openUploadPicker}
+          handleUploadFile={handleUploadFile}
+          runFindAccount={runFindAccount}
+          bulkValidResults={bulkValidResults}
+          isPasscodeModalOpen={isPasscodeModalOpen}
+          setIsPasscodeModalOpen={setIsPasscodeModalOpen}
+          passcodeInput={passcodeInput}
+          setPasscodeInput={setPasscodeInput}
+          passcodeError={passcodeError}
+          passcodeLoading={passcodeLoading}
+          handlePasscodeSubmit={handlePasscodeSubmit}
+          sessionUnlocked={sessionUnlocked}
+          soundEnabled={soundEnabled}
+          toggleSound={toggleSound}
+          liveValidCount={liveValidCount}
+          liveInvalidCount={liveInvalidCount}
+          liveResultIds={liveResultIds}
+        />
+      </Box>
+    </Route>
+  </Switch>
 );
 }
+
+
+
+
+
+
