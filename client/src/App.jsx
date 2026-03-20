@@ -1405,15 +1405,72 @@ return (
         <AdminPage />
       ) : (
         (() => {
-          setLocation("/");
+          setLocation("/free");
           return null;
         })()
       )}
     </Route>
 
-    <Route>
+    <Route path="/free">
       <Box position="relative">
         <CheckerPage
+          mode="free"
+          input={input}
+          uploadedInputBanner={uploadedInputBanner}
+          isLoading={isLoading}
+          checkLogs={checkLogs}
+          checkLogRef={checkLogRef}
+          workerCount={workerCount}
+          checkProgress={checkProgress}
+          progressBarStyle={progressBarStyle}
+          isProgressIndeterminate={isProgressIndeterminate}
+          uploadInputRef={uploadInputRef}
+          filePickerAccept={FILE_PICKER_ACCEPT}
+          minWorkerCount={MIN_WORKER_COUNT}
+          maxWorkerCount={1}
+          runCheck={runCheck}
+          stopCheck={stopCheck}
+          handleCookieInputChange={handleCookieInputChange}
+          decrementWorkerCount={decrementWorkerCount}
+          incrementWorkerCount={incrementWorkerCount}
+          checkNFToken={checkNFToken}
+          toggleCheckNFToken={handleCheckNFTokenChange}
+          openUploadPicker={openUploadPicker}
+          handleUploadFile={handleUploadFile}
+          runFindAccount={runFindAccount}
+          bulkValidResults={bulkValidResults}
+          isPasscodeModalOpen={isPasscodeModalOpen}
+          setIsPasscodeModalOpen={setIsPasscodeModalOpen}
+          passcodeInput={passcodeInput}
+          setPasscodeInput={setPasscodeInput}
+          passcodeError={passcodeError}
+          passcodeLoading={passcodeLoading}
+          handlePasscodeSubmit={handlePasscodeSubmit}
+          sessionUnlocked={false}
+          soundEnabled={soundEnabled}
+          toggleSound={toggleSound}
+          liveValidCount={liveValidCount}
+          liveInvalidCount={liveInvalidCount}
+          liveResultIds={liveResultIds}
+          runTrial={runTrial}
+          trialResults={trialResults}
+          showTrialResults={showTrialResults}
+          setShowTrialResults={setShowTrialResults}
+          isTrialModalOpen={isTrialModalOpen}
+          setIsTrialModalOpen={setIsTrialModalOpen}
+          trialCodeInput={trialCodeInput}
+          setTrialCodeInput={setTrialCodeInput}
+          trialCodeError={trialCodeError}
+          trialLoading={trialLoading}
+          handleTrialSubmit={handleTrialSubmit}
+        />
+      </Box>
+    </Route>
+
+    <Route path="/premium">
+      <Box position="relative">
+        <CheckerPage
+          mode="premium"
           input={input}
           uploadedInputBanner={uploadedInputBanner}
           isLoading={isLoading}
@@ -1451,29 +1508,26 @@ return (
           liveValidCount={liveValidCount}
           liveInvalidCount={liveInvalidCount}
           liveResultIds={liveResultIds}
-
-            runTrial={runTrial}
-  trialResults={trialResults}
-  showTrialResults={showTrialResults}
-  setShowTrialResults={setShowTrialResults}
-  isTrialModalOpen={isTrialModalOpen}
-  setIsTrialModalOpen={setIsTrialModalOpen}
-  trialCodeInput={trialCodeInput}
-  setTrialCodeInput={setTrialCodeInput}
-  trialCodeError={trialCodeError}
-  trialLoading={trialLoading}
-  handleTrialSubmit={handleTrialSubmit}
-
+          runTrial={runTrial}
+          trialResults={trialResults}
+          showTrialResults={showTrialResults}
+          setShowTrialResults={setShowTrialResults}
+          isTrialModalOpen={isTrialModalOpen}
+          setIsTrialModalOpen={setIsTrialModalOpen}
+          trialCodeInput={trialCodeInput}
+          setTrialCodeInput={setTrialCodeInput}
+          trialCodeError={trialCodeError}
+          trialLoading={trialLoading}
+          handleTrialSubmit={handleTrialSubmit}
         />
       </Box>
     </Route>
+
+    <Route path="/">
+      {(() => {
+        setLocation("/free");
+        return null;
+      })()}
+    </Route>
   </Switch>
 );
-}
-
-
-
-
-
-
-
