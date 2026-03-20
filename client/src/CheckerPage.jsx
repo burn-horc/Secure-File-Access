@@ -218,6 +218,8 @@ export default function CheckerPage({
   trialLoading,
   handleTrialSubmit,
 }) {
+  const isFreePage = mode === "free";
+const isPremiumPage = mode === "premium";
   const HISTORY_KEY = 'netflix-checker:history:v1';
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -1059,8 +1061,9 @@ export default function CheckerPage({
         </Grid>
       </Box>
 
-      <Box
-        position="fixed"
+      {isPremiumPage && (
+  <Box
+    position="fixed"
         bottom={{ base: "14px", sm: "18px" }}
         left="50%"
         transform="translateX(-50%)"
@@ -1193,7 +1196,7 @@ export default function CheckerPage({
 
         </Box>
       </Box>
-
+)}
       <Modal
   isOpen={isBulkModalOpen && !isMinimized}
   onClose={() => setIsBulkModalOpen(false)}
