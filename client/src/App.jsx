@@ -1401,20 +1401,7 @@ const handlePasscodeSubmit = async () => {
 return (
   <Switch>
     <Route path="/admin">
-      {canAccessAdmin ? (
-        <AdminPage />
-      ) : (
-        (() => {
-          setLocation("/free");
-          return null;
-        })()
-      )}
-    </Route>
-
- return (
-  <Switch>
-    <Route path="/admin">
-      {canAccessAdmin ? <AdminPage /> : null}
+      {canAccessAdmin ? <AdminPage /> : <Box />}
     </Route>
 
     <Route path="/free">
@@ -1529,7 +1516,7 @@ return (
       </Box>
     </Route>
 
-        <Route path="/">
+    <Route path="/">
       <Box position="relative">
         <CheckerPage
           mode="free"
