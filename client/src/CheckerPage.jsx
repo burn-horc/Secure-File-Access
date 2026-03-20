@@ -1048,6 +1048,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         </Grid>
       </Box>
 
+      {isPremiumPage && (
       <Box
         position="fixed"
         bottom={{ base: "14px", sm: "18px" }}
