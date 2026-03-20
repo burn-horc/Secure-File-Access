@@ -6,7 +6,7 @@ const previewAllowed =
 import { useLocation } from "wouter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast, Box } from "@chakra-ui/react";
-import { Switch, Route } from "wouter";
+
 import CheckerPage from "./CheckerPage";
 import AdminPage from "./AdminPage";
 import { showAppToast } from "./appToast.jsx";
