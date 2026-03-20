@@ -1,5 +1,4 @@
-const isFreePage = mode === "free";
-const isPremiumPage = mode === "premium";
+
 
 import React, { useState, useEffect, useMemo } from "react";
 import {
@@ -220,6 +219,9 @@ export default function CheckerPage({
   });
   const [recheckStates, setRecheckStates] = useState({});
   const [isMinimized, setIsMinimized] = useState(false);
+
+  const isFreePage = mode === "free";
+const isPremiumPage = mode === "premium";
 
   useEffect(() => {
     if (bulkValidResults && bulkValidResults.length > 0) {
