@@ -946,96 +946,53 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                     Upload File
                   </Button>
 
-                  {isPremiumPage && (
-  <Button
-    type="button"
-    gridColumn="span 2"
-    onClick={runFindAccount}
-    isDisabled={isLoading}
-    minH="3.4rem"
-    borderRadius="12px"
-    borderWidth="1px"
-    borderColor="rgba(255,200,30,0.7)"
-    bg="linear-gradient(100deg, #5a3800 0%, #c8860a 28%, #ffe066 50%, #c8860a 72%, #5a3800 100%)"
-    color="#fff8dc"
-    fontSize="sm"
-    fontWeight="800"
-    letterSpacing="0.12em"
-    textTransform="uppercase"
-    boxShadow="0 0 18px rgba(255,185,0,0.45), 0 2px 10px rgba(0,0,0,0.55)"
-    position="relative"
-    overflow="hidden"
-    transition="transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease"
-    _hover={{
-      filter: "brightness(1.18)",
-      boxShadow: "0 0 30px rgba(255,185,0,0.7), 0 2px 14px rgba(0,0,0,0.55)",
-      ...hoverLift,
-    }}
-    _active={{ transform: "translateY(0)" }}
-    _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-    data-testid="button-find-account"
-  >
-    <Box
-      position="absolute"
-      inset={0}
-      pointerEvents="none"
-      aria-hidden="true"
-      background="linear-gradient(105deg, transparent 30%, rgba(255,255,220,0.38) 50%, transparent 70%)"
-      backgroundSize="200% 100%"
-      animation={shimmerAnimation}
-    />
-    <Box display="flex" flexDirection="column" alignItems="center" gap="2px" position="relative">
-      <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
-        GENERATE ACCOUNT
-      </Box>
-    </Box>
-  </Button>
-)}
+                 {/* GENERATE BUTTON (always visible) */}
+<Button
+  type="button"
+  gridColumn="span 2"
+  onClick={runFindAccount}
+  isDisabled={isLoading}
+  minH="3.4rem"
+  borderRadius="12px"
+  borderWidth="1px"
+  borderColor={
+    isPremiumPage
+      ? "rgba(255,200,30,0.7)"
+      : "rgba(168,85,247,0.65)"
+  }
+  bg={
+    isPremiumPage
+      ? "linear-gradient(100deg, #5a3800 0%, #c8860a 28%, #ffe066 50%, #c8860a 72%, #5a3800 100%)"
+      : "linear-gradient(100deg, #2d1066 0%, #6d28d9 28%, #a855f7 50%, #6d28d9 72%, #2d1066 100%)"
+  }
+  color={isPremiumPage ? "#fff8dc" : "#faf5ff"}
+>
+  GENERATE ACCOUNT
+</Button>
 
-                  {isFreePage && (
-  <Button
-    type="button"
-    gridColumn="span 2"
-    onClick={runTrial}
-    isDisabled={isLoading}
-    minH="3.4rem"
-    borderRadius="12px"
-    borderWidth="1px"
-    borderColor="rgba(56,189,248,0.65)"
-    bg="linear-gradient(100deg, #082f49 0%, #0369a1 28%, #38bdf8 50%, #0369a1 72%, #082f49 100%)"
-    color="#eff6ff"
-    fontSize="sm"
-    fontWeight="800"
-    letterSpacing="0.12em"
-    textTransform="uppercase"
-    boxShadow="0 0 18px rgba(56,189,248,0.35), 0 2px 10px rgba(0,0,0,0.55)"
-    position="relative"
-    overflow="hidden"
-    transition="transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease"
-    _hover={{
-      filter: "brightness(1.12)",
-      boxShadow: "0 0 30px rgba(56,189,248,0.55), 0 2px 14px rgba(0,0,0,0.55)",
-      ...hoverLift,
-    }}
-    _active={{ transform: "translateY(0)" }}
-    _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-    data-testid="button-trial"
-  >
-    <Box
-      position="absolute"
-      inset={0}
-      pointerEvents="none"
-      aria-hidden="true"
-      background="linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%)"
-      backgroundSize="200% 100%"
-      animation={shimmerAnimation}
-    />
-    <Box display="flex" flexDirection="column" alignItems="center" gap="2px" position="relative">
-      <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
-        FREE TRIAL
-      </Box>
-    </Box>
-  </Button>
+{/* FREE TRIAL BUTTON (always visible) */}
+<Button
+  type="button"
+  gridColumn="span 2"
+  onClick={runTrial}
+  isDisabled={isLoading}
+  minH="3.4rem"
+  borderRadius="12px"
+  borderWidth="1px"
+  borderColor={
+    isFreePage
+      ? "rgba(56,189,248,0.65)"
+      : "rgba(34,197,94,0.65)"
+  }
+  bg={
+    isFreePage
+      ? "linear-gradient(100deg, #082f49 0%, #0369a1 28%, #38bdf8 50%, #0369a1 72%, #082f49 100%)"
+      : "linear-gradient(100deg, #052e16 0%, #15803d 28%, #22c55e 50%, #15803d 72%, #052e16 100%)"
+  }
+  color={isFreePage ? "#eff6ff" : "#f0fdf4"}
+>
+  FREE TRIAL
+</Button>
 )}
 
                   
