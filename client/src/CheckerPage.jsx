@@ -1903,6 +1903,81 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           </ModalBody>
         </ModalContent>
       </Modal>
+
+<Modal
+  isOpen={isTrialModalOpen}
+  onClose={() => setIsTrialModalOpen(false)}
+  isCentered
+  size="sm"
+>
+  <ModalOverlay bg="rgba(0,0,0,0.75)" backdropFilter="blur(4px)" />
+  <ModalContent
+    bg="linear-gradient(160deg, #0b1d2a 0%, #07131d 100%)"
+    borderWidth="1px"
+    borderColor="rgba(56,189,248,0.35)"
+    borderRadius="20px"
+    boxShadow="0 0 0 1px rgba(56,189,248,0.12), 0 20px 60px rgba(0,0,0,0.9)"
+    overflow="hidden"
+    mx={4}
+  >
+    <Box h="3px" bg="linear-gradient(90deg, #0369a1 0%, #38bdf8 50%, #0ea5e9 100%)" />
+    <ModalCloseButton color="rgba(255,255,255,0.5)" top={4} right={4} />
+    <ModalHeader
+      pt={6}
+      pb={0}
+      textAlign="center"
+      color="#38bdf8"
+      fontSize="lg"
+      fontWeight="800"
+      letterSpacing="0.12em"
+      textTransform="uppercase"
+    >
+      FREE TRIAL
+    </ModalHeader>
+    <ModalBody pb={6} pt={4}>
+      <VStack spacing={4}>
+        <Input
+          type="password"
+          placeholder="Trial Code"
+          value={trialCodeInput}
+          onChange={(e) => setTrialCodeInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleTrialSubmit()}
+          bg="rgba(255,255,255,0.05)"
+          borderColor="rgba(255,255,255,0.1)"
+          borderRadius="12px"
+          color="white"
+          _placeholder={{ color: "rgba(255,255,255,0.3)" }}
+          _focus={{ borderColor: "#38bdf8", boxShadow: "0 0 0 1px #38bdf8" }}
+          data-testid="input-trial-code"
+          autoFocus
+        />
+        {trialCodeError && (
+          <Text color="#ff4d4d" fontSize="sm" textAlign="center" w="full">
+            {trialCodeError}
+          </Text>
+        )}
+        <Button
+          w="full"
+          onClick={handleTrialSubmit}
+          isLoading={trialLoading}
+          isDisabled={!trialCodeInput.trim()}
+          bg="linear-gradient(135deg, #0369a1 0%, #38bdf8 100%)"
+          color="white"
+          fontWeight="700"
+          letterSpacing="0.08em"
+          borderRadius="12px"
+          borderWidth="0"
+          _hover={{ filter: "brightness(1.15)" }}
+          _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
+          data-testid="button-submit-trial"
+        >
+          Submit
+        </Button>
+      </VStack>
+    </ModalBody>
+  </ModalContent>
+</Modal>
+  
 )}
 </Box>
 
