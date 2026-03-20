@@ -1826,7 +1826,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 </ModalContent>
 </Modal>
 
-{isBulkModalOpen && isMinimized && (
+{isPremiumPage &&  ( 
   <Box
     position="fixed"
     bottom="24px"
