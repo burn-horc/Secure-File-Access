@@ -1451,6 +1451,19 @@ return (
           liveValidCount={liveValidCount}
           liveInvalidCount={liveInvalidCount}
           liveResultIds={liveResultIds}
+
+            runTrial={runTrial}
+  trialResults={trialResults}
+  showTrialResults={showTrialResults}
+  setShowTrialResults={setShowTrialResults}
+  isTrialModalOpen={isTrialModalOpen}
+  setIsTrialModalOpen={setIsTrialModalOpen}
+  trialCodeInput={trialCodeInput}
+  setTrialCodeInput={setTrialCodeInput}
+  trialCodeError={trialCodeError}
+  trialLoading={trialLoading}
+  handleTrialSubmit={handleTrialSubmit}
+
         />
       </Box>
     </Route>
