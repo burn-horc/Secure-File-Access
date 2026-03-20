@@ -538,9 +538,12 @@ export default function CheckerPage({
             minH={0}
             borderRadius="24px"
             borderWidth="1px"
-            borderColor={sessionUnlocked ? "rgba(255,185,0,0.38)" : "rgba(120,60,220,0.22)"}
-            bg={sessionUnlocked ? "linear-gradient(160deg, #1e1804 0%, #120f02 100%)" : "linear-gradient(160deg, #181e35 0%, #0f1220 100%)"}
-            boxShadow={sessionUnlocked ? "0 0 0 1px rgba(255,185,0,0.14), 0 8px 32px rgba(0,0,0,0.8), 0 0 60px rgba(255,160,0,0.20)" : "0 0 0 1px rgba(120,60,220,0.10), 0 8px 32px rgba(0,0,0,0.7), 0 0 60px rgba(90,30,180,0.12)"}
+            borderColor={isPremiumPage ? "rgba(255,185,0,0.38)" : "rgba(120,60,220,0.22)"}
+bg={isPremiumPage ? "linear-gradient(160deg, #1e1804 0%, #120f02 100%)" : "linear-gradient(160deg, #181e35 0%, #0f1220 100%)"}
+boxShadow={isPremiumPage
+  ? "0 0 0 1px rgba(255,185,0,0.14), 0 8px 32px rgba(0,0,0,0.8), 0 0 60px rgba(255,160,0,0.20)"
+  : "0 0 0 1px rgba(120,60,220,0.10), 0 8px 32px rgba(0,0,0,0.7), 0 0 60px rgba(90,30,180,0.12)"
+}
             transition="border-color 0.6s ease, box-shadow 0.6s ease, background 0.6s ease"
             overflow="hidden"
           >
@@ -558,9 +561,8 @@ export default function CheckerPage({
                 templateColumns="2.5rem 1fr 2.5rem"
                 alignItems="center"
                 borderBottomWidth="1px"
-                borderBottomColor={sessionUnlocked ? "rgba(255,185,0,0.22)" : "rgba(120,60,220,0.18)"}
-                bg={sessionUnlocked ? "rgba(20,15,3,0.7)" : "rgba(10,10,24,0.7)"}
-                px={3}
+                borderBottomColor={isPremiumPage ? "rgba(255,185,0,0.22)" : "rgba(120,60,220,0.18)"}
+bg={isPremiumPage ? "rgba(20,15,3,0.7)" : "rgba(10,10,24,0.7)"}
               >
                 <Box aria-hidden="true" display="flex" alignItems="center">
                   <SiNetflix color="#e50914" size="22px" />
@@ -573,8 +575,8 @@ export default function CheckerPage({
                   fontWeight="700"
                   fontFamily="'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Menlo, Consolas, monospace"
                   letterSpacing="0.06em"
-                  color={sessionUnlocked ? "#e50914" : "#ff8a3d"}
-                  animation={sessionUnlocked ? premiumAnimation : undefined}
+                  color={isPremiumPage ? "#e50914" : "#ff8a3d"}
+animation={isPremiumPage ? premiumAnimation : undefined}
                 >
                   {isPremiumPage ? "PREMIUM" : "FREE TRIAL"}
                 </Text>
