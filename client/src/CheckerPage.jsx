@@ -204,7 +204,6 @@ export default function CheckerPage({
   liveValidCount,
   liveInvalidCount,
   liveResultIds,
-  runFindAccount,
   runTrial,
 }) {
   const HISTORY_KEY = 'netflix-checker:history:v1';
