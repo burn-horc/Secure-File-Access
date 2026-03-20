@@ -167,6 +167,7 @@ async function copyTextToClipboard(value) {
 }
 
 export default function CheckerPage({
+  mode = "premium",
   input,
   uploadedInputBanner,
   isLoading,
@@ -204,6 +205,18 @@ export default function CheckerPage({
   liveValidCount,
   liveInvalidCount,
   liveResultIds,
+  runTrial,
+
+  trialResults,
+  showTrialResults,
+  setShowTrialResults,
+  isTrialModalOpen,
+  setIsTrialModalOpen,
+  trialCodeInput,
+  setTrialCodeInput,
+  trialCodeError,
+  trialLoading,
+  handleTrialSubmit,
 }) {
   const HISTORY_KEY = 'netflix-checker:history:v1';
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
