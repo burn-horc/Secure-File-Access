@@ -750,6 +750,13 @@ export default function App() {
   const [verifiedPasscode, setVerifiedPasscode] = useState("");
   const [location, setLocation] = useLocation();
 
+  const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
+const [trialCodeInput, setTrialCodeInput] = useState("");
+const [trialCodeError, setTrialCodeError] = useState("");
+const [trialLoading, setTrialLoading] = useState(false);
+const [trialResults, setTrialResults] = useState([]);
+const [showTrialResults, setShowTrialResults] = useState(false);
+  
   const canAccessAdmin = sessionUnlocked; 
 
   
@@ -1316,6 +1323,47 @@ const handlePasscodeSubmit = async () => {
       showToast(message);
     }
   };
+
+  const runTrial = () => {
+  if (isLoading) return;
+  setTrialCodeInput("");
+  setTrialCodeError("");
+  setIsTrialModalOpen(true);
+};
+
+const handleTrialSubmit = async () => {
+  const code = trialCodeInput.trim();
+  if (!code) return;
+
+  setTrialLoading(true);
+  setTrialCodeError("");
+
+  try {
+    const res = await fetch("/api/trial/create", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || "Unable to create trial.");
+    }
+
+    setTrialResults((prev) => [data.result, ...prev]);
+    setShowTrialResults(true);
+    setIsTrialModalOpen(false);
+    setTrialCodeInput("");
+  } catch (err) {
+    setTrialCodeError(
+      err instanceof Error ? err.message : "Trial request failed."
+    );
+  } finally {
+    setTrialLoading(false);
+  }
+};
 
   
 
