@@ -1372,7 +1372,6 @@ const handleTrialSubmit = async () => {
     setTrialLoading(false);
   }
 };
-  
   const fetchTrialAccount = async (code) => {
   if (isLoading) return;
 
