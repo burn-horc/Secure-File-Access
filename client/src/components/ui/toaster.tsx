@@ -1,3 +1,14 @@
+import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <div style={{ color: "white", background: "black", minHeight: "100vh" }}>TEST 1</div>
+    </QueryClientProvider>
+  );
+}
+
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
