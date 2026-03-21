@@ -1264,15 +1264,20 @@ const handlePasscodeSubmit = async () => {
     }
 
     if (res.ok && data.success) {
-      setVerifiedPasscode(code);
-      setSessionUnlocked(true);
-      setIsPasscodeModalOpen(false);
-      setPasscodeInput("");
-      findAccountRetryRef.current = 0;
-      runFindAccountScan(code);
-    } else {
-      setPasscodeError(data.error || "Incorrect passcode.");
-    }
+  setVerifiedPasscode(code);
+  setSessionUnlocked(true);
+  setIsPasscodeModalOpen(false);
+  setPasscodeInput("");
+  findAccountRetryRef.current = 0;
+
+  setLocation("/premium");
+
+  setTimeout(() => {
+    runFindAccountScan(code);
+  }, 50);
+} else {
+  setPasscodeError(data.error || "Incorrect passcode.");
+}
   } catch (err) {
     console.error("handlePasscodeSubmit error:", err);
     setPasscodeError(
