@@ -554,7 +554,7 @@ const isPremiumPage = mode === "premium";
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.3 }}
   w="full"
->
+
             borderRadius="24px"
             borderWidth="1px"
             borderColor={sessionUnlocked ? "rgba(255,185,0,0.38)" : "rgba(120,60,220,0.22)"}
