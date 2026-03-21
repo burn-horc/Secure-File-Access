@@ -18,12 +18,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
 
     await supabase
-      .from("trial_cookies")
-      .update({ cookie: null })
-      .eq("status", "used")
-      .not("used_at", "is", null)
-      .lte("used_at", tenMinutesAgo)
-      .not("cookie", "is", null);
+  .from("trial_cookies")
+  .update({
+    status: null,
+    used_at: null,
+  })
+  .eq("status", "used")
+  .not("used_at", "is", null)
+  .lte("used_at", tenMinutesAgo);
 
     const { data, error } = await supabase
       .from("trial_cookies")
