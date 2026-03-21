@@ -532,27 +532,25 @@ const isPremiumPage = mode === "premium";
   
   return (
     <Box
-      as="main"
-      h="100dvh"
-      minH="100dvh"
-      overflowX="hidden"
-      overflowY="auto"
-      bg="#0d0f18"
-      color="#ffffff"
-    >
+  as="main"
+  minH="100vh"
+  w="full"
+  overflowX="hidden"
+  bg="#0d0f18"
+  color="#ffffff"
+>
       <Box
-        mx="auto"
-        h="100%"
-        w="full"
-        px={{ base: 2, sm: 3, lg: 4 }}
-        py={{ base: 2, sm: 3 }}
-      >
-        <Grid h="full" minH={0} templateRows="minmax(0,1fr) auto" gap={3}>
+  mx="auto"
+  w="full"
+  maxW="1100px"
+  px={{ base: 2, sm: 3, lg: 4 }}
+  py={{ base: 2, sm: 3, lg: 6 }}
+>
+        <Grid gap={3}>
           <Box
-            as={motion.section}
-            {...fadeInUp(0.02)}
-            h="full"
-            minH={0}
+  as={motion.section}
+  {...fadeInUp(0.02)}
+  w="full"
             borderRadius="24px"
             borderWidth="1px"
             borderColor={sessionUnlocked ? "rgba(255,185,0,0.38)" : "rgba(120,60,220,0.22)"}
@@ -562,9 +560,7 @@ const isPremiumPage = mode === "premium";
             overflow="hidden"
           >
             <Flex
-              h="full"
-              minH={0}
-              direction="column"
+  direction="column"
               overflow="hidden"
               borderRadius="24px"
               borderWidth="0"
@@ -599,12 +595,10 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               </Grid>
 
               <Box
-                as="form"
-                onSubmit={runCheck}
-                display="grid"
-                flex="1"
-                minH={0}
-                gridTemplateRows="auto auto auto auto"
+  as="form"
+  onSubmit={runCheck}
+  display="grid"
+  gap={3}
                 alignContent="start"
                 gap={3}
                 p={{ base: 3, sm: 4 }}
