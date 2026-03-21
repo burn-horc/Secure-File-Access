@@ -599,16 +599,15 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   onSubmit={runCheck}
   display="grid"
   gap={3}
-                alignContent="start"
-                gap={3}
-                p={{ base: 3, sm: 4 }}
-              >
+  alignContent="start"
+  p={{ base: 3, sm: 4 }}
+>
                 <Box
-                  position="relative"
-                  h={{ base: "160px", sm: "200px" }}
-                  borderRadius="16px"
-                  bg="#141726"
-                >
+  position="relative"
+  h={{ base: "160px", sm: "200px", md: "260px", lg: "320px" }}
+  borderRadius="16px"
+  bg="#141726"
+>
                   {!isLoading && detectedCookieCount > 0 && (
                     <Badge
                       position="absolute"
