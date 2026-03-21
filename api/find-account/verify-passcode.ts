@@ -45,7 +45,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(429).json({
         success: false,
         error: "Too many failed attempts. Try again in 60 minutes! Nice try diddy 😂.",
-         
       });
     }
 
@@ -70,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { data, error } = await supabase
       .from("passcodes")
-      .select("id, code, is_active, expires_at")
+      .select("id, code, is_active, expires_at, max_uses, uses")
       .eq("code", passcode)
       .eq("is_active", true)
       .maybeSingle();
@@ -98,6 +97,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({
         success: false,
         error: "This passcode has expired.",
+      });
+    }
+
+    if (data.max_uses && (data.uses || 0) >= data.max_uses) {
+      await recordFailure(ip);
+      return res.status(403).json({
+        success: false,
+        error: "Premium code expired",
+      });
+    }
+
+    const { error: updateError } = await supabase
+      .from("passcodes")
+      .update({ uses: (data.uses || 0) + 1 })
+      .eq("id", data.id);
+
+    if (updateError) {
+      console.error("premium verify update error:", updateError);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to update premium code usage",
       });
     }
 
