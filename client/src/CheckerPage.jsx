@@ -1062,14 +1062,14 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       {isFreePage && (
   <Box
     position="relative"
-mt={6}
-mx="auto"
-zIndex={1}
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        gap={1}
-      >
+    mt={6}
+    mx="auto"
+    zIndex={1}
+    display="flex"
+    flexDirection="column"
+    alignItems="center"
+    gap={1}
+  >
         <Text
           fontSize="11px"
           fontWeight="600"
