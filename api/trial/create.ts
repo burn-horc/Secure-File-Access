@@ -9,22 +9,6 @@ const supabase = createClient(
   }
 );
 
-function normalizeResult(row: any) {
-  return {
-    valid: true,
-    email: row.email ?? null,
-    plan: row.plan ?? null,
-    countryOfSignup: row.country_of_signup ?? row.countryOfSignup ?? null,
-    nextBilling: row.next_billing ?? row.nextBilling ?? null,
-    memberSince: row.member_since ?? row.memberSince ?? null,
-    paymentMethod: row.payment_method ?? row.paymentMethod ?? null,
-    phone: row.phone ?? null,
-    cookieHeader: row.cookie_header ?? row.cookieHeader ?? null,
-    nftokenLink: row.nftoken_link ?? row.nftokenLink ?? null,
-    hasTokenLink: Boolean(row.nftoken_link ?? row.nftokenLink),
-  };
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
@@ -32,44 +16,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { data, error } = await supabase
-      .from("trial_accounts")
-      .select("*")
-      .eq("is_active", true)
-      .eq("is_used", false)
+      .from("trial_cookies")
+      .select('*')
+      .is("status", null)
+      .order("created_at", { ascending: true })
       .limit(1)
       .maybeSingle();
 
     if (error) {
       console.error("trial create supabase error:", error);
-      return res.status(500).json({ success: false, error: "Database error" });
+      return res.status(500).json({ success: false, error: error.message || "Database error" });
     }
 
     if (!data) {
-      return res.status(404).json({
-        success: false,
-        error: "No free trial account available.",
-      });
+      return res.status(404).json({ success: false, error: "No free trial account available." });
     }
 
     const { error: updateError } = await supabase
-      .from("trial_accounts")
-      .update({
-        is_used: true,
-        used_at: new Date().toISOString(),
-      })
+      .from("trial_cookies")
+      .update({ status: "used" })
       .eq("id", data.id);
 
     if (updateError) {
       console.error("trial create update error:", updateError);
-      return res.status(500).json({
-        success: false,
-        error: "Failed to reserve free trial account",
-      });
+      return res.status(500).json({ success: false, error: updateError.message || "Failed to update trial account" });
     }
+
+    const result = {
+      valid: true,
+      email: data.Email || "",
+      plan: data.Plan || "",
+      countryOfSignup: data.Country || "",
+      nextBilling: data["Next Billing"] || "",
+      memberSince: data["Member Si"] || "",
+      paymentMethod: data.Payment || "",
+      phone: data.Phone || "",
+      cookieHeader: data.cookie || "",
+      nftokenLink: "",
+    };
 
     return res.status(200).json({
       success: true,
-      result: normalizeResult(data),
+      result,
+      results: [result],
     });
   } catch (err) {
     console.error("trial create server error:", err);
