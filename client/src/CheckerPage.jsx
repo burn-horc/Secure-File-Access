@@ -549,20 +549,15 @@ const isPremiumPage = mode === "premium";
 >
         <Grid gap={3}>
           <Box
-  as={motion.section}
-  initial={{ opacity: 1, y: 0 }}   // ← fallback visible
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.3 }}
   w="full"
-
-            borderRadius="24px"
-            borderWidth="1px"
-            borderColor={sessionUnlocked ? "rgba(255,185,0,0.38)" : "rgba(120,60,220,0.22)"}
-            bg={sessionUnlocked ? "linear-gradient(160deg, #1e1804 0%, #120f02 100%)" : "linear-gradient(160deg, #181e35 0%, #0f1220 100%)"}
-            boxShadow={sessionUnlocked ? "0 0 0 1px rgba(255,185,0,0.14), 0 8px 32px rgba(0,0,0,0.8), 0 0 60px rgba(255,160,0,0.20)" : "0 0 0 1px rgba(120,60,220,0.10), 0 8px 32px rgba(0,0,0,0.7), 0 0 60px rgba(90,30,180,0.12)"}
-            transition="border-color 0.6s ease, box-shadow 0.6s ease, background 0.6s ease"
-            overflow="hidden"
-          >
+  borderRadius="24px"
+  borderWidth="1px"
+  borderColor={sessionUnlocked ? "rgba(255,185,0,0.38)" : "rgba(120,60,220,0.22)"}
+  bg={sessionUnlocked ? "linear-gradient(160deg, #1e1804 0%, #120f02 100%)" : "linear-gradient(160deg, #181e35 0%, #0f1220 100%)"}
+  boxShadow={sessionUnlocked ? "0 0 0 1px rgba(255,185,0,0.14), 0 8px 32px rgba(0,0,0,0.8), 0 0 60px rgba(255,160,0,0.20)" : "0 0 0 1px rgba(120,60,220,0.10), 0 8px 32px rgba(0,0,0,0.7), 0 0 60px rgba(90,30,180,0.12)"}
+  transition="border-color 0.6s ease, box-shadow 0.6s ease, background 0.6s ease"
+  overflow="hidden"
+>
             <Flex
   direction="column"
               overflow="hidden"
