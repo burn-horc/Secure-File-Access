@@ -963,7 +963,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   <Button
     type="button"
     gridColumn="span 2"
-    onClick={isFreePage ? () => setLocation("/premium") : runFindAccount}
+    onClick={runFindAccount}
     isDisabled={isLoading}
     minH="3.4rem"
     borderRadius="12px"
