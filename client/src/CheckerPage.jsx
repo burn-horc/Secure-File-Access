@@ -1065,7 +1065,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         </Grid>
       </Box>
 
-      {isPremiumPage && (
+      {isFreePage && (
   <Box
     position="fixed"
         bottom={{ base: "14px", sm: "18px" }}
@@ -1164,39 +1164,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
             </Box>
           </Box>
 
-          {/* PHCorner column */}
-          <Box display="flex" flexDirection="column" alignItems="center" gap="3px">
-            <Box
-              animation={arrowBounceAnimation}
-              style={{ animationDelay: "0.66s" }}
-              lineHeight="1"
-              fontSize="14px"
-              color="rgba(21,101,216,0.85)"
-              userSelect="none"
-              aria-hidden="true"
-            >↓</Box>
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              w="42px"
-              h="42px"
-              borderRadius="full"
-              bg="rgba(10,12,28,0.82)"
-              borderWidth="1px"
-              borderColor="rgba(21,101,216,0.35)"
-              boxShadow="0 0 12px rgba(21,101,216,0.18)"
-              animation={bobAnimation}
-              style={{ animationDelay: "1.8s" }}
-              transition="box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease"
-              _hover={{ bg: "rgba(21,101,216,0.18)", borderColor: "rgba(21,101,216,0.75)", boxShadow: "0 0 22px rgba(21,101,216,0.55)" }}
-              cursor="default"
-              aria-label="PHCorner"
-              data-testid="icon-phcorner"
-            >
-              
-            </Box>
-          </Box>
+          
 
         </Box>
       </Box>
