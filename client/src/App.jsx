@@ -1344,40 +1344,78 @@ const handleTrialSubmit = async () => {
   setTrialCodeError("");
 
   try {
-    const res = await fetch("/api/trial/verify-code", {
+    const verifyRes = await fetch("/api/trial/verify-code", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code }),
     });
 
-    let data = {};
-    try {
-      data = await res.json();
-    } catch {
-      data = { error: "Server returned invalid response." };
+    const verifyData = await verifyRes.json().catch(() => ({}));
+
+    if (!verifyRes.ok || !verifyData.success) {
+      throw new Error(verifyData.error || "Invalid trial code.");
     }
 
-    if (res.ok && data.success) {
-      setIsTrialModalOpen(false);
-      setTrialCodeInput("");
-      setLocation("/trial");
+    setIsTrialModalOpen(false);
+    setTrialCodeInput("");
+    setLocation("/trial");
 
-      setTimeout(() => {
-        fetchTrialAccount(code);
-      }, 50);
-    } else {
-      setTrialCodeError(data.error || "Invalid trial code.");
-    }
+    setTimeout(async () => {
+      try {
+        setCheckLogs([]);
+        setIsLoading(true);
+        setBulkValidResults([]);
+        setCheckProgress({ completed: 0, total: null });
+        setLiveValidCount(0);
+        setLiveInvalidCount(0);
+        setLiveResultIds(new Set());
+
+        appendCheckLog("info", "Finding Valid NETFLIX Account...");
+
+        const createRes = await fetch("/api/trial/create", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const createData = await createRes.json().catch(() => ({}));
+
+        if (!createRes.ok || !createData.success) {
+          throw new Error(createData.error || "No free trial account available.");
+        }
+
+        const result = createData.result;
+
+        setBulkValidResults([result]);
+        setLiveValidCount(1);
+        setLiveInvalidCount(0);
+        setCheckProgress({ completed: 1, total: 1 });
+
+        if (result?.cookieHeader) {
+          setLiveResultIds(new Set([result.cookieHeader]));
+        }
+
+        appendCheckLog(
+          "valid",
+          `VALID - ${result?.plan || "Unknown Plan"} - ${result?.countryOfSignup || "Unknown Country"}`
+        );
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Trial request failed.";
+        appendCheckLog("invalid", msg);
+        setTrialCodeError(msg);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 50);
   } catch (err) {
     setTrialCodeError(
-      err instanceof Error ? err.message : "Network error. Try again."
+      err instanceof Error ? err.message : "Trial request failed."
     );
   } finally {
     setTrialLoading(false);
   }
 };
-
   const fetchTrialAccount = async (code) => {
   if (isLoading) return;
 
