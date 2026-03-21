@@ -3,5 +3,15 @@
     "api/find-account.ts": {
       "includeFiles": "api/*.cjs"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
 }
