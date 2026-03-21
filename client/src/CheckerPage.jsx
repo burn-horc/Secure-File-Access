@@ -1009,7 +1009,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   <Button
     type="button"
     gridColumn="span 2"
-    onClick={isFreePage ? () => setLocation("/trial") : () => runTrial?.()}
+    onClick={() => runTrial?.()}
     isDisabled={isLoading}
     minH="3.4rem"
     borderRadius="12px"
