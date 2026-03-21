@@ -1361,63 +1361,8 @@ const handleTrialSubmit = async () => {
     setTrialCodeInput("");
     setLocation("/trial");
 
-    setTimeout(async () => {
-      try {
-        setCheckLogs([]);
-        nextCheckLogIdRef.current = 1;
-        setIsLoading(true);
-        setBulkValidResults([]);
-        latestPartialResultsRef.current = [];
-        setCheckProgress({ completed: 0, total: null });
-        setLiveValidCount(0);
-        setLiveInvalidCount(0);
-        setLiveResultIds(new Set());
-
-        appendCheckLog("info", "Finding Valid NETFLIX Account...");
-
-        const createRes = await fetch("/api/trial/create", {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-        });
-
-        const createData = await createRes.json().catch(() => ({}));
-
-        if (!createRes.ok || !createData.success) {
-          throw new Error(createData.error || "No free trial account available.");
-        }
-
-        const result = createData.result;
-        if (!result) {
-          throw new Error("No free trial account returned.");
-        }
-
-        latestPartialResultsRef.current = [result];
-        setBulkValidResults([result]);
-        setLiveValidCount(1);
-        setLiveInvalidCount(0);
-        setCheckProgress({ completed: 1, total: 1 });
-
-        if (result.cookieHeader) {
-          setLiveResultIds(new Set([result.cookieHeader]));
-        }
-
-        appendCheckLog(
-          "valid",
-          `VALID - ${result?.plan || "Unknown Plan"} - ${result?.countryOfSignup || "Unknown Country"}`
-        );
-
-        if (soundEnabled) {
-          playSuccessChime();
-        }
-      } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : "Trial request failed.";
-        appendCheckLog("invalid", `Error: ${msg}`);
-        setTrialCodeError(msg);
-      } finally {
-        setIsLoading(false);
-      }
+    setTimeout(() => {
+      fetchTrialAccount(code);
     }, 50);
   } catch (err) {
     setTrialCodeError(
@@ -1427,7 +1372,6 @@ const handleTrialSubmit = async () => {
     setTrialLoading(false);
   }
 };
-
   
   const fetchTrialAccount = async (code) => {
   if (isLoading) return;
