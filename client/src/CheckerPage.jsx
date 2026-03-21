@@ -549,8 +549,6 @@ const isPremiumPage = mode === "premium";
 >
         <Grid gap={3}>
           <Box
-  as={motion.section}
-  {...fadeInUp(0.02)}
   w="full"
             borderRadius="24px"
             borderWidth="1px"
