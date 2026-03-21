@@ -15,10 +15,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+
+    await supabase
+      .from("trial_cookies")
+      .update({ cookie: null })
+      .eq("status", "used")
+      .not("used_at", "is", null)
+      .lte("used_at", tenMinutesAgo)
+      .not("cookie", "is", null);
+
     const { data, error } = await supabase
       .from("trial_cookies")
-      .select('*')
+      .select("*")
       .is("status", null)
+      .not("cookie", "is", null)
       .order("created_at", { ascending: true })
       .limit(1)
       .maybeSingle();
@@ -34,7 +45,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { error: updateError } = await supabase
       .from("trial_cookies")
-      .update({ status: "used" })
+      .update({
+        status: "used",
+        used_at: new Date().toISOString(),
+      })
       .eq("id", data.id);
 
     if (updateError) {
