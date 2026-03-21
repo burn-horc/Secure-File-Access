@@ -1364,8 +1364,10 @@ const handleTrialSubmit = async () => {
     setTimeout(async () => {
       try {
         setCheckLogs([]);
+        nextCheckLogIdRef.current = 1;
         setIsLoading(true);
         setBulkValidResults([]);
+        latestPartialResultsRef.current = [];
         setCheckProgress({ completed: 0, total: null });
         setLiveValidCount(0);
         setLiveInvalidCount(0);
@@ -1386,13 +1388,17 @@ const handleTrialSubmit = async () => {
         }
 
         const result = createData.result;
+        if (!result) {
+          throw new Error("No free trial account returned.");
+        }
 
+        latestPartialResultsRef.current = [result];
         setBulkValidResults([result]);
         setLiveValidCount(1);
         setLiveInvalidCount(0);
         setCheckProgress({ completed: 1, total: 1 });
 
-        if (result?.cookieHeader) {
+        if (result.cookieHeader) {
           setLiveResultIds(new Set([result.cookieHeader]));
         }
 
@@ -1400,9 +1406,14 @@ const handleTrialSubmit = async () => {
           "valid",
           `VALID - ${result?.plan || "Unknown Plan"} - ${result?.countryOfSignup || "Unknown Country"}`
         );
+
+        if (soundEnabled) {
+          playSuccessChime();
+        }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Trial request failed.";
-        appendCheckLog("invalid", msg);
+        const msg =
+          err instanceof Error ? err.message : "Trial request failed.";
+        appendCheckLog("invalid", `Error: ${msg}`);
         setTrialCodeError(msg);
       } finally {
         setIsLoading(false);
@@ -1416,6 +1427,8 @@ const handleTrialSubmit = async () => {
     setTrialLoading(false);
   }
 };
+
+  
   const fetchTrialAccount = async (code) => {
   if (isLoading) return;
 
