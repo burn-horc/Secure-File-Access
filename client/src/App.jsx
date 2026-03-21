@@ -1395,7 +1395,7 @@ const handleTrialSubmit = async () => {
       throw new DOMException("Check aborted", "AbortError");
     }
 
-    appendCheckLog("info", "Finding Trial NETFLIX Account...");
+    appendCheckLog("info", "Finding Valid NETFLIX Account...");
 
     const response = await fetch("/api/trial/create", {
       method: "POST",
@@ -1426,7 +1426,7 @@ const handleTrialSubmit = async () => {
 
     setLiveValidCount(validResults.length);
     setLiveInvalidCount(invalidResults.length);
-    setBulkValidResults(validResults);
+   setBulkValidResults(results);
 
     results.forEach((result) => {
       const planLabel = result.plan?.trim() || "Unknown Plan";
