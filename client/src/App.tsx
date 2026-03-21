@@ -1,6 +1,4 @@
-export default function App() {
-  return <div style={{ minHeight: "100vh", background: "black", color: "white" }}>TEST APP</div>;
-}
+
 
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
