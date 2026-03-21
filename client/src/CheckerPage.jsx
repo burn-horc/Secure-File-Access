@@ -538,6 +538,7 @@ const isPremiumPage = mode === "premium";
   overflowX="hidden"
   bg="#0d0f18"
   color="#ffffff"
+  pb={{ base: "140px", md: "180px" }}
 >
       <Box
   mx="auto"
@@ -604,7 +605,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 >
                 <Box
   position="relative"
-  h={{ base: "160px", sm: "200px", md: "260px", lg: "320px" }}
+  h={{ base: "160px", sm: "200px", md: "220px", lg: "260px" }}
   borderRadius="16px"
   bg="#141726"
 >
@@ -988,7 +989,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       aria-hidden="true"
       background="linear-gradient(105deg, transparent 30%, rgba(255,255,220,0.38) 50%, transparent 70%)"
       backgroundSize="200% 100%"
-      animation={shimmerAnimation}
+      animation={undefined}
     />
     <Box display="flex" flexDirection="column" alignItems="center" gap="2px" position="relative">
       <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
