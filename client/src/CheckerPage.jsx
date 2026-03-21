@@ -1060,11 +1060,10 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 
       {isFreePage && (
   <Box
-    position="fixed"
-        bottom={{ base: "14px", sm: "18px" }}
-        left="50%"
-        transform="translateX(-50%)"
-        zIndex={999}
+    position="relative"
+mt={6}
+mx="auto"
+zIndex={1}
         display="flex"
         flexDirection="column"
         alignItems="center"
