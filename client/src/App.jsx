@@ -1344,32 +1344,120 @@ const handleTrialSubmit = async () => {
   setTrialCodeError("");
 
   try {
-    const res = await fetch("/api/trial/create", {
+    const res = await fetch("/api/trial/verify-code", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code }),
     });
 
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || "Unable to create trial.");
+    let data = {};
+    try {
+      data = await res.json();
+    } catch {
+      data = { error: "Server returned invalid response." };
     }
 
-    setTrialResults((prev) => [data.result, ...prev]);
-    setShowTrialResults(true);
-    setIsTrialModalOpen(false);
-    setTrialCodeInput("");
+    if (res.ok && data.success) {
+      setIsTrialModalOpen(false);
+      setTrialCodeInput("");
+      setLocation("/trial");
+
+      setTimeout(() => {
+        fetchTrialAccount(code);
+      }, 50);
+    } else {
+      setTrialCodeError(data.error || "Invalid trial code.");
+    }
   } catch (err) {
     setTrialCodeError(
-      err instanceof Error ? err.message : "Trial request failed."
+      err instanceof Error ? err.message : "Network error. Try again."
     );
   } finally {
     setTrialLoading(false);
   }
 };
 
+  const fetchTrialAccount = async (code) => {
+  if (isLoading) return;
+
+  const abortController = new AbortController();
+  activeCheckAbortControllerRef.current = abortController;
+  nextCheckLogIdRef.current = 1;
+  setCheckLogs([]);
+  setIsLoading(true);
+  toast.closeAll();
+  setBulkValidResults([]);
+  latestPartialResultsRef.current = [];
+  setCheckProgress({ completed: 0, total: null });
+  setLiveValidCount(0);
+  setLiveInvalidCount(0);
+  setLiveResultIds(new Set());
+
+  try {
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    if (abortController.signal.aborted) {
+      throw new DOMException("Check aborted", "AbortError");
+    }
+
+    appendCheckLog("info", "Finding Trial NETFLIX Account...");
+
+    const response = await fetch("/api/trial/create", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      signal: abortController.signal,
+      body: JSON.stringify({ code }),
+    });
+
+    if (!response.ok) {
+      const msg = await readApiErrorMessage(response);
+      throw new Error(msg);
+    }
+
+    const data = await response.json();
+    const results = Array.isArray(data?.results) ? data.results : data?.result ? [data.result] : [];
+
+    if (!results.length) {
+      appendCheckLog("invalid", "No trial account result returned.");
+      return;
+    }
+
+    latestPartialResultsRef.current = results;
+    setCheckProgress({ completed: results.length, total: results.length });
+
+    const validResults = results.filter((r) => r.valid);
+    const invalidResults = results.filter((r) => !r.valid);
+
+    setLiveValidCount(validResults.length);
+    setLiveInvalidCount(invalidResults.length);
+    setBulkValidResults(validResults);
+
+    results.forEach((result) => {
+      const planLabel = result.plan?.trim() || "Unknown Plan";
+      const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
+
+      if (result.valid) {
+        appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
+      } else {
+        appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${result.reason || "Unknown error"}`);
+      }
+    });
+  } catch (caughtError) {
+    if (isAbortError(caughtError)) {
+      appendCheckLog("info", "Stopped.");
+      return;
+    }
+
+    const message =
+      caughtError instanceof Error ? caughtError.message : "Unexpected client error";
+    appendCheckLog("invalid", `Error: ${message}`);
+    showToast(message);
+  } finally {
+    activeCheckAbortControllerRef.current = null;
+    setIsLoading(false);
+  }
+};
   
 
   if (vpnBlocked) {
