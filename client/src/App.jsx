@@ -1263,11 +1263,28 @@ const handlePasscodeSubmit = async () => {
       data = { error: "Server returned invalid response." };
     }
 
-    if (res.ok && data.success) {
-  setVerifiedPasscode(code);
-  setSessionUnlocked(true);
-  setIsPasscodeModalOpen(false);
-  setPasscodeInput("");
+    if (!res.ok || !data.success) {
+  throw new Error(data.error || "Unable to create trial.");
+}
+
+setIsTrialModalOpen(false);
+setTrialCodeInput("");
+
+// 🔥 go to trial page
+setLocation("/trial");
+
+// 🔥 simulate loading like premium
+setIsLoading(true);
+setCheckLogs([]);
+appendCheckLog("info", "Finding Valid NETFLIX Account...");
+
+setTimeout(() => {
+  setTrialResults((prev) => [data.result, ...prev]);
+  setShowTrialResults(true);
+  setIsLoading(false);
+
+  appendCheckLog("valid", "VALID - Trial Account Ready");
+}, 800);
   findAccountRetryRef.current = 0;
 
   setLocation("/premium");
