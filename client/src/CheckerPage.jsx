@@ -41,46 +41,9 @@ function displayBoolean(value) {
   return "N/A";
 }
 
-function readResultTokenLink(result, type = "default") {
-  const pick = (...values) => {
-    for (const value of values) {
-      if (typeof value === "string" && value.trim()) return value.trim();
-    }
-    return "";
-  };
-
-  if (type === "pc") {
-    return pick(
-      result?.pcLink,
-      result?.pcTokenLink,
-      result?.nftokenLink,
-      result?.tokenLink,
-      result?.link,
-      result?.url
-    );
-  }
-
-  if (type === "android") {
-    return pick(
-      result?.androidLink,
-      result?.mobileLink,
-      result?.mobileTokenLink,
-      result?.nftokenLink,
-      result?.tokenLink,
-      result?.link,
-      result?.url
-    );
-  }
-
-  return pick(
-    result?.nftokenLink,
-    result?.tokenLink,
-    result?.pcLink,
-    result?.androidLink,
-    result?.mobileLink,
-    result?.link,
-    result?.url
-  );
+function readResultTokenLink(result) {
+  const link = typeof result?.nftokenLink === "string" ? result.nftokenLink.trim() : "";
+  return link || "";
 }
 
 function getDaysUntil(dateStr) {
@@ -1086,41 +1049,6 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </Button>
 )}
                 </Grid>
-                <AppCredits />
-
-{isTrialPage && showTrialResults && trialResults?.length > 0 && (
-  <Box mt={4}>
-    {trialResults.map((result, index) => (
-      <Box key={index} p={3} border="1px solid #38bdf8" borderRadius="10px" mb={3}>
-        
-        <Text fontSize="sm" mb={2}>
-          {result.email || "Trial Account"}
-        </Text>
-
-        <HStack>
-          <Button
-            size="sm"
-            onClick={() =>
-              handlePcCopy(readResultTokenLink(result, "pc"))
-            }
-          >
-            PC
-          </Button>
-
-          <Button
-            size="sm"
-            onClick={() =>
-              handleAndroidCopy(readResultTokenLink(result, "android"))
-            }
-          >
-            Android
-          </Button>
-        </HStack>
-
-      </Box>
-    ))}
-  </Box>
-)}
               </Box>
             </Flex>
           </Box>
@@ -1593,7 +1521,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               fontSize="xs"
               py={5}
               _hover={{ filter: "brightness(1.15)" }}
-              onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result, "pc")))}
+              onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result)))}
               data-testid={`button-pc-${index}`}
             >
               {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
@@ -1608,7 +1536,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               fontSize="xs"
               py={5}
               _hover={{ filter: "brightness(1.15)" }}
-              onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result, "android")))}
+              onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result)))}
               data-testid={`button-android-${index}`}
             >
               {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile Watch"}
@@ -1623,7 +1551,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               fontSize="xs"
               py={5}
               _hover={{ filter: "brightness(1.15)" }}
-              onClick={() =>  handleCopyWithFeedback(`${index}-tv`, () => handleTvCopy(readResultTokenLink(result)))}
+              onClick={() => handleCopyWithFeedback(`${index}-tv`, () => handleTvCopy(readResultTokenLink(result)))}
               data-testid={`button-tv-${index}`}
             >
               {copiedStates[`${index}-tv`] ? "✓ Copied!" : "📺 TV Connect"}
@@ -1762,45 +1690,37 @@ animation={isPremiumPage ? premiumAnimation : undefined}
             )}
           </SimpleGrid>
 
-          <HStack mt={4} spacing={2}>
-  <Button
-    flex={1}
-    bg={copiedStates[`${index}-pc`] ? "linear-gradient(90deg,#00c853,#00e676)" : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"}
-    color="white"
-    fontWeight="700"
-    borderWidth="0"
-    borderRadius="10px"
-    fontSize="xs"
-    py={5}
-    _hover={{ filter: "brightness(1.15)" }}
-    onClick={() =>
-      handleCopyWithFeedback(`${index}-pc`, () =>
-        handlePcCopy(readResultTokenLink(result, "pc"))
-      )
-    }
-  >
-    {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
-  </Button>
+          <HStack mt={4} spacing={3}>
+            <Button
+              flex={1}
+              bg={copiedStates[`${index}-android`] ? "linear-gradient(90deg,#00c853,#00e676)" : "linear-gradient(90deg, #1a56db 0%, #6c47ff 100%)"}
+              color="white"
+              fontWeight="700"
+              borderWidth="0"
+              borderRadius="10px"
+              fontSize="sm"
+              _hover={{ filter: "brightness(1.15)" }}
+              onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result)))}
+              data-testid={`button-std-android-${index}`}
+            >
+              {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile"}
+            </Button>
 
-  <Button
-    flex={1}
-    bg={copiedStates[`${index}-android`] ? "linear-gradient(90deg,#00c853,#00e676)" : "linear-gradient(90deg, #1a56db 0%, #6c47ff 100%)"}
-    color="white"
-    fontWeight="700"
-    borderWidth="0"
-    borderRadius="10px"
-    fontSize="xs"
-    py={5}
-    _hover={{ filter: "brightness(1.15)" }}
-    onClick={() =>
-      handleCopyWithFeedback(`${index}-android`, () =>
-        handleAndroidCopy(readResultTokenLink(result, "android"))
-      )
-    }
-  >
-    {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile Watch"}
-  </Button>
-</HStack>
+            <Button
+              flex={1}
+              bg={copiedStates[`${index}-pc`] ? "linear-gradient(90deg,#00c853,#00e676)" : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"}
+              color="white"
+              fontWeight="700"
+              borderWidth="0"
+              borderRadius="10px"
+              fontSize="sm"
+              _hover={{ filter: "brightness(1.15)" }}
+              onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result)))}
+              data-testid={`button-std-pc-${index}`}
+            >
+              {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
+            </Button>
+          </HStack>
         </Box>
       </Box>
     );
