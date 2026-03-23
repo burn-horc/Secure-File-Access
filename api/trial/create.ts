@@ -58,20 +58,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ success: false, error: updateError.message || "Failed to update trial account" });
     }
 
-    const link = `https://www.netflix.com/login?cookie=${encodeURIComponent(data.cookie)}`;
-    const result = {
-      valid: true,
-      email: data.Email || "",
-      plan: data.Plan || "",
-      countryOfSignup: data.Country || "",
-      nextBilling: data["Next Billing"] || "",
-      memberSince: data["Member Si"] || "",
-      paymentMethod: data.Payment || "",
-      phone: data.Phone || "",
-      cookieHeader: data.cookie || "",
-      nftokenLink: `https://www.netflix.com/login?cookie=${encodeURIComponent(data.cookie)}`,
-    };
+    const checkRes = await fetch("YOUR_DOMAIN/api/check", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    input: data.cookie,
+    stream: false,
+  }),
+});
 
+const checkData = await checkRes.json();
+const result = checkData?.results?.[0];
     return res.status(200).json({
       success: true,
       result,
