@@ -1086,6 +1086,41 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </Button>
 )}
                 </Grid>
+                <AppCredits />
+
+{isTrialPage && showTrialResults && trialResults?.length > 0 && (
+  <Box mt={4}>
+    {trialResults.map((result, index) => (
+      <Box key={index} p={3} border="1px solid #38bdf8" borderRadius="10px" mb={3}>
+        
+        <Text fontSize="sm" mb={2}>
+          {result.email || "Trial Account"}
+        </Text>
+
+        <HStack>
+          <Button
+            size="sm"
+            onClick={() =>
+              handlePcCopy(readResultTokenLink(result, "pc"))
+            }
+          >
+            PC
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={() =>
+              handleAndroidCopy(readResultTokenLink(result, "android"))
+            }
+          >
+            Android
+          </Button>
+        </HStack>
+
+      </Box>
+    ))}
+  </Box>
+)}
               </Box>
             </Flex>
           </Box>
