@@ -1738,8 +1738,11 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     fontSize="xs"
     py={5}
     _hover={{ filter: "brightness(1.15)" }}
-    onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result)))}
-    data-testid={`button-std-pc-${index}`}
+    onClick={() =>
+      handleCopyWithFeedback(`${index}-pc`, () =>
+        handlePcCopy(readResultTokenLink(result, "pc"))
+      )
+    }
   >
     {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
   </Button>
@@ -1754,8 +1757,11 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     fontSize="xs"
     py={5}
     _hover={{ filter: "brightness(1.15)" }}
-    onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result)))}
-    data-testid={`button-std-android-${index}`}
+    onClick={() =>
+      handleCopyWithFeedback(`${index}-android`, () =>
+        handleAndroidCopy(readResultTokenLink(result, "android"))
+      )
+    }
   >
     {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile Watch"}
   </Button>
