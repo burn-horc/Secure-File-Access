@@ -38,11 +38,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (error) {
       console.error("trial create supabase error:", error);
-      return res.status(500).json({ success: false, error: error.message || "Database error" });
+      return res.status(500).json({
+        success: false,
+        error: error.message || "Database error",
+      });
     }
 
     if (!data) {
-      return res.status(404).json({ success: false, error: "No free trial account available." });
+      return res.status(404).json({
+        success: false,
+        error: "No free trial account available.",
+      });
     }
 
     const { error: updateError } = await supabase
@@ -55,20 +61,51 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (updateError) {
       console.error("trial create update error:", updateError);
-      return res.status(500).json({ success: false, error: updateError.message || "Failed to update trial account" });
+      return res.status(500).json({
+        success: false,
+        error: updateError.message || "Failed to update trial account",
+      });
     }
 
-    const checkRes = await fetch("YOUR_DOMAIN/api/check", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    input: data.cookie,
-    stream: false,
-  }),
-});
+    const protocol =
+      (req.headers["x-forwarded-proto"] as string) || "https";
+    const host = req.headers.host;
 
-const checkData = await checkRes.json();
-const result = checkData?.results?.[0];
+    if (!host) {
+      return res.status(500).json({
+        success: false,
+        error: "Missing host header",
+      });
+    }
+
+    const checkRes = await fetch(`${protocol}://${host}/api/check`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        input: data.cookie,
+        stream: false,
+      }),
+    });
+
+    const checkData = await checkRes.json().catch(() => ({}));
+
+    if (!checkRes.ok) {
+      console.error("trial create check error:", checkData);
+      return res.status(checkRes.status).json({
+        success: false,
+        error: checkData?.error || "Failed to generate trial account link",
+      });
+    }
+
+    const result = checkData?.results?.[0] || checkData?.result || null;
+
+    if (!result) {
+      return res.status(500).json({
+        success: false,
+        error: "Trial account check returned no result",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       result,
@@ -76,6 +113,9 @@ const result = checkData?.results?.[0];
     });
   } catch (err) {
     console.error("trial create server error:", err);
-    return res.status(500).json({ success: false, error: "Server error" });
+    return res.status(500).json({
+      success: false,
+      error: "Server error",
+    });
   }
 }
