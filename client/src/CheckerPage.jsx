@@ -1558,7 +1558,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               fontSize="xs"
               py={5}
               _hover={{ filter: "brightness(1.15)" }}
-              onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result)))}
+              onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result, "pc")))}
               data-testid={`button-pc-${index}`}
             >
               {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
@@ -1573,7 +1573,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               fontSize="xs"
               py={5}
               _hover={{ filter: "brightness(1.15)" }}
-              onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result)))}
+              onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result, "android")))}
               data-testid={`button-android-${index}`}
             >
               {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile Watch"}
@@ -1588,7 +1588,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               fontSize="xs"
               py={5}
               _hover={{ filter: "brightness(1.15)" }}
-              onClick={() => handleCopyWithFeedback(`${index}-tv`, () => handleTvCopy(readResultTokenLink(result)))}
+              onClick={() =>  handleCopyWithFeedback(`${index}-tv`, () => handleTvCopy(readResultTokenLink(result)))}
               data-testid={`button-tv-${index}`}
             >
               {copiedStates[`${index}-tv`] ? "✓ Copied!" : "📺 TV Connect"}
