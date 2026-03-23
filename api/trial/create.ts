@@ -58,6 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ success: false, error: updateError.message || "Failed to update trial account" });
     }
 
+    const link = `https://www.netflix.com/login?cookie=${encodeURIComponent(data.cookie)}`;
     const result = {
       valid: true,
       email: data.Email || "",
@@ -68,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       paymentMethod: data.Payment || "",
       phone: data.Phone || "",
       cookieHeader: data.cookie || "",
-      nftokenLink: "",
+      nftokenLink: `https://www.netflix.com/login?cookie=${encodeURIComponent(data.cookie)}`,
     };
 
     return res.status(200).json({
