@@ -46,6 +46,15 @@ function readResultTokenLink(result) {
   return link || "";
 }
 
+function extractNFToken(link) {
+  try {
+    const url = new URL(link);
+    return url.searchParams.get("nftoken");
+  } catch {
+    return null;
+  }
+}
+
 function getDaysUntil(dateStr) {
   if (!dateStr) return null;
   const d = new Date(dateStr);
@@ -498,15 +507,23 @@ const isPremiumPage = mode === "premium";
 };
 
   const handleTvCopy = async (link) => {
-    const copied = await copyTextToClipboard(link);
-    if (!copied) return;
-    showAppToast(toast, {
-      id: "checker-tv-link-copied",
-      title: "TV link copied",
-      status: "success",
-      duration: 1600,
-    });
-  };
+  if (!link) return false;
+
+  const token = extractNFToken(link);
+  const toCopy = token || link;
+
+  const copied = await copyTextToClipboard(toCopy);
+  if (!copied) return false;
+
+  showAppToast(toast, {
+    id: "checker-tv-link-copied",
+    title: token ? "TV code copied" : "TV link copied",
+    status: "success",
+    duration: 1600,
+  });
+
+  return true;
+};
 
   const handleCopyDetails = async (result) => {
     const na = "N/A";
