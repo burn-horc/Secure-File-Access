@@ -508,26 +508,34 @@ const isPremiumPage = mode === "premium";
   });
 };
 
-  const handleTvCopy = async (link) => {
-  if (!link) return false;
+  const handleTvOpen = (link) => {
+  if (!link) return;
 
   const token = extractNFToken(link);
-
-  const finalLink = token
-    ? `https://www.netflix.com/tv2?nftoken=${token}`
-    : link;
-
-  const copied = await copyTextToClipboard(finalLink);
-  if (!copied) return false;
+  if (!token) return;
 
   showAppToast(toast, {
-    id: "checker-tv-link-copied",
-    title: "TV link copied",
+    id: "checker-tv-open",
+    title: "Opening TV connect...",
     status: "success",
     duration: 1600,
   });
 
-  return true;
+  const win = window.open(link, "_blank");
+
+  setTimeout(() => {
+    const tvUrl = `https://www.netflix.com/tv2?nftoken=${token}`;
+
+    try {
+      if (win && !win.closed) {
+        win.location.href = tvUrl;
+      } else {
+        window.open(tvUrl, "_blank");
+      }
+    } catch {
+      window.open(tvUrl, "_blank");
+    }
+  }, 1800);
 };
 
   const handleCopyDetails = async (result) => {
@@ -1564,20 +1572,20 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile Watch"}
             </Button>
             <Button
-              flex={1}
-              bg={copiedStates[`${index}-tv`] ? "linear-gradient(90deg,#00c853,#00e676)" : "linear-gradient(90deg, #7c3aed 0%, #a855f7 100%)"}
-              color="white"
-              fontWeight="700"
-              borderWidth="0"
-              borderRadius="10px"
-              fontSize="xs"
-              py={5}
-              _hover={{ filter: "brightness(1.15)" }}
-              onClick={() => handleCopyWithFeedback(`${index}-tv`, () => handleTvCopy(readResultTokenLink(result)))}
-              data-testid={`button-tv-${index}`}
-            >
-              {copiedStates[`${index}-tv`] ? "✓ Copied!" : "📺 TV Connect"}
-            </Button>
+  flex={1}
+  bg="linear-gradient(90deg, #7c3aed 0%, #a855f7 100%)"
+  color="white"
+  fontWeight="700"
+  borderWidth="0"
+  borderRadius="10px"
+  fontSize="xs"
+  py={5}
+  _hover={{ filter: "brightness(1.15)" }}
+  onClick={() => handleTvOpen(readResultTokenLink(result))}
+  data-testid={`button-tv-${index}`}
+>
+  📺 TV Connect
+</Button>
           </HStack>
 
                              <Box px={4} pb={4}>
