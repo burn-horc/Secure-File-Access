@@ -535,7 +535,7 @@ const isPremiumPage = mode === "premium";
     } catch {
       window.open(tvUrl, "_blank");
     }
-  }, 1800);
+  }, 2500);
 };
 
   const handleCopyDetails = async (result) => {
