@@ -511,32 +511,14 @@ const isPremiumPage = mode === "premium";
   const handleTvOpen = (link) => {
   if (!link) return;
 
-  const token = extractNFToken(link);
-  if (!token) return;
-
-  const win = window.open("", "_blank");
+  window.open(link, "_blank", "noopener,noreferrer");
 
   showAppToast(toast, {
     id: "checker-tv-open",
-    title: "Connecting to TV...",
-    status: "loading",
-    duration: 2000,
+    title: "Open TV code on your TV, then enter it here quickly",
+    status: "info",
+    duration: 2600,
   });
-
-  if (!win) {
-    window.location.href = link;
-    return;
-  }
-
-  win.location.href = link;
-
-  setTimeout(() => {
-    try {
-      win.location.href = `https://www.netflix.com/tv2?nftoken=${encodeURIComponent(token)}`;
-    } catch {
-      window.open(`https://www.netflix.com/tv2?nftoken=${encodeURIComponent(token)}`, "_blank");
-    }
-  }, 1200);
 };
   
   const handleCopyDetails = async (result) => {
