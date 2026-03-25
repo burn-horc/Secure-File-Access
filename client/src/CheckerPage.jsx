@@ -514,7 +514,7 @@ const isPremiumPage = mode === "premium";
   const token = extractNFToken(link);
   if (!token) return;
 
-  const win = window.open("about:blank", "_blank");
+  const win = window.open("", "_blank");
 
   showAppToast(toast, {
     id: "checker-tv-open",
@@ -523,20 +523,22 @@ const isPremiumPage = mode === "premium";
     duration: 2000,
   });
 
-  try {
-    if (win) {
-      // Step 1: load login session
-      win.location.href = link;
-
-      // Step 2: quickly jump to tv2
-      setTimeout(() => {
-        win.location.href = `https://www.netflix.com/tv2?nftoken=${token}`;
-      }, 1200);
-    }
-  } catch {
-    window.open(`https://www.netflix.com/tv2?nftoken=${token}`, "_blank");
+  if (!win) {
+    window.location.href = link;
+    return;
   }
+
+  win.location.href = link;
+
+  setTimeout(() => {
+    try {
+      win.location.href = `https://www.netflix.com/tv2?nftoken=${encodeURIComponent(token)}`;
+    } catch {
+      window.open(`https://www.netflix.com/tv2?nftoken=${encodeURIComponent(token)}`, "_blank");
+    }
+  }, 1200);
 };
+  
   const handleCopyDetails = async (result) => {
     const na = "N/A";
     const lines = [
