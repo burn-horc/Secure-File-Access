@@ -48,8 +48,10 @@ function readResultTokenLink(result) {
 
 function extractNFToken(link) {
   try {
-    const url = new URL(link);
-    return url.searchParams.get("nftoken");
+    const match = link.match(/[?&]nftoken=([^&]+)/);
+    if (!match) return null;
+
+    return decodeURIComponent(match[1]); // keeps + intact
   } catch {
     return null;
   }
@@ -510,14 +512,17 @@ const isPremiumPage = mode === "premium";
   if (!link) return false;
 
   const token = extractNFToken(link);
-  const toCopy = token || link;
 
-  const copied = await copyTextToClipboard(toCopy);
+  const finalLink = token
+    ? `https://www.netflix.com/tv2?nftoken=${token}`
+    : link;
+
+  const copied = await copyTextToClipboard(finalLink);
   if (!copied) return false;
 
   showAppToast(toast, {
     id: "checker-tv-link-copied",
-    title: token ? "TV code copied" : "TV link copied",
+    title: "TV link copied",
     status: "success",
     duration: 1600,
   });
