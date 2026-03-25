@@ -41,9 +41,58 @@ function displayBoolean(value) {
   return "N/A";
 }
 
-function readResultTokenLink(result) {
-  const link = typeof result?.nftokenLink === "string" ? result.nftokenLink.trim() : "";
-  return link || "";
+function readResultTokenLink(result, type = "default") {
+  const pick = (...values) => {
+    for (const value of values) {
+      if (typeof value === "string" && value.trim()) return value.trim();
+    }
+    return "";
+  };
+
+  if (type === "pc") {
+    return pick(
+      result?.pcLink,
+      result?.pcTokenLink,
+      result?.nftokenLink,
+      result?.tokenLink,
+      result?.link,
+      result?.url
+    );
+  }
+
+  if (type === "android") {
+    return pick(
+      result?.androidLink,
+      result?.mobileLink,
+      result?.mobileTokenLink,
+      result?.nftokenLink,
+      result?.tokenLink,
+      result?.link,
+      result?.url
+    );
+  }
+
+  if (type === "tv") {
+    return pick(
+      result?.nftokenLink,
+      result?.tokenLink,
+      result?.pcLink,
+      result?.androidLink,
+      result?.mobileLink,
+      result?.link,
+      result?.url
+    );
+  }
+
+  return pick(
+    result?.nftokenLink,
+    result?.tokenLink,
+    result?.pcLink,
+    result?.androidLink,
+    result?.mobileLink,
+    result?.link,
+    result?.url
+  );
 }
 
 function extractNFToken(link) {
@@ -509,8 +558,17 @@ const isPremiumPage = mode === "premium";
   const handleTvOpen = (link) => {
   if (!link) return;
 
-  console.log("TV LINK:", link);
-  window.open(link, "_blank");
+  const opened = window.open(link, "_blank");
+
+  if (!opened) {
+    showAppToast(toast, {
+      id: "checker-tv-open-blocked",
+      title: "Popup blocked. Please allow popups and try again.",
+      status: "warning",
+      duration: 2500,
+    });
+    return;
+  }
 
   showAppToast(toast, {
     id: "checker-tv-open",
@@ -1533,7 +1591,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               fontSize="xs"
               py={5}
               _hover={{ filter: "brightness(1.15)" }}
-              onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result)))}
+              onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result, "pc")))}
               data-testid={`button-pc-${index}`}
             >
               {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
@@ -1548,7 +1606,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               fontSize="xs"
               py={5}
               _hover={{ filter: "brightness(1.15)" }}
-              onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result)))}
+              onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result, "android")))}
               data-testid={`button-android-${index}`}
             >
               {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile Watch"}
@@ -1563,7 +1621,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   fontSize="xs"
   py={5}
   _hover={{ filter: "brightness(1.15)" }}
-  onClick={() => handleTvOpen(readResultTokenLink(result))}
+  onClick={() => handleTvOpen(readResultTokenLink(result, "tv"))}
   data-testid={`button-tv-${index}`}
 >
   📺 TV Connect
