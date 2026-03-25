@@ -558,23 +558,19 @@ const isPremiumPage = mode === "premium";
   const handleTvOpen = (link) => {
   if (!link) return;
 
-  const opened = window.open(link, "_blank");
+  // 1st tab: open the account/login link
+  window.open(link, "_blank", "noopener,noreferrer");
 
-  if (!opened) {
-    showAppToast(toast, {
-      id: "checker-tv-open-blocked",
-      title: "Popup blocked. Please allow popups and try again.",
-      status: "warning",
-      duration: 2500,
-    });
-    return;
-  }
+  // 2nd tab: open TV page shortly after
+  setTimeout(() => {
+    window.open("https://www.netflix.com/tv2", "_blank", "noopener,noreferrer");
+  }, 700);
 
   showAppToast(toast, {
     id: "checker-tv-open",
-    title: "TV page opened",
-    status: "info",
-    duration: 1800,
+    title: "Opened account tab + TV tab",
+    status: "success",
+    duration: 2000,
   });
 };
   
