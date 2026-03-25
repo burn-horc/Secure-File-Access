@@ -509,29 +509,15 @@ const isPremiumPage = mode === "premium";
   const handleTvOpen = (link) => {
   if (!link) return;
 
-  const token = extractNFToken(link);
-
-  const win = window.open(link, "_blank");
-
-  if (!win) {
-    window.location.href = link;
-    return;
-  }
+  console.log("TV LINK:", link);
+  window.open(link, "_blank");
 
   showAppToast(toast, {
     id: "checker-tv-open",
-    title: "Opening TV connect...",
-    status: "loading",
-    duration: 2000,
+    title: "TV page opened",
+    status: "info",
+    duration: 1800,
   });
-
-  setTimeout(() => {
-    if (token) {
-      win.location.href = `https://www.netflix.com/tv2?nftoken=${encodeURIComponent(token)}`;
-    } else {
-      win.location.href = "https://www.netflix.com/tv2";
-    }
-  }, 1500);
 };
   
   const handleCopyDetails = async (result) => {
