@@ -493,22 +493,16 @@ const isPremiumPage = mode === "premium";
       duration: 1600,
     });
   };
-  const handleTvOpen = (link) => {
-  if (!link) return;
+  const handlePcCopy = async (link) => {
+  const copied = await copyTextToClipboard(link);
+  if (!copied) return;
 
-  // 1st tab: open the account/login link
-  window.open(link, "_blank", "noopener,noreferrer");
-
-  // 2nd tab: open TV page shortly after
-  setTimeout(() => {
-    window.open("https://www.netflix.com/tv2", "_blank", "noopener,noreferrer");
-  }, 700);
-
+  const toastId = "checker-single-pc-link-copied";
   showAppToast(toast, {
-    id: "checker-tv-open",
-    title: "Opened account tab + TV tab",
+    id: toastId,
+    title: "PC link copied",
     status: "success",
-    duration: 2000,
+    duration: 1600,
   });
 };
 
