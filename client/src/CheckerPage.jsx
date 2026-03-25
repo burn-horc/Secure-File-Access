@@ -514,30 +514,29 @@ const isPremiumPage = mode === "premium";
   const token = extractNFToken(link);
   if (!token) return;
 
+  const win = window.open("about:blank", "_blank");
+
   showAppToast(toast, {
     id: "checker-tv-open",
-    title: "Opening TV connect...",
-    status: "success",
-    duration: 1600,
+    title: "Connecting to TV...",
+    status: "loading",
+    duration: 2000,
   });
 
-  const win = window.open(link, "_blank");
+  try {
+    if (win) {
+      // Step 1: load login session
+      win.location.href = link;
 
-  setTimeout(() => {
-    const tvUrl = `https://www.netflix.com/tv2?nftoken=${token}`;
-
-    try {
-      if (win && !win.closed) {
-        win.location.href = tvUrl;
-      } else {
-        window.open(tvUrl, "_blank");
-      }
-    } catch {
-      window.open(tvUrl, "_blank");
+      // Step 2: quickly jump to tv2
+      setTimeout(() => {
+        win.location.href = `https://www.netflix.com/tv2?nftoken=${token}`;
+      }, 1200);
     }
-  }, 2500);
+  } catch {
+    window.open(`https://www.netflix.com/tv2?nftoken=${token}`, "_blank");
+  }
 };
-
   const handleCopyDetails = async (result) => {
     const na = "N/A";
     const lines = [
