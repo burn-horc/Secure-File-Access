@@ -558,20 +558,31 @@ const isPremiumPage = mode === "premium";
   const handleTvOpen = (link) => {
   if (!link) return;
 
-  // 1st tab: open the account/login link
-  window.open(link, "_blank", "noopener,noreferrer");
+  const token = extractNFToken(link);
+  if (!token) return;
 
-  // 2nd tab: open TV page shortly after
-  setTimeout(() => {
-    window.open("https://www.netflix.com/tv2", "_blank", "noopener,noreferrer");
-  }, 700);
+  const win = window.open("about:blank", "_blank");
 
   showAppToast(toast, {
     id: "checker-tv-open",
-    title: "Opened account tab + TV tab",
-    status: "success",
+    title: "Connecting to TV...",
+    status: "loading",
     duration: 2000,
   });
+
+  try {
+    if (win) {
+      // Step 1: load login session
+      win.location.href = link;
+
+      // Step 2: quickly jump to tv2
+      setTimeout(() => {
+        win.location.href = `https://www.netflix.com/tv2?nftoken=${token}`;
+      }, 1200);
+    }
+  } catch {
+    window.open(`https://www.netflix.com/tv2?nftoken=${token}`, "_blank");
+  }
 };
   
   const handleCopyDetails = async (result) => {
