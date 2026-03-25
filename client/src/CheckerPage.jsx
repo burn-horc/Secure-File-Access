@@ -48,10 +48,8 @@ function readResultTokenLink(result) {
 
 function extractNFToken(link) {
   try {
-    const match = link.match(/[?&]nftoken=([^&]+)/);
-    if (!match) return null;
-
-    return decodeURIComponent(match[1]); // keeps + intact
+    const url = new URL(link);
+    return url.searchParams.get("nftoken");
   } catch {
     return null;
   }
@@ -520,11 +518,18 @@ const isPremiumPage = mode === "premium";
     return;
   }
 
+  showAppToast(toast, {
+    id: "checker-tv-open",
+    title: "Opening TV connect...",
+    status: "loading",
+    duration: 2000,
+  });
+
   setTimeout(() => {
     if (token) {
-      win.location.href = `https://www.netflix.com/tv2?nftoken=${token}`;
+      win.location.href = `https://www.netflix.com/tv2?nftoken=${encodeURIComponent(token)}`;
     } else {
-      win.location.href = `https://www.netflix.com/tv2`;
+      win.location.href = "https://www.netflix.com/tv2";
     }
   }, 1500);
 };
