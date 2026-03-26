@@ -197,9 +197,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       delayMs: 500,
       randomJitter: true,
       staggerMs: 300,
-      onValidCookie: async (cookieHeader: string) => {
-        await saveStreamValidCookie(cookieHeader);
-      },
+      onValidCookie: async (result: any) => {
+  await saveStreamValidCookie(result);
+},
     };
 
     console.log("Worker count:", workerCount);
