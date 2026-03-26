@@ -97,20 +97,19 @@ async function saveStreamValidCookie(cookieHeader: string) {
   }
 
   const { error: cookieError } = await supabase
-    .from("cookies")
-    .upsert(
-      [
-        {
-          account_id: accountId,
-          cookie_header: cookieHeader,
-          plan: null,
-          country: null,
-          checked_at: checkedAt,
-        },
-      ],
-      { onConflict: "cookie_header" }
-    );
-
+  .from("checked_cookies")
+  .upsert(
+    [
+      {
+        account_id: accountId,
+        cookie_header: cookieHeader,
+        plan: null,
+        country: null,
+        checked_at: checkedAt,
+      },
+    ],
+    { onConflict: "cookie_header" }
+  );
   if (cookieError) {
     console.error("stream cookies upsert error:", cookieError.message);
   }
