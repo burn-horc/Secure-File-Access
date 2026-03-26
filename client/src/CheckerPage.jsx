@@ -1685,9 +1685,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 <Box mb={3}>
                   <b>• 📺 TV CONNECT</b><br />
                   Open Netflix on your Smart TV and choose <b>Login via Code</b>.<br />
-                  Paste the TV Connect link into your browser.<br />
-                  Then replace the link with:<br />
-                  <b>www.netflix.com/tv2</b><br />
+                  Click the Tv connect.<br />
                   Enter the code shown on your TV screen.
                 </Box>
 
