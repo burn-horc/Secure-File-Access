@@ -74,21 +74,21 @@ async function savePassedCheckAudits(
   }
 }
 
-async function saveStreamValidCookie(cookieHeader: string) {
-  if (!cookieHeader) return;
+async function saveStreamValidCookie(result: any) {
+  if (!result?.cookieHeader) return;
 
   const checkedAt = new Date().toISOString();
-  const accountId = crypto.randomUUID();
+  const accountId = result.accountId || crypto.randomUUID();
 
   const { error: liveError } = await supabase.from("live_checks").insert([
     {
       account_id: accountId,
       status: "passed",
-      cookie_header: cookieHeader,
-      plan: null,
-      country: null,
+      cookie_header: result.cookieHeader,
+      plan: result.plan || null,
+      country: result.countryOfSignup || null,
       checked_at: checkedAt,
-      expires_at: null,
+      expires_at: result.nextBillingRaw || null,
     },
   ]);
 
@@ -97,24 +97,24 @@ async function saveStreamValidCookie(cookieHeader: string) {
   }
 
   const { error: cookieError } = await supabase
-  .from("checked_cookies")
-  .upsert(
-    [
-      {
-        account_id: accountId,
-        cookie_header: cookieHeader,
-        plan: null,
-        country: null,
-        checked_at: checkedAt,
-      },
-    ],
-    { onConflict: "cookie_header" }
-  );
+    .from("checked_cookies")
+    .upsert(
+      [
+        {
+          account_id: accountId,
+          cookie_header: result.cookieHeader,
+          plan: result.plan || null,
+          country: result.countryOfSignup || null,
+          checked_at: checkedAt,
+        },
+      ],
+      { onConflict: "cookie_header" }
+    );
+
   if (cookieError) {
     console.error("stream checked_cookies upsert error:", cookieError.message);
   }
 }
-
 function isRetryableFailure(result: any) {
   const reason = String(result?.reason || result?.error || "").toLowerCase();
   return (
