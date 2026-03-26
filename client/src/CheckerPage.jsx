@@ -571,22 +571,17 @@ const isPremiumPage = mode === "premium";
   });
 
   try {
-    if (!win) {
-      window.open(`https://netflix.com/tv2?nftoken=${encodeURIComponent(token)}`, "_blank");
-      return;
+    if (win) {
+      // Step 1: load login session
+      win.location.href = link;
+
+      // Step 2: quickly jump to tv2
+      setTimeout(() => {
+        win.location.href = `https://netflix.com/tv2?nftoken=${token}`;
+      }, 1200);
     }
-
-    const safeLink = link.replace("https://netflix.com", "https://www.netflix.com");
-
-    // first load browser page
-    win.location.href = safeLink;
-
-    // then go to working tv2
-    setTimeout(() => {
-      win.location.href = `https://netflix.com/tv2?nftoken=${encodeURIComponent(token)}`;
-    }, 1200);
   } catch {
-    window.open(`https://netflix.com/tv2?nftoken=${encodeURIComponent(token)}`, "_blank");
+    window.open(`https://netflix.com/tv2?nftoken=${token}`, "_blank");
   }
 };
   
