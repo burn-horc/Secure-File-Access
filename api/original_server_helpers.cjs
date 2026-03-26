@@ -641,7 +641,7 @@ async function runStreamedCheck(req, res, cookies, workerCount, checkOptions = {
           valid += 1;
           if (resultWithCookie.cookieHeader && typeof checkOptions.onValidCookie === 'function') {
             console.log('[auto-save] valid cookie found in streamed check, invoking save callback');
-            try { await checkOptions.onValidCookie(resultWithCookie.cookieHeader); } catch (err) { console.error('[auto-save] callback error:', err); }
+            try { await checkOptions.onValidCookie(resultWithCookie); } catch (err) { console.error('[auto-save] callback error:', err); }
           } else if (resultWithCookie.valid) {
             console.log('[auto-save] valid result but cookieHeader is empty/null — cannot save');
           }
@@ -719,7 +719,7 @@ async function runDirectCheck(cookies, workerCount, checkOptions = {}) {
 
         results[index] = sanitizeCheckerResultForClient(result, cookie);
         if (results[index] && results[index].valid && results[index].cookieHeader && typeof checkOptions.onValidCookie === 'function') {
-          try { await checkOptions.onValidCookie(results[index].cookieHeader); } catch (_) {}
+          try { await checkOptions.onValidCookie(results[index]); } catch (_) {}
         }
       }
     })
