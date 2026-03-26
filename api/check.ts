@@ -65,8 +65,8 @@ async function savePassedCheckAudits(
 
   if (cookieRows.length > 0) {
     const { error: cookieError } = await supabase
-      .from("cookies")
-      .upsert(cookieRows, { onConflict: "cookie_header" });
+  .from("checked_cookies")
+  .upsert(cookieRows, { onConflict: "cookie_header" });
 
     if (cookieError) {
       console.error("save cookies error:", cookieError.message);
