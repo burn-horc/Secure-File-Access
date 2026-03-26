@@ -665,7 +665,7 @@ const isPremiumPage = mode === "premium";
                   color={isPremiumPage ? "#e50914" : isTrialPage ? "#38bdf8" : "#ff8a3d"}
 animation={isPremiumPage ? premiumAnimation : undefined}
                 >
-                  {isPremiumPage ? "PREMIUM" : isTrialPage ? "FREE TRIAL" : "FREE"}
+                  {isPremiumPage ? "PREMIUM" : isTrialPage ? "TRIAL" : "FREE"}
                 </Text>
                 <Box aria-hidden="true" />
               </Grid>
