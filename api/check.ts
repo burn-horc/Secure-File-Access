@@ -111,7 +111,7 @@ async function saveStreamValidCookie(cookieHeader: string) {
     { onConflict: "cookie_header" }
   );
   if (cookieError) {
-    console.error("stream cookies upsert error:", cookieError.message);
+    console.error("stream checked_cookies upsert error:", cookieError.message);
   }
 }
 
