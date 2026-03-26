@@ -561,7 +561,8 @@ const isPremiumPage = mode === "premium";
   const token = extractNFToken(link);
   if (!token) return;
 
-  const win = window.open("about:blank", "_blank");
+  // 👇 important: open blank with protection
+  const win = window.open("", "_blank", "noopener,noreferrer");
 
   showAppToast(toast, {
     id: "checker-tv-open",
@@ -572,10 +573,15 @@ const isPremiumPage = mode === "premium";
 
   try {
     if (win) {
-      // Step 1: load login session
-      win.location.href = link;
+      // 👇 force browser version first (prevents app launch)
+      const safeLink = link
+        .replace("https://netflix.com", "https://www.netflix.com")
+        + "#"; // 👈 small trick to weaken app detection
 
-      // Step 2: quickly jump to tv2
+      // Step 1: load session safely
+      win.location.href = safeLink;
+
+      // Step 2: your WORKING tv2 (keep this exactly)
       setTimeout(() => {
         win.location.href = `https://netflix.com/tv2?nftoken=${token}`;
       }, 1200);
