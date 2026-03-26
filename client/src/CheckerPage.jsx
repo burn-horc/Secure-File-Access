@@ -561,8 +561,7 @@ const isPremiumPage = mode === "premium";
   const token = extractNFToken(link);
   if (!token) return;
 
-  // 👇 important: open blank with protection
-  const win = window.open("", "_blank", "noopener,noreferrer");
+  const win = window.open("about:blank", "_blank");
 
   showAppToast(toast, {
     id: "checker-tv-open",
@@ -572,22 +571,22 @@ const isPremiumPage = mode === "premium";
   });
 
   try {
-    if (win) {
-      // 👇 force browser version first (prevents app launch)
-      const safeLink = link
-        .replace("https://netflix.com", "https://www.netflix.com")
-        + "#"; // 👈 small trick to weaken app detection
-
-      // Step 1: load session safely
-      win.location.href = safeLink;
-
-      // Step 2: your WORKING tv2 (keep this exactly)
-      setTimeout(() => {
-        win.location.href = `https://netflix.com/tv2?nftoken=${token}`;
-      }, 1200);
+    if (!win) {
+      window.open(`https://netflix.com/tv2?nftoken=${encodeURIComponent(token)}`, "_blank");
+      return;
     }
+
+    const safeLink = link.replace("https://netflix.com", "https://www.netflix.com");
+
+    // first load browser page
+    win.location.href = safeLink;
+
+    // then go to working tv2
+    setTimeout(() => {
+      win.location.href = `https://netflix.com/tv2?nftoken=${encodeURIComponent(token)}`;
+    }, 1200);
   } catch {
-    window.open(`https://netflix.com/tv2?nftoken=${token}`, "_blank");
+    window.open(`https://netflix.com/tv2?nftoken=${encodeURIComponent(token)}`, "_blank");
   }
 };
   
