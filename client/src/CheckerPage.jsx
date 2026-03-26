@@ -95,10 +95,10 @@ function readResultTokenLink(result, type = "default") {
   );
 }
 
-function extractNFToken(link) {
+function extractNFTokenRaw(link) {
   try {
-    const url = new URL(link);
-    return url.searchParams.get("nftoken");
+    const match = link.match(/[?&]nftoken=([^&]+)/);
+    return match ? match[1] : null;
   } catch {
     return null;
   }
@@ -558,31 +558,36 @@ const isPremiumPage = mode === "premium";
   const handleTvOpen = (link) => {
   if (!link) return;
 
-  const token = extractNFToken(link);
-  if (!token) return;
+  const rawToken = extractNFTokenRaw(link);
+  if (!rawToken) {
+    showAppToast(toast, {
+      id: "checker-tv-open-invalid",
+      title: "Invalid TV token link",
+      status: "error",
+      duration: 2200,
+    });
+    return;
+  }
 
-  const win = window.open("about:blank", "_blank");
+  const finalUrl = `https://www.netflix.com/tv2?nftoken=${rawToken}`;
+  const win = window.open(finalUrl, "_blank", "noopener,noreferrer");
+
+  if (!win) {
+    showAppToast(toast, {
+      id: "checker-tv-open-blocked",
+      title: "Popup blocked. Please allow popups and try again.",
+      status: "warning",
+      duration: 2500,
+    });
+    return;
+  }
 
   showAppToast(toast, {
     id: "checker-tv-open",
-    title: "Connecting to TV...",
-    status: "loading",
-    duration: 2000,
+    title: "TV page opened",
+    status: "info",
+    duration: 1800,
   });
-
-  try {
-    if (win) {
-      // Step 1: load login session
-      win.location.href = link;
-
-      // Step 2: quickly jump to tv2
-      setTimeout(() => {
-        win.location.href = `https://www.netflix.com/tv2?nftoken=${token}`;
-      }, 1200);
-    }
-  } catch {
-    window.open(`https://www.netflix.com/tv2?nftoken=${token}`, "_blank");
-  }
 };
   
   const handleCopyDetails = async (result) => {
