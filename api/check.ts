@@ -57,7 +57,9 @@ const cookieRows = passed.map((item) => ({
   checked_at: new Date().toISOString(),
 }));
 
-const { error: cookieError } = await supabase.from("cookies").insert(cookieRows);
+const { error: cookieError } = await supabase
+  .from("cookies")
+  .upsert(cookieRows, { onConflict: "cookie_header" });
 
 if (cookieError) {
   console.error("save cookies error:", cookieError.message);
