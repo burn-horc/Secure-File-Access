@@ -608,83 +608,83 @@ const isPremiumPage = mode === "premium";
     });
   };
 
-  const primaryBtn = {
-  borderRadius: "12px",
-  borderWidth: "1px",
-  borderColor: "rgba(139,92,246,0.35)",
-  bg: "rgba(139,92,246,0.10)",
-  color: "#8b5cf6",
-  fontWeight: "700",
-  letterSpacing: "0.04em",
-  transition: "all 0.2s ease",
-  _hover: {
-    bg: "rgba(139,92,246,0.16)",
-    borderColor: "rgba(139,92,246,0.6)",
-  },
-  _active: {
-    bg: "rgba(139,92,246,0.20)",
-  },
-};
+    const primaryBtn = {
+    borderRadius: "12px",
+    borderWidth: "1px",
+    borderColor: "rgba(139,92,246,0.35)",
+    bg: "rgba(139,92,246,0.10)",
+    color: "#8b5cf6",
+    fontWeight: "700",
+    letterSpacing: "0.04em",
+    transition: "all 0.2s ease",
+    _hover: {
+      bg: "rgba(139,92,246,0.16)",
+      borderColor: "rgba(139,92,246,0.6)",
+    },
+    _active: {
+      bg: "rgba(139,92,246,0.20)",
+    },
+  };
 
-const secondaryBtn = {
-  borderRadius: "12px",
-  borderWidth: "1px",
-  borderColor: "rgba(139,92,246,0.35)",
-  bg: "rgba(139,92,246,0.10)",
-  color: "#8b5cf6",
-  fontWeight: "700",
-  letterSpacing: "0.04em",
-  transition: "all 0.2s ease",
-  _hover: {
-    bg: "rgba(139,92,246,0.16)",
-    borderColor: "rgba(139,92,246,0.6)",
-  },
-  _active: {
-    bg: "rgba(139,92,246,0.20)",
-  },
-};
+  const secondaryBtn = {
+    borderRadius: "12px",
+    borderWidth: "1px",
+    borderColor: "rgba(139,92,246,0.35)",
+    bg: "rgba(139,92,246,0.10)",
+    color: "#8b5cf6",
+    fontWeight: "700",
+    letterSpacing: "0.04em",
+    transition: "all 0.2s ease",
+    _hover: {
+      bg: "rgba(139,92,246,0.16)",
+      borderColor: "rgba(139,92,246,0.6)",
+    },
+    _active: {
+      bg: "rgba(139,92,246,0.20)",
+    },
+  };
 
   const modalShell = {
-  bg: "linear-gradient(160deg, #181e35 0%, #0f1220 100%)",
-  borderWidth: "1px",
-  borderColor: "rgba(139,92,246,0.28)",
-  borderRadius: "20px",
-  boxShadow: "0 0 0 1px rgba(139,92,246,0.08), 0 20px 60px rgba(0,0,0,0.9)",
-  overflow: "hidden",
-};
+    bg: "linear-gradient(160deg, #181e35 0%, #0f1220 100%)",
+    borderWidth: "1px",
+    borderColor: "rgba(139,92,246,0.28)",
+    borderRadius: "20px",
+    boxShadow: "0 0 0 1px rgba(139,92,246,0.08), 0 20px 60px rgba(0,0,0,0.9)",
+    overflow: "hidden",
+  };
 
-const softCard = {
-  bg: "rgba(255,255,255,0.04)",
-  borderWidth: "1px",
-  borderColor: "rgba(255,255,255,0.08)",
-  borderRadius: "14px",
-};
+  const softCard = {
+    bg: "rgba(255,255,255,0.04)",
+    borderWidth: "1px",
+    borderColor: "rgba(255,255,255,0.08)",
+    borderRadius: "14px",
+  };
 
-const pillBtn = {
-  borderRadius: "12px",
-  borderWidth: "1px",
-  borderColor: "rgba(139,92,246,0.35)",
-  bg: "rgba(139,92,246,0.10)",
-  color: "#8b5cf6",
-  fontWeight: "700",
-  _hover: {
-    bg: "rgba(139,92,246,0.16)",
-    borderColor: "rgba(139,92,246,0.6)",
-  },
-};
-
-const ghostDarkBtn = {
-  borderRadius: "12px",
-  borderWidth: "1px",
-  borderColor: "rgba(255,255,255,0.14)",
-  bg: "rgba(255,255,255,0.03)",
-  color: "rgba(255,255,255,0.88)",
-  fontWeight: "600",
-  _hover: {
-    bg: "rgba(255,255,255,0.06)",
+  const pillBtn = {
+    borderRadius: "12px",
+    borderWidth: "1px",
     borderColor: "rgba(139,92,246,0.35)",
-  },
-};
+    bg: "rgba(139,92,246,0.10)",
+    color: "#8b5cf6",
+    fontWeight: "700",
+    _hover: {
+      bg: "rgba(139,92,246,0.16)",
+      borderColor: "rgba(139,92,246,0.6)",
+    },
+  };
+
+  const ghostDarkBtn = {
+    borderRadius: "12px",
+    borderWidth: "1px",
+    borderColor: "rgba(255,255,255,0.14)",
+    bg: "rgba(255,255,255,0.03)",
+    color: "rgba(255,255,255,0.88)",
+    fontWeight: "600",
+    _hover: {
+      bg: "rgba(255,255,255,0.06)",
+      borderColor: "rgba(139,92,246,0.35)",
+    },
+  };
   
   return (
     <Box
@@ -1434,7 +1434,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       {accountHistory.map((result, index) => {
         const theme = getPlanTheme(result?.plan);
         const expiryBadge = getExpiryBadge(result?.nextBilling);
-        return (
+      
+      return (
           <Box
             key={index}
             mb={3}
@@ -1490,17 +1491,17 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       const recheckState = recheckStates[index] || {};
       const grade = getAccountGrade(result);
       const isLive = liveResultIds?.has(result?.cookieHeader);
-      return (
+            return (
         <Box
-  key={index}
-  mb={4}
-  borderRadius="18px"
-  borderWidth="1px"
-  borderColor="rgba(139,92,246,0.26)"
-  bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
-  boxShadow="0 8px 28px rgba(0,0,0,0.42)"
-  overflow="hidden"
->
+          key={index}
+          mb={4}
+          borderRadius="18px"
+          borderWidth="1px"
+          borderColor="rgba(139,92,246,0.26)"
+          bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+          boxShadow="0 8px 28px rgba(0,0,0,0.42)"
+          overflow="hidden"
+        >
           <Box px={4} pt={4} pb={2}>
             <HStack spacing={2} mb={2} justify="space-between" flexWrap="wrap">
               <HStack spacing={2}>
@@ -1571,8 +1572,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 value ? (
                   <Box
                     key={label}
-                    bg="rgba(255,255,255,0.04)"
-                    borderRadius="10px"
+                    {...softCard}
                     px={3}
                     py={2.5}
                   >
@@ -1592,21 +1592,18 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           </Box>
 
           <Box px={4} pb={2}>
-            <HStack spacing={2}>
+            <HStack spacing={2} flexWrap="wrap">
               <Button
+                {...ghostDarkBtn}
                 size="xs"
-                variant="outline"
-                borderColor="rgba(255,255,255,0.2)"
-                color="rgba(255,255,255,0.65)"
-                borderRadius="8px"
                 fontSize="xs"
                 isDisabled={recheckState.loading}
                 onClick={() => handleRecheck(index, result?.cookieHeader)}
                 data-testid={`button-recheck-${index}`}
-                _hover={{ borderColor: theme.accent, color: theme.accent }}
               >
                 {recheckState.loading ? "⏳ Checking..." : "🔄 Re-check"}
               </Button>
+
               {recheckState.result !== null && recheckState.result !== undefined && (
                 <Badge
                   borderRadius="full"
@@ -1622,6 +1619,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                   {recheckState.result?.valid ? "✓ Still Live!" : "✗ No Longer Live"}
                 </Badge>
               )}
+
               {recheckState.error && (
                 <Badge borderRadius="full" px={2} fontSize="9px" bg="rgba(255,77,77,0.15)" color="#ff4d4d">
                   ✗ Check Failed
@@ -1632,74 +1630,54 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 
           <HStack px={4} pb={3} spacing={2}>
             <Button
+              {...primaryBtn}
               flex={1}
-              bg={copiedStates[`${index}-pc`] ? "linear-gradient(90deg,#00c853,#00e676)" : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"}
-              color="white"
-              fontWeight="700"
-              borderWidth="0"
-              borderRadius="10px"
               fontSize="xs"
               py={5}
-              _hover={{ filter: "brightness(1.15)" }}
               onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result, "pc")))}
               data-testid={`button-pc-${index}`}
             >
-              {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
+              {copiedStates[`${index}-pc`] ? "✓ Copied!" : "PC Watch"}
             </Button>
+
             <Button
+              {...primaryBtn}
               flex={1}
-              bg={copiedStates[`${index}-android`] ? "linear-gradient(90deg,#00c853,#00e676)" : "linear-gradient(90deg, #1a56db 0%, #6c47ff 100%)"}
-              color="white"
-              fontWeight="700"
-              borderWidth="0"
-              borderRadius="10px"
               fontSize="xs"
               py={5}
-              _hover={{ filter: "brightness(1.15)" }}
               onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result, "android")))}
               data-testid={`button-android-${index}`}
             >
-              {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile Watch"}
+              {copiedStates[`${index}-android`] ? "✓ Copied!" : "Mobile Watch"}
             </Button>
+
             <Button
-  flex={1}
-  bg="linear-gradient(90deg, #7c3aed 0%, #a855f7 100%)"
-  color="white"
-  fontWeight="700"
-  borderWidth="0"
-  borderRadius="10px"
-  fontSize="xs"
-  py={5}
-  _hover={{ filter: "brightness(1.15)" }}
-  onClick={() => handleTvOpen(readResultTokenLink(result, "tv"))}
-  data-testid={`button-tv-${index}`}
->
-  📺 TV Connect
-</Button>
+              {...primaryBtn}
+              flex={1}
+              fontSize="xs"
+              py={5}
+              onClick={() => handleTvOpen(readResultTokenLink(result, "tv"))}
+              data-testid={`button-tv-${index}`}
+            >
+              TV Connect
+            </Button>
           </HStack>
 
-                             <Box px={4} pb={4}>
+          <Box px={4} pb={4}>
             <Button
-              variant="outline"
-              borderStyle="dashed"
-              borderColor="rgba(255,255,255,0.22)"
-              color="rgba(255,255,255,0.75)"
-              borderRadius="10px"
-              fontSize="sm"
+              {...ghostDarkBtn}
               w="full"
-              _hover={{ borderColor: theme.border, color: theme.accent }}
+              fontSize="sm"
               onClick={() => setShowGuide(!showGuide)}
             >
-            click this  📡 ACCESS GUIDE {showGuide ? "▲" : "▼"}
+              Access Guide {showGuide ? "▲" : "▼"}
             </Button>
 
             {showGuide && (
               <Box
                 mt={3}
-                border="1px dashed rgba(255,255,255,0.22)"
-                borderRadius="10px"
+                {...softCard}
                 p={4}
-                bg="rgba(0,0,0,0.3)"
                 color="rgba(255,255,255,0.85)"
                 fontSize="sm"
               >
@@ -1708,14 +1686,14 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 </Box>
 
                 <Box mb={3}>
-                  <b>• 💻 PC WATCH</b><br />
+                  <b>• PC WATCH</b><br />
                   Open your browser and paste the provided link to access the account.
                 </Box>
 
                 <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
 
                 <Box mb={3}>
-                  <b>• 📱 MOBILE WATCH</b><br />
+                  <b>• MOBILE WATCH</b><br />
                   Make sure you have the Netflix app installed.<br />
                   Ensure there is no other Netflix account logged in on your app or browser.<br />
                   Paste the provided link into your main browser (Chrome/Safari).<br />
@@ -1726,16 +1704,16 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
 
                 <Box mb={3}>
-                  <b>• 📺 TV CONNECT</b><br />
+                  <b>• TV CONNECT</b><br />
                   Open Netflix on your Smart TV and choose <b>Login via Code</b>.<br />
-                  Click the Tv connect.<br />
+                  Click TV Connect.<br />
                   Enter the code shown on your TV screen.
                 </Box>
 
                 <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
 
                 <Box>
-                  <b>• 🔄 RE-CHECK</b><br />
+                  <b>• RE-CHECK</b><br />
                   Refresh and verify the account before using it.
                 </Box>
               </Box>
@@ -1743,7 +1721,6 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           </Box>
         </Box>
       );
-    }
 
     const modalDetailItems = [
       ["Plan", result?.plan],
@@ -1757,22 +1734,19 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       ["Phone", result?.phone],
       ["Phone Verified", displayBoolean(result?.phoneVerified)],
     ];
-
+      
     return (
       <Box
         key={index}
         mb={4}
-        borderRadius="16px"
+        borderRadius="18px"
         borderWidth="1px"
-        borderColor="rgba(120,60,220,0.5)"
-        bg="linear-gradient(135deg, #181e35 0%, #111827 100%)"
-        animation={prefersReducedMotion ? undefined : `${cardGlowPurpleKf} 2.5s ease-in-out infinite`}
+        borderColor="rgba(139,92,246,0.26)"
+        bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+        boxShadow="0 8px 28px rgba(0,0,0,0.42)"
         overflow="hidden"
       >
-        <Box
-          h="3px"
-          bg="linear-gradient(90deg, #e50914 0%, #7c3aed 50%, #1a56db 100%)"
-        />
+        <Box h="3px" bg="linear-gradient(90deg, #8b5cf6 0%, #a855f7 100%)" />
         <Box p={4}>
           <HStack justify="space-between" mb={3}>
             <HStack spacing={2}>
@@ -1784,8 +1758,10 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               </Text>
             </HStack>
             <Badge
-              bg="#7c3aed"
-              color="white"
+              bg="rgba(139,92,246,0.16)"
+              color="#8b5cf6"
+              borderWidth="1px"
+              borderColor="rgba(139,92,246,0.35)"
               fontSize="9px"
               fontWeight="800"
               letterSpacing="0.1em"
@@ -1800,43 +1776,37 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={2}>
             {modalDetailItems.map(([label, value], i) =>
               value ? (
-                <Text key={i} fontSize="sm" color="rgba(255,255,255,0.85)">
-                  <Box as="span" color="rgba(255,255,255,0.45)" fontWeight="600">{label}: </Box>
-                  {displayValue(value)}
-                </Text>
+                <Box key={i} {...softCard} px={3} py={2.5}>
+                  <Text fontSize="10px" color="rgba(255,255,255,0.45)" fontWeight="600" textTransform="uppercase" mb={0.5}>
+                    {label}
+                  </Text>
+                  <Text fontSize="sm" color="rgba(255,255,255,0.88)">
+                    {displayValue(value)}
+                  </Text>
+                </Box>
               ) : null
             )}
           </SimpleGrid>
 
           <HStack mt={4} spacing={3}>
             <Button
+              {...primaryBtn}
               flex={1}
-              bg={copiedStates[`${index}-android`] ? "linear-gradient(90deg,#00c853,#00e676)" : "linear-gradient(90deg, #1a56db 0%, #6c47ff 100%)"}
-              color="white"
-              fontWeight="700"
-              borderWidth="0"
-              borderRadius="10px"
               fontSize="sm"
-              _hover={{ filter: "brightness(1.15)" }}
               onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result)))}
               data-testid={`button-std-android-${index}`}
             >
-              {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile"}
+              {copiedStates[`${index}-android`] ? "✓ Copied!" : "Mobile"}
             </Button>
 
             <Button
+              {...primaryBtn}
               flex={1}
-              bg={copiedStates[`${index}-pc`] ? "linear-gradient(90deg,#00c853,#00e676)" : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"}
-              color="white"
-              fontWeight="700"
-              borderWidth="0"
-              borderRadius="10px"
               fontSize="sm"
-              _hover={{ filter: "brightness(1.15)" }}
               onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result)))}
               data-testid={`button-std-pc-${index}`}
             >
-              {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
+              {copiedStates[`${index}-pc`] ? "✓ Copied!" : "PC Watch"}
             </Button>
           </HStack>
         </Box>
@@ -1848,25 +1818,17 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 {sessionUnlocked && !isLoading && bulkValidResults?.length > 0 && (
   <ModalFooter
     borderTopWidth="1px"
-    borderTopColor="rgba(0,213,99,0.15)"
+    borderTopColor="rgba(139,92,246,0.18)"
     pt={3}
     pb={4}
     px={4}
   >
     <HStack w="full" spacing={2}>
       <Button
+        {...primaryBtn}
         flex={1}
-        borderRadius="12px"
-        fontWeight="800"
         fontSize="sm"
         py={5}
-        letterSpacing="0.08em"
-        bg={copyAllDone
-          ? "linear-gradient(90deg,#00c853,#00e676)"
-          : "linear-gradient(90deg, #b8860b 0%, #ffe066 50%, #b8860b 100%)"
-        }
-        color={copyAllDone ? "white" : "#1a0a00"}
-        _hover={{ filter: "brightness(1.12)" }}
         onClick={async () => {
           const allCookies = bulkValidResults
             .map(r => r.cookieHeader)
@@ -1878,44 +1840,33 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         }}
         data-testid="button-copy-all"
       >
-        {copyAllDone ? "✓ All Cookies Copied!" : `📋 COPY ALL`}
+        {copyAllDone ? "✓ All Cookies Copied!" : "Copy All"}
       </Button>
+
       <Button
+        {...primaryBtn}
         flex={1}
-        borderRadius="12px"
-        fontWeight="800"
         fontSize="sm"
         py={5}
-        letterSpacing="0.08em"
-        variant="outline"
-        borderColor="rgba(255,255,255,0.25)"
-        color="rgba(255,255,255,0.75)"
-        _hover={{ borderColor: "#ffe066", color: "#ffe066" }}
         onClick={handleDownloadCookies}
         data-testid="button-download-cookies"
       >
-        ⬇ .txt
+        Download .txt
       </Button>
+
       <Button
+        {...primaryBtn}
         flex={1}
-        borderRadius="12px"
-        fontWeight="800"
         fontSize="sm"
         py={5}
-        letterSpacing="0.08em"
-        variant="outline"
-        borderColor="rgba(255,255,255,0.20)"
-        color="rgba(255,255,255,0.65)"
-        _hover={{ borderColor: "#00d563", color: "#00d563" }}
         onClick={handleExportCsv}
         data-testid="button-export-csv"
       >
-        📊 .csv
+        Export .csv
       </Button>
     </HStack>
   </ModalFooter>
 )}
-
 </ModalContent>
 </Modal>
 
@@ -1928,26 +1879,10 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     data-testid="pill-minimized-modal"
   >
     <Button
+      {...pillBtn}
       onClick={() => setIsMinimized(false)}
-      borderRadius="full"
       px={5}
       h="44px"
-      bg={sessionUnlocked
-        ? "linear-gradient(135deg, #0d1a12 0%, #091008 100%)"
-        : "linear-gradient(135deg, #181e35 0%, #0f1220 100%)"}
-      borderWidth="1.5px"
-      borderColor={sessionUnlocked ? "rgba(0,213,99,0.55)" : "rgba(120,60,220,0.55)"}
-      boxShadow={sessionUnlocked
-        ? "0 4px 24px rgba(0,213,99,0.22), 0 8px 32px rgba(0,0,0,0.8)"
-        : "0 4px 24px rgba(120,60,220,0.22), 0 8px 32px rgba(0,0,0,0.8)"}
-      color={sessionUnlocked ? "#00d563" : "#c084fc"}
-      fontWeight="700"
-      fontSize="xs"
-      letterSpacing="0.08em"
-      _hover={{
-        borderColor: sessionUnlocked ? "#00d563" : "#c084fc",
-        filter: "brightness(1.2)",
-      }}
       title="Restore"
       data-testid="button-restore-modal"
     >
@@ -1964,29 +1899,20 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </Box>
 )}
 
-      <Modal
+            <Modal
         isOpen={isPasscodeModalOpen}
         onClose={() => setIsPasscodeModalOpen(false)}
         isCentered
         size="sm"
       >
         <ModalOverlay bg="rgba(0,0,0,0.75)" backdropFilter="blur(4px)" />
-        <ModalContent
-          bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
-          borderWidth="1px"
-          borderColor="rgba(120,60,220,0.3)"
-          borderRadius="20px"
-          boxShadow="0 0 0 1px rgba(120,60,220,0.12), 0 20px 60px rgba(0,0,0,0.9)"
-          overflow="hidden"
-          mx={4}
-        >
-          <Box h="3px" bg="linear-gradient(90deg, #e50914 0%, #7c3aed 50%, #1a56db 100%)" />
+        <ModalContent {...modalShell} mx={4}>
           <ModalCloseButton color="rgba(255,255,255,0.5)" top={4} right={4} />
           <ModalHeader
             pt={6}
             pb={0}
             textAlign="center"
-            color="#c084fc"
+            color="#8b5cf6"
             fontSize="lg"
             fontWeight="800"
             letterSpacing="0.12em"
@@ -2007,7 +1933,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 borderRadius="12px"
                 color="white"
                 _placeholder={{ color: "rgba(255,255,255,0.3)" }}
-                _focus={{ borderColor: "#7c3aed", boxShadow: "0 0 0 1px #7c3aed" }}
+                _focus={{ borderColor: "#8b5cf6", boxShadow: "0 0 0 1px #8b5cf6" }}
                 data-testid="input-find-passcode"
                 autoFocus
               />
@@ -2017,18 +1943,11 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 </Text>
               )}
               <Button
+                {...primaryBtn}
                 w="full"
                 onClick={handlePasscodeSubmit}
                 isLoading={passcodeLoading}
                 isDisabled={!passcodeInput.trim()}
-                bg="linear-gradient(135deg, #6a35e8 0%, #a855f7 100%)"
-                color="white"
-                fontWeight="700"
-                letterSpacing="0.08em"
-                borderRadius="12px"
-                borderWidth="0"
-                _hover={{ filter: "brightness(1.15)" }}
-                _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
                 data-testid="button-unlock-find-account"
               >
                 Unlock
@@ -2044,22 +1963,13 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   size="sm"
 >
   <ModalOverlay bg="rgba(0,0,0,0.75)" backdropFilter="blur(4px)" />
-  <ModalContent
-    bg="linear-gradient(160deg, #0f1f33 0%, #0a1424 100%)"
-    borderWidth="1px"
-    borderColor="rgba(56,189,248,0.35)"
-    borderRadius="20px"
-    boxShadow="0 0 0 1px rgba(56,189,248,0.12), 0 20px 60px rgba(0,0,0,0.9)"
-    overflow="hidden"
-    mx={4}
-  >
-    <Box h="3px" bg="linear-gradient(90deg, #0ea5e9 0%, #38bdf8 50%, #1d4ed8 100%)" />
+  <ModalContent {...modalShell} mx={4}>
     <ModalCloseButton color="rgba(255,255,255,0.5)" top={4} right={4} />
     <ModalHeader
       pt={6}
       pb={0}
       textAlign="center"
-      color="#38bdf8"
+      color="#8b5cf6"
       fontSize="lg"
       fontWeight="800"
       letterSpacing="0.12em"
@@ -2080,7 +1990,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           borderRadius="12px"
           color="white"
           _placeholder={{ color: "rgba(255,255,255,0.3)" }}
-          _focus={{ borderColor: "#38bdf8", boxShadow: "0 0 0 1px #38bdf8" }}
+          _focus={{ borderColor: "#8b5cf6", boxShadow: "0 0 0 1px #8b5cf6" }}
           autoFocus
         />
         {trialCodeError && (
@@ -2089,18 +1999,11 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           </Text>
         )}
         <Button
+          {...primaryBtn}
           w="full"
           onClick={handleTrialSubmit}
           isLoading={trialLoading}
           isDisabled={!trialCodeInput.trim()}
-          bg="linear-gradient(135deg, #0369a1 0%, #38bdf8 100%)"
-          color="white"
-          fontWeight="700"
-          letterSpacing="0.08em"
-          borderRadius="12px"
-          borderWidth="0"
-          _hover={{ filter: "brightness(1.15)" }}
-          _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
         >
           Unlock
         </Button>
