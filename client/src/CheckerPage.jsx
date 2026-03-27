@@ -1132,28 +1132,61 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           </Box>
 
           <AppCredits />
-           <Box>
-  <b>• Need Help?</b><br />
-  You can reach me through my platforms for premium access and support.
-</Box>
-
-<Button
-  as="a"
-  href="/support"
-  size="sm"
-  mt={3}
-  borderRadius="10px"
-  bg="rgba(139,92,246,0.08)"
-  border="1px solid rgba(139,92,246,0.35)"
-  color="#8b5cf6"
-  _hover={{
-    bg: "rgba(139,92,246,0.15)",
-    borderColor: "rgba(139,92,246,0.6)",
-  }}
+           <Box
+  mt={5}
+  mx="auto"
+  w="full"
+  maxW="760px"
+  px={1}
 >
-  Contact / Support
-</Button>
+  <Box
+    borderWidth="1px"
+    borderColor="rgba(139,92,246,0.18)"
+    borderRadius="16px"
+    bg="rgba(255,255,255,0.02)"
+    px={4}
+    py={4}
+  >
+    <HStack justify="space-between" align="center" spacing={3}>
+      <Box>
+        <Text
+          m={0}
+          fontSize="sm"
+          fontWeight="700"
+          color="white"
+          letterSpacing="0.01em"
+        >
+          Need help?
+        </Text>
+        <Text
+          m={0}
+          mt={1}
+          fontSize="xs"
+          color="rgba(255,255,255,0.58)"
+        >
+          Contact options and support information
+        </Text>
+      </Box>
 
+      <Button
+        as="a"
+        href="/support"
+        size="sm"
+        minW="140px"
+        borderRadius="12px"
+        bg="rgba(139,92,246,0.1)"
+        border="1px solid rgba(139,92,246,0.35)"
+        color="#8b5cf6"
+        _hover={{
+          bg: "rgba(139,92,246,0.16)",
+          borderColor: "rgba(139,92,246,0.6)",
+        }}
+      >
+        Contact
+      </Button>
+    </HStack>
+  </Box>
+</Box>
         </Grid>
       </Box>
 
