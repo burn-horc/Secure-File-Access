@@ -1,4 +1,4 @@
-const maintenanceMode = false;
+const maintenanceMode = true;
 const previewAllowed =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("preview") === "burnpogi";
