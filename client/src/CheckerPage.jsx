@@ -2022,7 +2022,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       letterSpacing="0.12em"
       textTransform="uppercase"
     >
-      TRIAL CODE
+      RANDOM ACCOUNT CODE
     </ModalHeader>
     <ModalBody pb={6} pt={4}>
       <VStack spacing={4}>
@@ -2059,7 +2059,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           _hover={{ filter: "brightness(1.15)" }}
           _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
         >
-          Unlock Trial
+          Unlock
         </Button>
       </VStack>
     </ModalBody>
