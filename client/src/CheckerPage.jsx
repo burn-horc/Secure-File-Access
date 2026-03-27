@@ -1474,7 +1474,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       })}
     </Box>
   ) : null}
-  {!showHistory && bulkValidResults?.map((result, index) => {
+    {!showHistory && bulkValidResults?.map((result, index) => {
     if (sessionUnlocked) {
       const premiumFields = [
         ["EMAIL", result?.email],
@@ -1491,7 +1491,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       const recheckState = recheckStates[index] || {};
       const grade = getAccountGrade(result);
       const isLive = liveResultIds?.has(result?.cookieHeader);
-            return (
+
+      return (
         <Box
           key={index}
           mb={4}
@@ -1508,17 +1509,32 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 <Text fontSize="xs" color="rgba(255,255,255,0.35)" fontFamily="mono" fontWeight="700">
                   #{index + 1}
                 </Text>
+
                 {isLive && (
                   <HStack spacing={1} align="center">
-                    <Box as="span" animation={pulseRedAnim} fontSize="9px" lineHeight="1" display="inline-block">🔴</Box>
-                    <Text fontSize="9px" color="#ff4d4d" fontWeight="800" letterSpacing="0.08em">LIVE</Text>
+                    <Box as="span" animation={pulseRedAnim} fontSize="9px" lineHeight="1" display="inline-block">
+                      🔴
+                    </Box>
+                    <Text fontSize="9px" color="#ff4d4d" fontWeight="800" letterSpacing="0.08em">
+                      LIVE
+                    </Text>
                   </HStack>
                 )}
-                <Text fontSize="lg" color={theme.accent} lineHeight="1" fontWeight="900">✓</Text>
-                <Text fontWeight="700" fontSize="sm" letterSpacing="0.1em" textTransform="uppercase" color={theme.accent}>
+
+                <Text fontSize="lg" color={theme.accent} lineHeight="1" fontWeight="900">
+                  ✓
+                </Text>
+                <Text
+                  fontWeight="700"
+                  fontSize="sm"
+                  letterSpacing="0.1em"
+                  textTransform="uppercase"
+                  color={theme.accent}
+                >
                   VALID ACCOUNT
                 </Text>
               </HStack>
+
               <HStack spacing={1} flexWrap="wrap">
                 <Badge
                   bg={grade.bg}
@@ -1534,6 +1550,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 >
                   {grade.grade}
                 </Badge>
+
                 {expiryBadge && (
                   <Badge
                     bg={expiryBadge.bg}
@@ -1549,6 +1566,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                     {expiryBadge.label}
                   </Badge>
                 )}
+
                 <Badge
                   bg={theme.badgeColor}
                   color="white"
@@ -1563,6 +1581,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 </Badge>
               </HStack>
             </HStack>
+
             <Box borderBottomWidth="1px" borderBottomColor="rgba(255,255,255,0.1)" />
           </Box>
 
@@ -1576,14 +1595,20 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                     px={3}
                     py={2.5}
                   >
-                    <Text fontSize="10px" letterSpacing="0.12em" color="rgba(255,255,255,0.4)" fontWeight="600" textTransform="uppercase" mb={0.5}>
+                    <Text
+                      fontSize="10px"
+                      letterSpacing="0.12em"
+                      color="rgba(255,255,255,0.4)"
+                      fontWeight="600"
+                      textTransform="uppercase"
+                      mb={0.5}
+                    >
                       {label}:
                     </Text>
                     <Text fontSize="sm" fontWeight="600" color="rgba(255,255,255,0.92)">
                       {label === "COUNTRY"
                         ? `${getCountryFlag(value)} ${displayValue(value)}`
-                        : displayValue(value)
-                      }
+                        : displayValue(value)}
                     </Text>
                   </Box>
                 ) : null
@@ -1634,7 +1659,11 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               flex={1}
               fontSize="xs"
               py={5}
-              onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result, "pc")))}
+              onClick={() =>
+                handleCopyWithFeedback(`${index}-pc`, () =>
+                  handlePcCopy(readResultTokenLink(result, "pc"))
+                )
+              }
               data-testid={`button-pc-${index}`}
             >
               {copiedStates[`${index}-pc`] ? "✓ Copied!" : "PC Watch"}
@@ -1645,7 +1674,11 @@ animation={isPremiumPage ? premiumAnimation : undefined}
               flex={1}
               fontSize="xs"
               py={5}
-              onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result, "android")))}
+              onClick={() =>
+                handleCopyWithFeedback(`${index}-android`, () =>
+                  handleAndroidCopy(readResultTokenLink(result, "android"))
+                )
+              }
               data-testid={`button-android-${index}`}
             >
               {copiedStates[`${index}-android`] ? "✓ Copied!" : "Mobile Watch"}
@@ -1686,34 +1719,44 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 </Box>
 
                 <Box mb={3}>
-                  <b>• PC WATCH</b><br />
+                  <b>• PC WATCH</b>
+                  <br />
                   Open your browser and paste the provided link to access the account.
                 </Box>
 
                 <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
 
                 <Box mb={3}>
-                  <b>• MOBILE WATCH</b><br />
-                  Make sure you have the Netflix app installed.<br />
-                  Ensure there is no other Netflix account logged in on your app or browser.<br />
-                  Paste the provided link into your main browser (Chrome/Safari).<br />
-                  You will be redirected to Netflix — tap the “Open in App” button.<br />
+                  <b>• MOBILE WATCH</b>
+                  <br />
+                  Make sure you have the Netflix app installed.
+                  <br />
+                  Ensure there is no other Netflix account logged in on your app or browser.
+                  <br />
+                  Paste the provided link into your main browser (Chrome/Safari).
+                  <br />
+                  You will be redirected to Netflix — tap the “Open in App” button.
+                  <br />
                   <i>Note: Language may vary depending on account country.</i>
                 </Box>
 
                 <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
 
                 <Box mb={3}>
-                  <b>• TV CONNECT</b><br />
-                  Open Netflix on your Smart TV and choose <b>Login via Code</b>.<br />
-                  Click TV Connect.<br />
+                  <b>• TV CONNECT</b>
+                  <br />
+                  Open Netflix on your Smart TV and choose <b>Login via Code</b>.
+                  <br />
+                  Click TV Connect.
+                  <br />
                   Enter the code shown on your TV screen.
                 </Box>
 
                 <Box borderTop="1px dashed rgba(255,255,255,0.15)" my={2} />
 
                 <Box>
-                  <b>• RE-CHECK</b><br />
+                  <b>• RE-CHECK</b>
+                  <br />
                   Refresh and verify the account before using it.
                 </Box>
               </Box>
@@ -1721,6 +1764,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           </Box>
         </Box>
       );
+    }
 
     const modalDetailItems = [
       ["Plan", result?.plan],
@@ -1734,19 +1778,20 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       ["Phone", result?.phone],
       ["Phone Verified", displayBoolean(result?.phoneVerified)],
     ];
-      
+
     return (
       <Box
         key={index}
         mb={4}
-        borderRadius="18px"
+        borderRadius="16px"
         borderWidth="1px"
-        borderColor="rgba(139,92,246,0.26)"
-        bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
-        boxShadow="0 8px 28px rgba(0,0,0,0.42)"
+        borderColor="rgba(120,60,220,0.5)"
+        bg="linear-gradient(135deg, #181e35 0%, #111827 100%)"
+        animation={prefersReducedMotion ? undefined : `${cardGlowPurpleKf} 2.5s ease-in-out infinite`}
         overflow="hidden"
       >
-        <Box h="3px" bg="linear-gradient(90deg, #8b5cf6 0%, #a855f7 100%)" />
+        <Box h="3px" bg="linear-gradient(90deg, #e50914 0%, #7c3aed 50%, #1a56db 100%)" />
+
         <Box p={4}>
           <HStack justify="space-between" mb={3}>
             <HStack spacing={2}>
@@ -1757,11 +1802,10 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 {displayValue(result.plan)}
               </Text>
             </HStack>
+
             <Badge
-              bg="rgba(139,92,246,0.16)"
-              color="#8b5cf6"
-              borderWidth="1px"
-              borderColor="rgba(139,92,246,0.35)"
+              bg="#7c3aed"
+              color="white"
               fontSize="9px"
               fontWeight="800"
               letterSpacing="0.1em"
@@ -1776,37 +1820,61 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={2}>
             {modalDetailItems.map(([label, value], i) =>
               value ? (
-                <Box key={i} {...softCard} px={3} py={2.5}>
-                  <Text fontSize="10px" color="rgba(255,255,255,0.45)" fontWeight="600" textTransform="uppercase" mb={0.5}>
-                    {label}
-                  </Text>
-                  <Text fontSize="sm" color="rgba(255,255,255,0.88)">
-                    {displayValue(value)}
-                  </Text>
-                </Box>
+                <Text key={i} fontSize="sm" color="rgba(255,255,255,0.85)">
+                  <Box as="span" color="rgba(255,255,255,0.45)" fontWeight="600">
+                    {label}:{" "}
+                  </Box>
+                  {displayValue(value)}
+                </Text>
               ) : null
             )}
           </SimpleGrid>
 
           <HStack mt={4} spacing={3}>
             <Button
-              {...primaryBtn}
               flex={1}
+              bg={
+                copiedStates[`${index}-android`]
+                  ? "linear-gradient(90deg,#00c853,#00e676)"
+                  : "linear-gradient(90deg, #1a56db 0%, #6c47ff 100%)"
+              }
+              color="white"
+              fontWeight="700"
+              borderWidth="0"
+              borderRadius="10px"
               fontSize="sm"
-              onClick={() => handleCopyWithFeedback(`${index}-android`, () => handleAndroidCopy(readResultTokenLink(result)))}
+              _hover={{ filter: "brightness(1.15)" }}
+              onClick={() =>
+                handleCopyWithFeedback(`${index}-android`, () =>
+                  handleAndroidCopy(readResultTokenLink(result))
+                )
+              }
               data-testid={`button-std-android-${index}`}
             >
-              {copiedStates[`${index}-android`] ? "✓ Copied!" : "Mobile"}
+              {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile"}
             </Button>
 
             <Button
-              {...primaryBtn}
               flex={1}
+              bg={
+                copiedStates[`${index}-pc`]
+                  ? "linear-gradient(90deg,#00c853,#00e676)"
+                  : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"
+              }
+              color="white"
+              fontWeight="700"
+              borderWidth="0"
+              borderRadius="10px"
               fontSize="sm"
-              onClick={() => handleCopyWithFeedback(`${index}-pc`, () => handlePcCopy(readResultTokenLink(result)))}
+              _hover={{ filter: "brightness(1.15)" }}
+              onClick={() =>
+                handleCopyWithFeedback(`${index}-pc`, () =>
+                  handlePcCopy(readResultTokenLink(result))
+                )
+              }
               data-testid={`button-std-pc-${index}`}
             >
-              {copiedStates[`${index}-pc`] ? "✓ Copied!" : "PC Watch"}
+              {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
             </Button>
           </HStack>
         </Box>
