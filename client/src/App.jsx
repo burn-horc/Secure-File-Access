@@ -3,6 +3,7 @@ const previewAllowed =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("preview") === "burnpogi";
 
+import SupportPage from "./SupportPage";
 import { useLocation } from "wouter";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast, Box } from "@chakra-ui/react";
