@@ -30,9 +30,6 @@ import AppCredits from "./AppCredits";
 import { showAppToast } from "./appToast.jsx";
 import SupportPage from "./SupportPage";
 
-// then in routes
-<Route path="/support" component={SupportPage} />
-
 function displayValue(value, fallback = "N/A") {
   if (value == null) return fallback;
   const text = String(value).trim();
