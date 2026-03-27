@@ -1697,6 +1697,11 @@ return (
   />
 </Route>
 
+    <Route path="/support">
+  <SupportPage />
+</Route>
+
+    
     <Route path="/">
   <CheckerPage
     mode="free"
