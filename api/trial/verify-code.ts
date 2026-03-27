@@ -18,7 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { code } = req.body || {};
 
     if (!code || !String(code).trim()) {
-      return res.status(400).json({ success: false, error: "Trial code is required" });
+      return res.status(400).json({ success: false, error: "Code is required" });
     }
 
     const { data, error } = await supabase
@@ -34,11 +34,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (!data) {
-      return res.status(401).json({ success: false, error: "Invalid trial code" });
+      return res.status(401).json({ success: false, error: "Invalid code" });
     }
 
     if (data.max_uses && data.uses >= data.max_uses) {
-      return res.status(403).json({ success: false, error: "Trial code expired" });
+      return res.status(403).json({ success: false, error: "Code expired" });
     }
 
     const { error: updateError } = await supabase
