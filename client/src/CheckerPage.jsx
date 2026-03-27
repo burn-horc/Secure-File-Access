@@ -2022,7 +2022,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       letterSpacing="0.12em"
       textTransform="uppercase"
     >
-      RANDOM ACCOUNT CODE
+      ACCOUNT CODE
     </ModalHeader>
     <ModalBody pb={6} pt={4}>
       <VStack spacing={4}>
