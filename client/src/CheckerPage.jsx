@@ -1134,7 +1134,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         </Grid>
       </Box>
 
-      {isFreePage && (
+      {false && isFreePage && (
   <Box
     position="relative"
     mt={6}
