@@ -1232,7 +1232,47 @@ animation={isPremiumPage ? premiumAnimation : undefined}
             </Box>
           </Box>
 
-          
+          {isFreePage && (
+  <Box
+    position="relative"
+    mt={6}
+    mx="auto"
+    zIndex={1}
+    display="flex"
+    flexDirection="column"
+    alignItems="center"
+    gap={2}
+  >
+    <Text
+      fontSize="11px"
+      fontWeight="600"
+      letterSpacing="0.04em"
+      color="rgba(255,255,255,0.55)"
+      textAlign="center"
+      userSelect="none"
+      lineHeight="1.5"
+    >
+      Need help getting started?
+    </Text>
+
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      borderColor="rgba(139,92,246,0.35)"
+      color="#8b5cf6"
+      borderRadius="10px"
+      bg="rgba(255,255,255,0.02)"
+      _hover={{
+        bg: "rgba(139,92,246,0.08)",
+        borderColor: "rgba(139,92,246,0.6)",
+      }}
+      onClick={() => setShowGuide((prev) => !prev)}
+    >
+      Open Guide
+    </Button>
+  </Box>
+
 
         </Box>
       </Box>
