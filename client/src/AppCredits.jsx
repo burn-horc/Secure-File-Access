@@ -1,6 +1,6 @@
 import { Text } from "@chakra-ui/react";
 
-const DEFAULT_COPY = "\u00A9 SATISACROH. All Rights Reserved.";
+const DEFAULT_COPY = "\u00A9 2026 SATISACROH. All Rights Reserved.";
 
 export default function AppCredits({ copy = DEFAULT_COPY, ...props }) {
   return (
