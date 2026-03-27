@@ -643,6 +643,48 @@ const secondaryBtn = {
     bg: "rgba(139,92,246,0.20)",
   },
 };
+
+  const modalShell = {
+  bg: "linear-gradient(160deg, #181e35 0%, #0f1220 100%)",
+  borderWidth: "1px",
+  borderColor: "rgba(139,92,246,0.28)",
+  borderRadius: "20px",
+  boxShadow: "0 0 0 1px rgba(139,92,246,0.08), 0 20px 60px rgba(0,0,0,0.9)",
+  overflow: "hidden",
+};
+
+const softCard = {
+  bg: "rgba(255,255,255,0.04)",
+  borderWidth: "1px",
+  borderColor: "rgba(255,255,255,0.08)",
+  borderRadius: "14px",
+};
+
+const pillBtn = {
+  borderRadius: "12px",
+  borderWidth: "1px",
+  borderColor: "rgba(139,92,246,0.35)",
+  bg: "rgba(139,92,246,0.10)",
+  color: "#8b5cf6",
+  fontWeight: "700",
+  _hover: {
+    bg: "rgba(139,92,246,0.16)",
+    borderColor: "rgba(139,92,246,0.6)",
+  },
+};
+
+const ghostDarkBtn = {
+  borderRadius: "12px",
+  borderWidth: "1px",
+  borderColor: "rgba(255,255,255,0.14)",
+  bg: "rgba(255,255,255,0.03)",
+  color: "rgba(255,255,255,0.88)",
+  fontWeight: "600",
+  _hover: {
+    bg: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(139,92,246,0.35)",
+  },
+};
   
   return (
     <Box
