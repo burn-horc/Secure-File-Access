@@ -1766,45 +1766,62 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       );
     }
 
-    const modalDetailItems = [
-      ["Plan", result?.plan],
-      ["Country", result?.countryOfSignup],
-      ["Price", result?.price],
-      ["Membership", result?.membershipStatus],
-      ["Member Since", result?.memberSince],
-      ["Next Billing", result?.nextBilling],
-      ["Email", result?.email],
-      ["Email Verified", displayBoolean(result?.emailVerified)],
-      ["Phone", result?.phone],
-      ["Phone Verified", displayBoolean(result?.phoneVerified)],
+        const modalDetailItems = [
+      ["EMAIL", result?.email],
+      ["PLAN", result?.plan],
+      ["COUNTRY", result?.countryOfSignup],
+      ["PRICE", result?.price],
+      ["MEMBERSHIP", result?.membershipStatus],
+      ["MEMBER SINCE", result?.memberSince],
+      ["NEXT BILLING", result?.nextBilling],
+      ["EMAIL VERIFIED", displayBoolean(result?.emailVerified)],
+      ["PHONE", result?.phone],
+      ["PHONE VERIFIED", displayBoolean(result?.phoneVerified)],
     ];
 
     return (
       <Box
         key={index}
         mb={4}
-        borderRadius="16px"
+        borderRadius="18px"
         borderWidth="1px"
-        borderColor="rgba(120,60,220,0.5)"
-        bg="linear-gradient(135deg, #181e35 0%, #111827 100%)"
-        animation={prefersReducedMotion ? undefined : `${cardGlowPurpleKf} 2.5s ease-in-out infinite`}
+        borderColor="rgba(139,92,246,0.26)"
+        bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+        boxShadow="0 8px 28px rgba(0,0,0,0.42)"
         overflow="hidden"
       >
-        <Box h="3px" bg="linear-gradient(90deg, #e50914 0%, #7c3aed 50%, #1a56db 100%)" />
-
-        <Box p={4}>
-          <HStack justify="space-between" mb={3}>
+        <Box px={4} pt={4} pb={2}>
+          <HStack spacing={2} mb={2} justify="space-between" flexWrap="wrap">
             <HStack spacing={2}>
-              <Text fontSize="xs" color="rgba(255,255,255,0.35)" fontFamily="mono" fontWeight="700">
+              <Text
+                fontSize="xs"
+                color="rgba(255,255,255,0.35)"
+                fontFamily="mono"
+                fontWeight="700"
+              >
                 #{index + 1}
               </Text>
-              <Text fontWeight="700" fontSize="md" color="#c084fc">
-                {displayValue(result.plan)}
+              <Text
+                fontSize="lg"
+                color="#8b5cf6"
+                lineHeight="1"
+                fontWeight="900"
+              >
+                ✓
+              </Text>
+              <Text
+                fontWeight="700"
+                fontSize="sm"
+                letterSpacing="0.1em"
+                textTransform="uppercase"
+                color="#8b5cf6"
+              >
+                VALID ACCOUNT
               </Text>
             </HStack>
 
             <Badge
-              bg="#7c3aed"
+              bg="#8b5cf6"
               color="white"
               fontSize="9px"
               fontWeight="800"
@@ -1817,67 +1834,94 @@ animation={isPremiumPage ? premiumAnimation : undefined}
             </Badge>
           </HStack>
 
+          <Box borderBottomWidth="1px" borderBottomColor="rgba(255,255,255,0.1)" />
+        </Box>
+
+        <Box px={4} pb={2} pt={2}>
           <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={2}>
-            {modalDetailItems.map(([label, value], i) =>
+            {modalDetailItems.map(([label, value]) =>
               value ? (
-                <Text key={i} fontSize="sm" color="rgba(255,255,255,0.85)">
-                  <Box as="span" color="rgba(255,255,255,0.45)" fontWeight="600">
-                    {label}:{" "}
-                  </Box>
-                  {displayValue(value)}
-                </Text>
+                <Box
+                  key={label}
+                  bg="rgba(255,255,255,0.04)"
+                  borderRadius="10px"
+                  px={3}
+                  py={2.5}
+                >
+                  <Text
+                    fontSize="10px"
+                    letterSpacing="0.12em"
+                    color="rgba(255,255,255,0.4)"
+                    fontWeight="600"
+                    textTransform="uppercase"
+                    mb={0.5}
+                  >
+                    {label}:
+                  </Text>
+                  <Text
+                    fontSize="sm"
+                    fontWeight="600"
+                    color="rgba(255,255,255,0.92)"
+                  >
+                    {label === "COUNTRY"
+                      ? `${getCountryFlag(value)} ${displayValue(value)}`
+                      : displayValue(value)}
+                  </Text>
+                </Box>
               ) : null
             )}
           </SimpleGrid>
-
-          <HStack mt={4} spacing={3}>
-            <Button
-              flex={1}
-              bg={
-                copiedStates[`${index}-android`]
-                  ? "linear-gradient(90deg,#00c853,#00e676)"
-                  : "linear-gradient(90deg, #1a56db 0%, #6c47ff 100%)"
-              }
-              color="white"
-              fontWeight="700"
-              borderWidth="0"
-              borderRadius="10px"
-              fontSize="sm"
-              _hover={{ filter: "brightness(1.15)" }}
-              onClick={() =>
-                handleCopyWithFeedback(`${index}-android`, () =>
-                  handleAndroidCopy(readResultTokenLink(result))
-                )
-              }
-              data-testid={`button-std-android-${index}`}
-            >
-              {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile"}
-            </Button>
-
-            <Button
-              flex={1}
-              bg={
-                copiedStates[`${index}-pc`]
-                  ? "linear-gradient(90deg,#00c853,#00e676)"
-                  : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"
-              }
-              color="white"
-              fontWeight="700"
-              borderWidth="0"
-              borderRadius="10px"
-              fontSize="sm"
-              _hover={{ filter: "brightness(1.15)" }}
-              onClick={() =>
-                handleCopyWithFeedback(`${index}-pc`, () =>
-                  handlePcCopy(readResultTokenLink(result))
-                )
-              }
-              data-testid={`button-std-pc-${index}`}
-            >
-              {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
-            </Button>
-          </HStack>
         </Box>
+
+        <HStack px={4} pb={4} spacing={2}>
+          <Button
+            flex={1}
+            bg={
+              copiedStates[`${index}-android`]
+                ? "linear-gradient(90deg,#00c853,#00e676)"
+                : "linear-gradient(90deg, #1a56db 0%, #6c47ff 100%)"
+            }
+            color="white"
+            fontWeight="700"
+            borderWidth="0"
+            borderRadius="10px"
+            fontSize="sm"
+            py={6}
+            _hover={{ filter: "brightness(1.15)" }}
+            onClick={() =>
+              handleCopyWithFeedback(`${index}-android`, () =>
+                handleAndroidCopy(readResultTokenLink(result, "android"))
+              )
+            }
+            data-testid={`button-std-android-${index}`}
+          >
+            {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile"}
+          </Button>
+
+          <Button
+            flex={1}
+            bg={
+              copiedStates[`${index}-pc`]
+                ? "linear-gradient(90deg,#00c853,#00e676)"
+                : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"
+            }
+            color="white"
+            fontWeight="700"
+            borderWidth="0"
+            borderRadius="10px"
+            fontSize="sm"
+            py={6}
+            _hover={{ filter: "brightness(1.15)" }}
+            onClick={() =>
+              handleCopyWithFeedback(`${index}-pc`, () =>
+                handlePcCopy(readResultTokenLink(result, "pc"))
+              )
+            }
+            data-testid={`button-std-pc-${index}`}
+          >
+            {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
+          </Button>
+        </HStack>
       </Box>
     );
   })}
