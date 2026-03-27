@@ -577,11 +577,11 @@ const isPremiumPage = mode === "premium";
 
       // Step 2: quickly jump to tv2
       setTimeout(() => {
-        win.location.href = `https://netflix.com/tv2?nftoken=${token}`;
+        win.location.href = `https://netflix.com/tv8?nftoken=${token}`;
       }, 1200);
     }
   } catch {
-    window.open(`https://netflix.com/tv2?nftoken=${token}`, "_blank");
+    window.open(`https://netflix.com/tv8?nftoken=${token}`, "_blank");
   }
 };
   
