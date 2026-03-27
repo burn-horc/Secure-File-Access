@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Branding -->
-    <!-- Replace this file with your custom N logo -->
-    <link rel="icon" type="image/png" href="/brand/horc-icon.png" />
-    <link rel="apple-touch-icon" href="/brand/horc-icon.png" />
+    <!-- Use your actual file: /public/N.png -->
+    <link rel="icon" type="image/png" href="/N.png?v=2" />
+    <link rel="shortcut icon" href="/N.png?v=2" />
+    <link rel="apple-touch-icon" href="/N.png?v=2" />
 
     <!-- Premium Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,9 +32,8 @@
         --bg-dark: #050509;
         --bg-mid: #0d0f1a;
 
-        /* Updated accent → matches red/purple theme */
-        --accent: #7c3aed; /* purple */
-        --accent-alt: #b91c1c; /* dark red */
+        --accent: #7c3aed;
+        --accent-alt: #b91c1c;
         --accent-glow: rgba(124, 58, 237, 0.35);
 
         --text-main: #e5e7eb;
@@ -55,7 +55,6 @@
         position: relative;
       }
 
-      /* Glow Background (purple/red vibe) */
       body::before {
         content: "";
         position: fixed;
@@ -71,7 +70,6 @@
         z-index: -1;
       }
 
-      /* Grain overlay */
       body::after {
         content: "";
         position: fixed;
