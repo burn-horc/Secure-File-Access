@@ -33,7 +33,7 @@ export default function SupportPage() {
               textTransform="uppercase"
               color="#8b5cf6"
             >
-              Support
+              SUPPORT
             </Text>
             <Text fontSize="sm" color="rgba(255,255,255,0.65)">
               Help, setup information, and contact options.
@@ -43,27 +43,50 @@ export default function SupportPage() {
           <Divider borderColor="rgba(255,255,255,0.08)" />
 
           <Box>
-            <Text fontSize="sm" fontWeight="700" mb={1}>
+            <Text fontSize="sm" fontWeight="700" mb={2}>
               Help Guide
             </Text>
-            <Text fontSize="sm" color="rgba(255,255,255,0.72)">
-              Check the guide first for setup steps and common questions.
+            <Text fontSize="sm" color="rgba(255,255,255,0.72)" lineHeight="1.8">
+              Follow these steps to get started:
+              <br />
+              • Paste your cookies (JSON, Netscape, or raw format)
+              <br />
+              • Click "Start Check"
+              <br />
+              • Monitor live results in the log section
+              <br />
+              • Valid accounts will appear automatically
+              <br />
+              <br />
+              If checks fail:
+              <br />
+              • Turn off VPN
+              <br />
+              • Use fresh cookies
+              <br />
+              • Try again after a few minutes
             </Text>
           </Box>
 
           <Box>
-            <Text fontSize="sm" fontWeight="700" mb={1}>
+            <Text fontSize="sm" fontWeight="700" mb={2}>
               Contact
             </Text>
-            <Text fontSize="sm" color="rgba(255,255,255,0.72)">
-              For general support, use your preferred contact option below.
+            <Text fontSize="sm" color="rgba(255,255,255,0.72)" lineHeight="1.8">
+              For support or inquiries, feel free to reach out:
+              <br />
+              <br />
+              burnhorc@gmail.com
+              <br />
+              <br />
+              We typically respond as soon as possible.
             </Text>
           </Box>
 
           <VStack spacing={3} pt={1}>
             <Button
               as="a"
-              href="mailto:you@example.com"
+              href="mailto:burnhorc@gmail.com?subject=Support Request"
               w="full"
               borderRadius="12px"
               bg="linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%)"
