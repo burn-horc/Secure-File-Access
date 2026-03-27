@@ -1272,7 +1272,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       Open Guide
     </Button>
   </Box>
-
+)}
 
         </Box>
       </Box>
