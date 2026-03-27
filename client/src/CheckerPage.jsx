@@ -28,7 +28,7 @@ import { motion } from "framer-motion";
 import { SiNetflix, SiFacebook, SiTelegram } from "react-icons/si";
 import AppCredits from "./AppCredits";
 import { showAppToast } from "./appToast.jsx";
-import SupportPage from "./SupportPage";
+
 
 function displayValue(value, fallback = "N/A") {
   if (value == null) return fallback;
