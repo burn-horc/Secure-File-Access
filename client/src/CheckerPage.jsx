@@ -611,34 +611,37 @@ const isPremiumPage = mode === "premium";
   const primaryBtn = {
   borderRadius: "12px",
   borderWidth: "1px",
-  borderColor: "rgba(139,92,246,0.45)",
-  bg: "linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)",
-  color: "white",
+  borderColor: "rgba(139,92,246,0.35)",
+  bg: "rgba(139,92,246,0.10)",
+  color: "#8b5cf6",
   fontWeight: "700",
-  letterSpacing: "0.08em",
-  boxShadow: "0 8px 24px rgba(139,92,246,0.22)",
+  letterSpacing: "0.04em",
   transition: "all 0.2s ease",
   _hover: {
-    filter: "brightness(1.08)",
-    transform: "translateY(-1px)",
+    bg: "rgba(139,92,246,0.16)",
+    borderColor: "rgba(139,92,246,0.6)",
   },
-  _active: { transform: "translateY(0)" },
+  _active: {
+    bg: "rgba(139,92,246,0.20)",
+  },
 };
 
 const secondaryBtn = {
   borderRadius: "12px",
   borderWidth: "1px",
-  borderColor: "rgba(255,255,255,0.12)",
-  bg: "rgba(255,255,255,0.04)",
-  color: "rgba(255,255,255,0.9)",
-  fontWeight: "600",
-  letterSpacing: "0.06em",
+  borderColor: "rgba(139,92,246,0.35)",
+  bg: "rgba(139,92,246,0.10)",
+  color: "#8b5cf6",
+  fontWeight: "700",
+  letterSpacing: "0.04em",
   transition: "all 0.2s ease",
   _hover: {
-    bg: "rgba(255,255,255,0.08)",
-    transform: "translateY(-1px)",
+    bg: "rgba(139,92,246,0.16)",
+    borderColor: "rgba(139,92,246,0.6)",
   },
-  _active: { transform: "translateY(0)" },
+  _active: {
+    bg: "rgba(139,92,246,0.20)",
+  },
 };
   
   return (
@@ -1021,6 +1024,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     {...primaryBtn}
     type="submit"
     minH="2.8rem"
+    fontSize="sm"
     onClick={(event) => {
       if (!isLoading) return;
       event.preventDefault();
@@ -1031,9 +1035,10 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </Button>
 
   <Button
-    {...secondaryBtn}
+    {...primaryBtn}
     type="button"
     minH="2.8rem"
+    fontSize="sm"
     onClick={openUploadPicker}
     disabled={isLoading}
     _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
@@ -1047,27 +1052,29 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       type="button"
       gridColumn="span 2"
       minH="3.4rem"
+      fontSize="sm"
       onClick={runFindAccount}
       isDisabled={isLoading}
       data-testid="button-find-account"
       _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
     >
-      PREMIUM ACCOUNT
+      Premium Account
     </Button>
   )}
 
   {(isFreePage || isTrialPage) && (
     <Button
-      {...secondaryBtn}
+      {...primaryBtn}
       type="button"
       gridColumn="span 2"
       minH="3.4rem"
+      fontSize="sm"
       onClick={() => runTrial?.()}
       isDisabled={isLoading}
       data-testid="button-trial"
       _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
     >
-      RANDOM ACCOUNT
+      Random Account
     </Button>
   )}
 </Grid>
