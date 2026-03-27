@@ -607,6 +607,39 @@ const isPremiumPage = mode === "premium";
       duration: 1600,
     });
   };
+
+  const primaryBtn = {
+  borderRadius: "12px",
+  borderWidth: "1px",
+  borderColor: "rgba(139,92,246,0.45)",
+  bg: "linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)",
+  color: "white",
+  fontWeight: "700",
+  letterSpacing: "0.08em",
+  boxShadow: "0 8px 24px rgba(139,92,246,0.22)",
+  transition: "all 0.2s ease",
+  _hover: {
+    filter: "brightness(1.08)",
+    transform: "translateY(-1px)",
+  },
+  _active: { transform: "translateY(0)" },
+};
+
+const secondaryBtn = {
+  borderRadius: "12px",
+  borderWidth: "1px",
+  borderColor: "rgba(255,255,255,0.12)",
+  bg: "rgba(255,255,255,0.04)",
+  color: "rgba(255,255,255,0.9)",
+  fontWeight: "600",
+  letterSpacing: "0.06em",
+  transition: "all 0.2s ease",
+  _hover: {
+    bg: "rgba(255,255,255,0.08)",
+    transform: "translateY(-1px)",
+  },
+  _active: { transform: "translateY(0)" },
+};
   
   return (
     <Box
@@ -976,157 +1009,68 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 </VStack>
 
                 <Grid templateColumns="repeat(2, minmax(0, 1fr))" gap={2}>
-                  <Input
-                    ref={uploadInputRef}
-                    type="file"
-                    accept={filePickerAccept}
-                    display="none"
-                    onChange={(event) => void handleUploadFile(event)}
-                  />
-                  <Button
-                    type="submit"
-                    onClick={(event) => {
-                      if (!isLoading) return;
-                      event.preventDefault();
-                      stopCheck();
-                    }}
-                    minH="2.8rem"
-                    borderRadius="12px"
-                    borderWidth="1px"
-                    borderColor="rgba(229,9,20,0.7)"
-                    bg="#e50914"
-                    color="#ffffff"
-                    fontSize="sm"
-                    fontWeight="700"
-                    letterSpacing="0.07em"
-                    textTransform="uppercase"
-                    transition="transform 0.16s ease, background-color 0.16s ease"
-                    _hover={{ bg: "#c8000f", ...hoverLift }}
-                    _active={{ transform: "translateY(0)" }}
-                  >
-                    {isLoading ? "Stop" : "Start"}
-                  </Button>
+  <Input
+    ref={uploadInputRef}
+    type="file"
+    accept={filePickerAccept}
+    display="none"
+    onChange={(event) => void handleUploadFile(event)}
+  />
 
-                  <Button
-                    type="button"
-                    onClick={openUploadPicker}
-                    disabled={isLoading}
-                    minH="2.8rem"
-                    borderRadius="12px"
-                    borderWidth="1px"
-                    borderColor="rgba(26,86,219,0.7)"
-                    bg="#1a56db"
-                    color="#ffffff"
-                    fontSize="sm"
-                    fontWeight="700"
-                    letterSpacing="0.07em"
-                    textTransform="uppercase"
-                    transition="transform 0.16s ease, background-color 0.16s ease"
-                    _hover={{ bg: "#1546b8", ...hoverLift }}
-                    _active={{ transform: "translateY(0)" }}
-                    _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-                  >
-                    Upload File
-                  </Button>
-
-                  {(isFreePage || isPremiumPage) && (
   <Button
-    type="button"
-    gridColumn="span 2"
-    onClick={runFindAccount}
-    isDisabled={isLoading}
-    minH="3.4rem"
-    borderRadius="12px"
-    borderWidth="1px"
-    borderColor="rgba(255,200,30,0.7)"
-    bg="linear-gradient(100deg, #5a3800 0%, #c8860a 28%, #ffe066 50%, #c8860a 72%, #5a3800 100%)"
-    color="#fff8dc"
-    fontSize="sm"
-    fontWeight="800"
-    letterSpacing="0.12em"
-    textTransform="uppercase"
-    boxShadow="0 0 18px rgba(255,185,0,0.45), 0 2px 10px rgba(0,0,0,0.55)"
-    position="relative"
-    overflow="hidden"
-    transition="transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease"
-    _hover={{
-      filter: "brightness(1.18)",
-      boxShadow: "0 0 30px rgba(255,185,0,0.7), 0 2px 14px rgba(0,0,0,0.55)",
-      ...hoverLift,
+    {...primaryBtn}
+    type="submit"
+    minH="2.8rem"
+    onClick={(event) => {
+      if (!isLoading) return;
+      event.preventDefault();
+      stopCheck();
     }}
-    _active={{ transform: "translateY(0)" }}
-    _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-    data-testid="button-find-account"
   >
-    <Box
-      position="absolute"
-      inset={0}
-      pointerEvents="none"
-      aria-hidden="true"
-      background="linear-gradient(105deg, transparent 30%, rgba(255,255,220,0.38) 50%, transparent 70%)"
-      backgroundSize="200% 100%"
-      animation={undefined}
-    />
-    <Box display="flex" flexDirection="column" alignItems="center" gap="2px" position="relative">
-      <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
-        PREMIUM ACCOUNT
-      </Box>
-    </Box>
+    {isLoading ? "Stop" : "Start"}
   </Button>
-)}
 
-{(isFreePage || isTrialPage) && (
   <Button
+    {...secondaryBtn}
     type="button"
-    gridColumn="span 2"
-    onClick={() => runTrial?.()}
-    isDisabled={isLoading}
-    minH="3.4rem"
-    borderRadius="12px"
-    borderWidth="1px"
-    borderColor="rgba(56,189,248,0.65)"
-    bg="linear-gradient(100deg, #082f49 0%, #0369a1 28%, #38bdf8 50%, #0369a1 72%, #082f49 100%)"
-    color="#eff6ff"
-    fontSize="sm"
-    fontWeight="800"
-    letterSpacing="0.12em"
-    textTransform="uppercase"
-    boxShadow="0 0 18px rgba(56,189,248,0.35), 0 2px 10px rgba(0,0,0,0.55)"
-    position="relative"
-    overflow="hidden"
-    transition="transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease"
-    _hover={{
-      filter: "brightness(1.12)",
-      boxShadow: "0 0 30px rgba(56,189,248,0.55), 0 2px 14px rgba(0,0,0,0.55)",
-      ...hoverLift,
-    }}
-    _active={{ transform: "translateY(0)" }}
+    minH="2.8rem"
+    onClick={openUploadPicker}
+    disabled={isLoading}
     _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-    data-testid="button-trial"
   >
-    <Box
-      position="absolute"
-      inset={0}
-      pointerEvents="none"
-      aria-hidden="true"
-      background="linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%)"
-      backgroundSize="200% 100%"
-      animation={shimmerAnimation}
-    />
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      gap="2px"
-      position="relative"
+    Upload File
+  </Button>
+
+  {(isFreePage || isPremiumPage) && (
+    <Button
+      {...primaryBtn}
+      type="button"
+      gridColumn="span 2"
+      minH="3.4rem"
+      onClick={runFindAccount}
+      isDisabled={isLoading}
+      data-testid="button-find-account"
+      _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
     >
-      <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
-        RANDOM ACCOUNT
-      </Box>
-    </Box>
-  </Button>
-)}
-                </Grid>
+      PREMIUM ACCOUNT
+    </Button>
+  )}
+
+  {(isFreePage || isTrialPage) && (
+    <Button
+      {...secondaryBtn}
+      type="button"
+      gridColumn="span 2"
+      minH="3.4rem"
+      onClick={() => runTrial?.()}
+      isDisabled={isLoading}
+      data-testid="button-trial"
+      _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
+    >
+      RANDOM ACCOUNT
+    </Button>
+  )}
+</Grid>
               </Box>
             </Flex>
           </Box>
