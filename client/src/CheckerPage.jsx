@@ -1068,7 +1068,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     />
     <Box display="flex" flexDirection="column" alignItems="center" gap="2px" position="relative">
       <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
-        GENERATE ACCOUNT
+        PREMIUM ACCOUNT
       </Box>
     </Box>
   </Button>
@@ -1120,7 +1120,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       position="relative"
     >
       <Box fontSize="xs" fontWeight="800" letterSpacing="0.12em">
-        TRIAL
+        RANDOM ACCOUNT
       </Box>
     </Box>
   </Button>
