@@ -1295,29 +1295,23 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   <ModalOverlay bg="rgba(0,0,0,0.62)" backdropFilter="blur(2px)" />
 
   <ModalContent
-    bg={sessionUnlocked
-      ? "linear-gradient(160deg, #0d1410 0%, #091008 100%)"
-      : "linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
-    }
-    borderWidth="1px"
-    borderColor={sessionUnlocked ? "rgba(0,213,99,0.28)" : "rgba(120,60,220,0.22)"}
-    boxShadow={sessionUnlocked
-      ? "0 0 0 1px rgba(0,213,99,0.12), 0 16px 48px rgba(0,0,0,0.8), 0 0 80px rgba(0,213,99,0.10)"
-      : "0 0 0 1px rgba(120,60,220,0.10), 0 16px 48px rgba(0,0,0,0.8), 0 0 80px rgba(90,30,180,0.15)"
-    }
-    color="#ffffff"
-    mx={{ base: 0, md: 3 }}
-    borderRadius={{ base: 0, md: "20px" }}
-  >
-    <ModalHeader
-      borderBottomWidth="1px"
-      borderBottomColor={sessionUnlocked ? "rgba(0,213,99,0.18)" : "rgba(120,60,220,0.18)"}
-      fontSize="sm"
-      letterSpacing="0.1em"
-      textTransform="uppercase"
-      color={sessionUnlocked ? "#00d563" : "#c084fc"}
-      pr="80px"
-    >
+  bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+  borderWidth="1px"
+  borderColor="rgba(139,92,246,0.22)"
+  boxShadow="0 0 0 1px rgba(139,92,246,0.08), 0 16px 48px rgba(0,0,0,0.8)"
+  color="#ffffff"
+  mx={{ base: 0, md: 3 }}
+  borderRadius={{ base: 0, md: "20px" }}
+>
+   <ModalHeader
+  borderBottomWidth="1px"
+  borderBottomColor="rgba(139,92,246,0.18)"
+  fontSize="sm"
+  letterSpacing="0.1em"
+  textTransform="uppercase"
+  color="#8b5cf6"
+  pr="80px"
+>
       <HStack spacing={2} align="center">
         <Text>{showHistory ? "📚 History" : `Valid Accounts (${bulkValidResults?.length || 0})`}</Text>
         {sessionUnlocked && (
@@ -1498,15 +1492,15 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       const isLive = liveResultIds?.has(result?.cookieHeader);
       return (
         <Box
-          key={index}
-          mb={4}
-          borderRadius="16px"
-          borderWidth="1.5px"
-          borderColor={theme.border}
-          bg={theme.bg}
-          animation={theme.glowAnim}
-          overflow="hidden"
-        >
+  key={index}
+  mb={4}
+  borderRadius="18px"
+  borderWidth="1px"
+  borderColor="rgba(139,92,246,0.26)"
+  bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+  boxShadow="0 8px 28px rgba(0,0,0,0.42)"
+  overflow="hidden"
+>
           <Box px={4} pt={4} pb={2}>
             <HStack spacing={2} mb={2} justify="space-between" flexWrap="wrap">
               <HStack spacing={2}>
