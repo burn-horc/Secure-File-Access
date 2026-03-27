@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Branding -->
-    <link rel="icon" type="image/webp" href="/brand/astronaut.webp" />
-    <link rel="apple-touch-icon" href="/brand/astronaut.webp" />
+    <!-- Replace this file with your custom N logo -->
+    <link rel="icon" type="image/png" href="/brand/horc-icon.png" />
+    <link rel="apple-touch-icon" href="/brand/horc-icon.png" />
 
     <!-- Premium Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,14 +23,19 @@
       href="https://cdn-uicons.flaticon.com/uicons-brands/css/uicons-brands.css"
     />
 
+    <!-- Tab Title -->
     <title>Burn • Horc</title>
 
     <style>
       :root {
         --bg-dark: #050509;
         --bg-mid: #0d0f1a;
-        --accent: #ff5a00;
-        --accent-glow: rgba(255, 90, 0, 0.4);
+
+        /* Updated accent → matches red/purple theme */
+        --accent: #7c3aed; /* purple */
+        --accent-alt: #b91c1c; /* dark red */
+        --accent-glow: rgba(124, 58, 237, 0.35);
+
         --text-main: #e5e7eb;
         --text-muted: #9ca3af;
       }
@@ -49,7 +55,7 @@
         position: relative;
       }
 
-      /* Subtle Glow Background Effect */
+      /* Glow Background (purple/red vibe) */
       body::before {
         content: "";
         position: fixed;
@@ -60,12 +66,12 @@
         height: 800px;
         background: radial-gradient(circle, var(--accent-glow), transparent 70%);
         filter: blur(120px);
-        opacity: 0.4;
+        opacity: 0.5;
         pointer-events: none;
         z-index: -1;
       }
 
-      /* Optional subtle grain overlay */
+      /* Grain overlay */
       body::after {
         content: "";
         position: fixed;
@@ -84,7 +90,6 @@
 
   <body>
     <div id="root"></div>
-
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
