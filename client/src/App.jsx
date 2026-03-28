@@ -1457,40 +1457,57 @@ const handleTrialSubmit = async () => {
   
 
   if (vpnBlocked) {
-    return (
-      <Box minH="100vh" bg="#141414" display="flex" alignItems="center" justifyContent="center" p={6}>
+  return (
+    <Flex direction="column" minH="100vh" bg="#141414">
+      <Box flex="1" display="flex" alignItems="center" justifyContent="center" p={6}>
         <Box textAlign="center" maxW="420px">
-          <Box color="#e50914" fontSize="64px" fontWeight="900" letterSpacing="-2px" mb={6} lineHeight={1}>N</Box>
-          <Box color="#e50914" fontSize="22px" fontWeight="700" mb={3}>Access Blocked</Box>
+          <Box color="#e50914" fontSize="64px" fontWeight="900" letterSpacing="-2px" mb={6} lineHeight={1}>
+            N
+          </Box>
+          <Box color="#e50914" fontSize="22px" fontWeight="700" mb={3}>
+            Access Blocked
+          </Box>
           <Box color="#aaa" fontSize="15px" lineHeight="1.7">
-            A VPN or proxy connection has been detected.<br />
+            A VPN or proxy connection has been detected.
+            <br />
             Please disable your VPN and refresh the page.
           </Box>
         </Box>
       </Box>
-    );
-  }
 
-  if (maintenanceMode && !previewAllowed) {
-  return (
-    <Box minH="100vh" bg="#141414" display="flex" alignItems="center" justifyContent="center" p={6}>
-      <Box textAlign="center" maxW="420px">
-        <Box color="#e50914" fontSize="64px" fontWeight="900" letterSpacing="-2px" mb={6} lineHeight={1}>
-          N
-        </Box>
-        <Box color="#fff" fontSize="28px" fontWeight="700" mb={3}>
-          Under Maintenance
-        </Box>
-        <Box color="#aaa" fontSize="15px" lineHeight="1.7">
-          We’re updating the website right now.
-          <br />
-          Please check back soon.
-        </Box>
+      <Box pt={4} pb={6} px={4}>
+        <AppCredits />
       </Box>
-    </Box>
+    </Flex>
   );
 }
 
+  if (maintenanceMode && !previewAllowed) {
+  return (
+    <Flex direction="column" minH="100vh" bg="#141414">
+      <Box flex="1" display="flex" alignItems="center" justifyContent="center" p={6}>
+        <Box textAlign="center" maxW="420px">
+          <Box color="#e50914" fontSize="64px" fontWeight="900" letterSpacing="-2px" mb={6} lineHeight={1}>
+            N
+          </Box>
+          <Box color="#fff" fontSize="28px" fontWeight="700" mb={3}>
+            Under Maintenance
+          </Box>
+          <Box color="#aaa" fontSize="15px" lineHeight="1.7">
+            We’re updating the website right now.
+            <br />
+            Please check back soon.
+          </Box>
+        </Box>
+      </Box>
+
+      <Box pt={4} pb={6} px={4}>
+        <AppCredits />
+      </Box>
+    </Flex>
+  );
+}
+  
 return (
   <Flex direction="column" minH="100vh">
     <Box flex="1">
@@ -1759,9 +1776,7 @@ return (
         </Route>
       </Switch>
       </Box>
-    <Box flex="1" display="flex" alignItems="center" justifyContent="center">
-      {/* maintenance content */}
-    </Box>
+    
 
   <Box pt={4} pb={6} px={4}>
     <AppCredits />
