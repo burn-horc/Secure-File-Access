@@ -759,6 +759,7 @@ const [trialCodeError, setTrialCodeError] = useState("");
 const [trialLoading, setTrialLoading] = useState(false);
 const [trialResults, setTrialResults] = useState([]);
 const [showTrialResults, setShowTrialResults] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const [acceptedNotice, setAcceptedNotice] = useState(true);
   
   const canAccessAdmin = sessionUnlocked; 
@@ -1848,7 +1849,80 @@ return (
       </Switch>
       </Box>
     
+<Box px={4} mt={4}>
+  <Box
+    borderWidth="1px"
+    borderColor="rgba(139,92,246,0.22)"
+    borderRadius="24px"
+    bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+    boxShadow="0 8px 32px rgba(0,0,0,0.65)"
+    p={5}
+  >
+    <VStack align="stretch" spacing={3}>
+      <Flex justify="space-between" align="center">
+        <Text color="white" fontSize="md" fontWeight="700">
+          Support this platform
+        </Text>
 
+        <Button
+          size="sm"
+          variant="ghost"
+          color="#8b5cf6"
+          _hover={{ bg: "rgba(139,92,246,0.12)" }}
+          onClick={() => setShowSupport((prev) => !prev)}
+        >
+          {showSupport ? "Hide" : "View"}
+        </Button>
+      </Flex>
+
+      {!showSupport ? (
+        <Text fontSize="sm" color="rgba(255,255,255,0.6)">
+          Optional contributions help maintain and improve the service.
+        </Text>
+      ) : (
+        <Box
+          borderWidth="1px"
+          borderColor="rgba(255,255,255,0.08)"
+          bg="rgba(255,255,255,0.03)"
+          borderRadius="14px"
+          p={4}
+        >
+          <Text fontSize="sm" color="rgba(255,255,255,0.72)" lineHeight="1.7">
+            This platform is independently maintained. Contributions are entirely
+            optional and help support ongoing development and operational costs.
+          </Text>
+
+          <Text
+            color="#8b5cf6"
+            fontSize="sm"
+            fontWeight="700"
+            mt={3}
+            letterSpacing="0.04em"
+          >
+            GCash: 09XXXXXXXXX
+          </Text>
+
+          <Text fontSize="xs" color="rgba(255,255,255,0.45)" mt={1}>
+            Optional • No obligation
+          </Text>
+
+          <Button
+            mt={3}
+            size="sm"
+            borderRadius="10px"
+            bg="linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%)"
+            color="white"
+            _hover={{ filter: "brightness(1.08)" }}
+            onClick={() => navigator.clipboard.writeText("09XXXXXXXXX")}
+          >
+            Copy Number
+          </Button>
+        </Box>
+      )}
+    </VStack>
+  </Box>
+</Box>
+    
   <Box pt={4} pb={6} px={4}>
     <AppCredits />
   </Box>
