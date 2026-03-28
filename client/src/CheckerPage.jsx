@@ -685,6 +685,49 @@ const isPremiumPage = mode === "premium";
       borderColor: "rgba(139,92,246,0.35)",
     },
   };
+
+  const successBtn = {
+  borderRadius: "12px",
+  borderWidth: "0",
+  bg: "linear-gradient(90deg, #00d563 0%, #00b050 100%)",
+  color: "white",
+  fontWeight: "800",
+  transition: "all 0.2s ease",
+  _hover: {
+    filter: "brightness(1.12)",
+  },
+  _active: {
+    filter: "brightness(0.96)",
+  },
+};
+
+const tvBtn = {
+  borderRadius: "12px",
+  borderWidth: "1px",
+  borderColor: "rgba(168,85,247,0.45)",
+  bg: "rgba(168,85,247,0.12)",
+  color: "#a855f7",
+  fontWeight: "800",
+  transition: "all 0.2s ease",
+  _hover: {
+    bg: "rgba(168,85,247,0.18)",
+    borderColor: "rgba(168,85,247,0.72)",
+  },
+};
+
+const mobileBtn = {
+  borderRadius: "12px",
+  borderWidth: "1px",
+  borderColor: "rgba(99,102,241,0.45)",
+  bg: "rgba(99,102,241,0.12)",
+  color: "#7c83ff",
+  fontWeight: "800",
+  transition: "all 0.2s ease",
+  _hover: {
+    bg: "rgba(99,102,241,0.18)",
+    borderColor: "rgba(99,102,241,0.72)",
+  },
+};
   
   return (
     <Box
