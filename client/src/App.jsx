@@ -1849,7 +1849,7 @@ return (
       </Switch>
       </Box>
     
-<Box px={4} mt={4}>
+<Box px={4} mt={-10}>
   <Box
     borderWidth="1px"
     borderColor="rgba(139,92,246,0.22)"
