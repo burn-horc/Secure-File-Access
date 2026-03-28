@@ -1,3 +1,4 @@
+const [acceptedNotice, setAcceptedNotice] = useState(false);
 const maintenanceMode = false;
 const previewAllowed =
   typeof window !== "undefined" &&
@@ -1455,7 +1456,80 @@ const handleTrialSubmit = async () => {
   }
 };
   
+if (!acceptedNotice) {
+  return (
+    <Flex direction="column" minH="100vh" bg="#0d0f18" color="white" py={8} px={4}>
+      <Box flex="1" display="flex" alignItems="center" justifyContent="center">
+        <Box
+          w="full"
+          maxW="md"
+          borderWidth="1px"
+          borderColor="rgba(139,92,246,0.22)"
+          borderRadius="24px"
+          bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+          boxShadow="0 8px 32px rgba(0,0,0,0.65)"
+          p={6}
+        >
+          <VStack spacing={4} textAlign="center">
+            <Text
+              fontSize="xl"
+              fontWeight="800"
+              letterSpacing="0.1em"
+              textTransform="uppercase"
+              color="#8b5cf6"
+            >
+              NOTICE
+            </Text>
 
+            <Text fontSize="sm" color="rgba(255,255,255,0.75)" lineHeight="1.8">
+              This site is provided for lawful, authorized, and educational use only.
+              By continuing, you confirm that you have permission to use any data you submit
+              and that you will comply with all applicable terms and laws.
+            </Text>
+
+            <Box
+              borderWidth="1px"
+              borderColor="rgba(255,255,255,0.08)"
+              bg="rgba(255,255,255,0.03)"
+              borderRadius="14px"
+              p={4}
+              w="full"
+            >
+              <Text
+                fontSize="xs"
+                fontWeight="700"
+                letterSpacing="0.08em"
+                textTransform="uppercase"
+                color="#c4b5fd"
+                mb={2}
+              >
+                Disclaimer
+              </Text>
+
+              <Text fontSize="xs" color="rgba(255,255,255,0.68)" lineHeight="1.8">
+                We do not guarantee uninterrupted availability.
+                Users are responsible for ensuring they have proper authorization
+                for any activity performed through this site.
+              </Text>
+            </Box>
+
+            <Button
+              w="full"
+              borderRadius="12px"
+              bg="linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%)"
+              color="white"
+              _hover={{ filter: "brightness(1.08)" }}
+              onClick={() => setAcceptedNotice(true)}
+            >
+              I Understand
+            </Button>
+          </VStack>
+        </Box>
+      </Box>
+    </Flex>
+  );
+}
+  
   if (vpnBlocked) {
   return (
     <Flex direction="column" minH="100vh" bg="#141414">
