@@ -759,7 +759,7 @@ const [trialCodeError, setTrialCodeError] = useState("");
 const [trialLoading, setTrialLoading] = useState(false);
 const [trialResults, setTrialResults] = useState([]);
 const [showTrialResults, setShowTrialResults] = useState(false);
-  const [acceptedNotice, setAcceptedNotice] = useState(false);
+  const [acceptedNotice, setAcceptedNotice] = useState(true);
   
   const canAccessAdmin = sessionUnlocked; 
 
