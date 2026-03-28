@@ -93,7 +93,7 @@ export default function SupportPage() {
                 Facebook:
               </Text>{" "}
               <Link
-                href="https://facebook.com/yourpage"
+                href="https://www.facebook.com/burn024/"
                 isExternal
                 color="#c4b5fd"
                 textDecoration="underline"
@@ -105,7 +105,7 @@ export default function SupportPage() {
                 Telegram:
               </Text>{" "}
               <Link
-                href="https://t.me/yourusername"
+                href="https://t.me/BURNx24"
                 isExternal
                 color="#c4b5fd"
                 textDecoration="underline"
