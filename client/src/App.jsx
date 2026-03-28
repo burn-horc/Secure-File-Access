@@ -1,4 +1,4 @@
-const [acceptedNotice, setAcceptedNotice] = useState(false);
+
 const maintenanceMode = false;
 const previewAllowed =
   typeof window !== "undefined" &&
@@ -7,7 +7,7 @@ const previewAllowed =
 import SupportPage from "./SupportPage";
 import { useLocation } from "wouter";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useToast, Box, Flex } from "@chakra-ui/react";
+import { useToast, Box, Flex, Button, Text, VStack } from "@chakra-ui/react";
 import { Switch, Route } from "wouter";
 import CheckerPage from "./CheckerPage";
 import AdminPage from "./AdminPage";
@@ -759,6 +759,7 @@ const [trialCodeError, setTrialCodeError] = useState("");
 const [trialLoading, setTrialLoading] = useState(false);
 const [trialResults, setTrialResults] = useState([]);
 const [showTrialResults, setShowTrialResults] = useState(false);
+  const [acceptedNotice, setAcceptedNotice] = useState(false);
   
   const canAccessAdmin = sessionUnlocked; 
 
