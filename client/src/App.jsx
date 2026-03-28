@@ -1760,9 +1760,7 @@ return (
       </Switch>
     </Box>
 
-    <Box pb={6} px={4}>
-      <AppCredits />
-    </Box>
+    
   </Flex>
 );
   }
