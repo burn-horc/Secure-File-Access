@@ -109,14 +109,8 @@ export default function SupportPage() {
             </Button>
           </VStack>
 
-          <Text
-            textAlign="center"
-            fontSize="12px"
-            color="rgba(255,255,255,0.38)"
-            pt={1}
-          >
-            © 2026 SATISACROH. All Rights Reserved.
-          </Text>
+          
+          
         </VStack>
       </Container>
     </Box>
