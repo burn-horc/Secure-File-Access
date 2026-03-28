@@ -1899,7 +1899,7 @@ return (
             mt={3}
             letterSpacing="0.04em"
           >
-            GCash: 09XXXXXXXXX
+            GCash: 09283525806
           </Text>
 
           <Text fontSize="xs" color="rgba(255,255,255,0.45)" mt={1}>
