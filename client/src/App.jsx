@@ -1475,9 +1475,7 @@ const handleTrialSubmit = async () => {
         </Box>
       </Box>
 
-      <Box pt={4} pb={6} px={4}>
-        <AppCredits />
-      </Box>
+      
     </Flex>
   );
 }
@@ -1501,9 +1499,7 @@ const handleTrialSubmit = async () => {
         </Box>
       </Box>
 
-      <Box pt={4} pb={6} px={4}>
-        <AppCredits />
-      </Box>
+      
     </Flex>
   );
 }
