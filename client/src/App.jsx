@@ -1758,9 +1758,14 @@ return (
           />
         </Route>
       </Switch>
+      </Box>
+    <Box flex="1" display="flex" alignItems="center" justifyContent="center">
+      {/* maintenance content */}
     </Box>
 
-    
-  </Flex>
+  <Box pt={4} pb={6} px={4}>
+    <AppCredits />
+  </Box>
+</Flex>
 );
   }
