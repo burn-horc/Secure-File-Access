@@ -4,6 +4,7 @@ import {
   Button,
   Container,
   Divider,
+  Link,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -73,13 +74,47 @@ export default function SupportPage() {
               Contact
             </Text>
             <Text fontSize="sm" color="rgba(255,255,255,0.72)" lineHeight="1.8">
-              For support or inquiries, feel free to reach out:
+              For support or inquiries, feel free to reach out through any of
+              the following:
               <br />
               <br />
-              burnhorc@gmail.com
+              <Text as="span" fontWeight="600" color="white">
+                Email:
+              </Text>{" "}
+              <Link
+                href="mailto:burnhorc@gmail.com?subject=Support Request"
+                color="#c4b5fd"
+                textDecoration="underline"
+              >
+                burnhorc@gmail.com
+              </Link>
+              <br />
+              <Text as="span" fontWeight="600" color="white">
+                Facebook:
+              </Text>{" "}
+              <Link
+                href="https://facebook.com/yourpage"
+                isExternal
+                color="#c4b5fd"
+                textDecoration="underline"
+              >
+                facebook.com/yourpage
+              </Link>
+              <br />
+              <Text as="span" fontWeight="600" color="white">
+                Telegram:
+              </Text>{" "}
+              <Link
+                href="https://t.me/yourusername"
+                isExternal
+                color="#c4b5fd"
+                textDecoration="underline"
+              >
+                t.me/yourusername
+              </Link>
               <br />
               <br />
-              We typically respond as soon as possible.
+              We typically respond within 24 hours.
             </Text>
           </Box>
 
@@ -97,6 +132,36 @@ export default function SupportPage() {
             </Button>
 
             <Button
+              as="a"
+              href="https://www.facebook.com/burn024/"
+              target="_blank"
+              rel="noopener noreferrer"
+              w="full"
+              borderRadius="12px"
+              bg="rgba(255,255,255,0.06)"
+              color="white"
+              border="1px solid rgba(255,255,255,0.12)"
+              _hover={{ bg: "rgba(255,255,255,0.1)" }}
+            >
+              Facebook Page
+            </Button>
+
+            <Button
+              as="a"
+              href="https://t.me/BURNx24"
+              target="_blank"
+              rel="noopener noreferrer"
+              w="full"
+              borderRadius="12px"
+              bg="rgba(255,255,255,0.06)"
+              color="white"
+              border="1px solid rgba(255,255,255,0.12)"
+              _hover={{ bg: "rgba(255,255,255,0.1)" }}
+            >
+              Telegram Support
+            </Button>
+
+            <Button
               w="full"
               variant="outline"
               borderColor="rgba(255,255,255,0.16)"
@@ -108,9 +173,6 @@ export default function SupportPage() {
               Back to Home
             </Button>
           </VStack>
-
-          
-          
         </VStack>
       </Container>
     </Box>
