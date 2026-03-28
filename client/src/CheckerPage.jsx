@@ -513,11 +513,16 @@ const isPremiumPage = mode === "premium";
   const [showGuide, setShowGuide] = useState(false);
   const [copiedStates, setCopiedStates] = useState({});
   const [copyAllDone, setCopyAllDone] = useState(false);
-  const handleCopyWithFeedback = (key, copyFn) => {
-    copyFn();
-    setCopiedStates(prev => ({ ...prev, [key]: true }));
-    setTimeout(() => setCopiedStates(prev => ({ ...prev, [key]: false })), 1800);
-  };
+  
+  const handleCopyWithFeedback = async (key, copyFn) => {
+  const copied = await copyFn();
+  if (!copied) return;
+
+  setCopiedStates(prev => ({ ...prev, [key]: true }));
+  setTimeout(() => {
+    setCopiedStates(prev => ({ ...prev, [key]: false }));
+  }, 1800);
+};
 
   const getLogToneColor = (tone) =>
     tone === "valid" ? "#23d7c6" : tone === "invalid" ? "#ff6584" : "rgba(255,255,255,0.82)";
@@ -531,21 +536,33 @@ const isPremiumPage = mode === "premium";
           transition: { duration: 0.34, delay, ease: easing },
         };
   const hoverLift = prefersReducedMotion ? {} : { transform: "translateY(-1px)" };
+  
   const handleAndroidCopy = async (link) => {
-    const copied = await copyTextToClipboard(link);
-    if (!copied) return;
+  const tokenLink = typeof link === "string" && link.trim()
+    ? link.trim()
+    : "";
 
-    const toastId = "checker-single-android-link-copied";
-    showAppToast(toast, {
-      id: toastId,
-      title: "Android link copied",
-      status: "success",
-      duration: 1600,
-    });
-  };
+  const copied = await copyTextToClipboard(tokenLink);
+  if (!copied) return false;
+
+  const toastId = "checker-single-android-link-copied";
+  showAppToast(toast, {
+    id: toastId,
+    title: "Android link copied",
+    status: "success",
+    duration: 1600,
+  });
+
+  return true;
+};
+  
   const handlePcCopy = async (link) => {
-  const copied = await copyTextToClipboard(link);
-  if (!copied) return;
+  const tokenLink = typeof link === "string" && link.trim()
+    ? link.trim()
+    : "";
+
+  const copied = await copyTextToClipboard(tokenLink);
+  if (!copied) return false;
 
   const toastId = "checker-single-pc-link-copied";
   showAppToast(toast, {
@@ -554,6 +571,8 @@ const isPremiumPage = mode === "premium";
     status: "success",
     duration: 1600,
   });
+
+  return true;
 };
 
   const handleTvOpen = (link) => {
