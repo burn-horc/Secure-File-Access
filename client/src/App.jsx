@@ -1913,7 +1913,7 @@ return (
             bg="linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%)"
             color="white"
             _hover={{ filter: "brightness(1.08)" }}
-            onClick={() => navigator.clipboard.writeText("09XXXXXXXXX")}
+            onClick={() => navigator.clipboard.writeText("09283525806")}
           >
             Copy Number
           </Button>
