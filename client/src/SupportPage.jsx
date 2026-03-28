@@ -13,6 +13,9 @@ import { useLocation } from "wouter";
 export default function SupportPage() {
   const [, setLocation] = useLocation();
 
+  
+  const showSocials = false;
+
   return (
     <Box minH="100vh" bg="#0d0f18" color="white" py={8} px={4}>
       <Container maxW="md">
@@ -74,8 +77,8 @@ export default function SupportPage() {
               Contact
             </Text>
             <Text fontSize="sm" color="rgba(255,255,255,0.72)" lineHeight="1.8">
-              For support or inquiries, feel free to reach out through any of
-              the following:
+              For support or inquiries, feel free to reach out through the
+              following:
               <br />
               <br />
 
@@ -90,37 +93,68 @@ export default function SupportPage() {
                 burnhorc@gmail.com
               </Link>
 
-              <br />
+              {showSocials && (
+                <>
+                  <br />
+                  <Text as="span" fontWeight="600" color="white">
+                    Facebook:
+                  </Text>{" "}
+                  <Link
+                    href="https://www.facebook.com/burn024/"
+                    isExternal
+                    color="#c4b5fd"
+                    textDecoration="underline"
+                  >
+                    facebook.com/burn024
+                  </Link>
 
-              <Text as="span" fontWeight="600" color="white">
-                Facebook:
-              </Text>{" "}
-              <Link
-                href="https://www.facebook.com/burn024/"
-                isExternal
-                color="#c4b5fd"
-                textDecoration="underline"
-              >
-                facebook.com/burn024
-              </Link>
-
-              <br />
-
-              <Text as="span" fontWeight="600" color="white">
-                Telegram:
-              </Text>{" "}
-              <Link
-                href="https://t.me/BURNx24"
-                isExternal
-                color="#c4b5fd"
-                textDecoration="underline"
-              >
-                t.me/BURNx24
-              </Link>
+                  <br />
+                  <Text as="span" fontWeight="600" color="white">
+                    Telegram:
+                  </Text>{" "}
+                  <Link
+                    href="https://t.me/BURNx24"
+                    isExternal
+                    color="#c4b5fd"
+                    textDecoration="underline"
+                  >
+                    t.me/BURNx24
+                  </Link>
+                </>
+              )}
 
               <br />
               <br />
               We typically respond within 24 hours.
+            </Text>
+          </Box>
+
+          <Box
+            borderWidth="1px"
+            borderColor="rgba(255,255,255,0.08)"
+            bg="rgba(255,255,255,0.03)"
+            borderRadius="14px"
+            p={4}
+          >
+            <Text
+              fontSize="xs"
+              fontWeight="700"
+              letterSpacing="0.08em"
+              textTransform="uppercase"
+              color="#c4b5fd"
+              mb={2}
+            >
+              Disclaimer
+            </Text>
+            <Text
+              fontSize="xs"
+              color="rgba(255,255,255,0.68)"
+              lineHeight="1.8"
+            >
+              This tool is provided for educational and testing purposes only.
+              We do not guarantee uninterrupted availability, and users are
+              responsible for ensuring they have proper authorization to use any
+              data submitted through this tool.
             </Text>
           </Box>
 
@@ -137,35 +171,39 @@ export default function SupportPage() {
               Email Support
             </Button>
 
-            <Button
-              as="a"
-              href="https://www.facebook.com/burn024/"
-              target="_blank"
-              rel="noopener noreferrer"
-              w="full"
-              borderRadius="12px"
-              bg="rgba(255,255,255,0.06)"
-              color="white"
-              border="1px solid rgba(255,255,255,0.12)"
-              _hover={{ bg: "rgba(255,255,255,0.1)" }}
-            >
-              Facebook Page
-            </Button>
+            {showSocials && (
+              <>
+                <Button
+                  as="a"
+                  href="https://www.facebook.com/burn024/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  w="full"
+                  borderRadius="12px"
+                  bg="rgba(255,255,255,0.06)"
+                  color="white"
+                  border="1px solid rgba(255,255,255,0.12)"
+                  _hover={{ bg: "rgba(255,255,255,0.1)" }}
+                >
+                  Facebook Page
+                </Button>
 
-            <Button
-              as="a"
-              href="https://t.me/BURNx24"
-              target="_blank"
-              rel="noopener noreferrer"
-              w="full"
-              borderRadius="12px"
-              bg="rgba(255,255,255,0.06)"
-              color="white"
-              border="1px solid rgba(255,255,255,0.12)"
-              _hover={{ bg: "rgba(255,255,255,0.1)" }}
-            >
-              Telegram Support
-            </Button>
+                <Button
+                  as="a"
+                  href="https://t.me/BURNx24"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  w="full"
+                  borderRadius="12px"
+                  bg="rgba(255,255,255,0.06)"
+                  color="white"
+                  border="1px solid rgba(255,255,255,0.12)"
+                  _hover={{ bg: "rgba(255,255,255,0.1)" }}
+                >
+                  Telegram Support
+                </Button>
+              </>
+            )}
 
             <Button
               w="full"
