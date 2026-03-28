@@ -78,6 +78,7 @@ export default function SupportPage() {
               the following:
               <br />
               <br />
+
               <Text as="span" fontWeight="600" color="white">
                 Email:
               </Text>{" "}
@@ -88,7 +89,9 @@ export default function SupportPage() {
               >
                 burnhorc@gmail.com
               </Link>
+
               <br />
+
               <Text as="span" fontWeight="600" color="white">
                 Facebook:
               </Text>{" "}
@@ -98,9 +101,11 @@ export default function SupportPage() {
                 color="#c4b5fd"
                 textDecoration="underline"
               >
-                facebook.com/yourpage
+                facebook.com/burn024
               </Link>
+
               <br />
+
               <Text as="span" fontWeight="600" color="white">
                 Telegram:
               </Text>{" "}
@@ -110,8 +115,9 @@ export default function SupportPage() {
                 color="#c4b5fd"
                 textDecoration="underline"
               >
-                t.me/yourusername
+                t.me/BURNx24
               </Link>
+
               <br />
               <br />
               We typically respond within 24 hours.
