@@ -693,40 +693,30 @@ const isPremiumPage = mode === "premium";
   color: "white",
   fontWeight: "800",
   transition: "all 0.2s ease",
-  _hover: {
-    filter: "brightness(1.12)",
-  },
-  _active: {
-    filter: "brightness(0.96)",
-  },
-};
-
-const tvBtn = {
-  borderRadius: "12px",
-  borderWidth: "1px",
-  borderColor: "rgba(168,85,247,0.45)",
-  bg: "rgba(168,85,247,0.12)",
-  color: "#a855f7",
-  fontWeight: "800",
-  transition: "all 0.2s ease",
-  _hover: {
-    bg: "rgba(168,85,247,0.18)",
-    borderColor: "rgba(168,85,247,0.72)",
-  },
+  _hover: { filter: "brightness(1.12)" },
+  _active: { filter: "brightness(0.96)" },
 };
 
 const mobileBtn = {
   borderRadius: "12px",
-  borderWidth: "1px",
-  borderColor: "rgba(99,102,241,0.45)",
-  bg: "rgba(99,102,241,0.12)",
-  color: "#7c83ff",
+  borderWidth: "0",
+  bg: "linear-gradient(90deg, #2563eb 0%, #6366f1 100%)",
+  color: "white",
   fontWeight: "800",
   transition: "all 0.2s ease",
-  _hover: {
-    bg: "rgba(99,102,241,0.18)",
-    borderColor: "rgba(99,102,241,0.72)",
-  },
+  _hover: { filter: "brightness(1.12)" },
+  _active: { filter: "brightness(0.96)" },
+};
+
+const tvBtn = {
+  borderRadius: "12px",
+  borderWidth: "0",
+  bg: "linear-gradient(90deg, #7c3aed 0%, #a855f7 100%)",
+  color: "white",
+  fontWeight: "800",
+  transition: "all 0.2s ease",
+  _hover: { filter: "brightness(1.12)" },
+  _active: { filter: "brightness(0.96)" },
 };
   
   return (
