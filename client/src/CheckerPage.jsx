@@ -1654,48 +1654,55 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           </Box>
 
           <HStack px={4} pb={3} spacing={2}>
-            <Button
-              {...primaryBtn}
-              flex={1}
-              fontSize="xs"
-              py={5}
-              onClick={() =>
-                handleCopyWithFeedback(`${index}-pc`, () =>
-                  handlePcCopy(readResultTokenLink(result, "pc"))
-                )
-              }
-              data-testid={`button-pc-${index}`}
-            >
-              {copiedStates[`${index}-pc`] ? "✓ Copied!" : "PC Watch"}
-            </Button>
+  <Button
+    flex={1}
+    bg={copiedStates[`${index}-pc`]
+      ? "linear-gradient(90deg,#00c853,#00e676)"
+      : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"}
+    color="white"
+    fontWeight="800"
+    borderRadius="12px"
+    borderWidth="0"
+    fontSize="xs"
+    py={5}
+    _hover={{ filter: "brightness(1.15)" }}
+    onClick={() =>
+      handleCopyWithFeedback(`${index}-pc`, () =>
+        handlePcCopy(readResultTokenLink(result, "pc"))
+      )
+    }
+    data-testid={`button-pc-${index}`}
+  >
+    {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
+  </Button>
 
-            <Button
-              {...primaryBtn}
-              flex={1}
-              fontSize="xs"
-              py={5}
-              onClick={() =>
-                handleCopyWithFeedback(`${index}-android`, () =>
-                  handleAndroidCopy(readResultTokenLink(result, "android"))
-                )
-              }
-              data-testid={`button-android-${index}`}
-            >
-              {copiedStates[`${index}-android`] ? "✓ Copied!" : "Mobile Watch"}
-            </Button>
+  <Button
+    {...primaryBtn}
+    flex={1}
+    fontSize="xs"
+    py={5}
+    onClick={() =>
+      handleCopyWithFeedback(`${index}-android`, () =>
+        handleAndroidCopy(readResultTokenLink(result, "android"))
+      )
+    }
+    data-testid={`button-android-${index}`}
+  >
+    {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile Watch"}
+  </Button>
 
-            <Button
-              {...primaryBtn}
-              flex={1}
-              fontSize="xs"
-              py={5}
-              onClick={() => handleTvOpen(readResultTokenLink(result, "tv"))}
-              data-testid={`button-tv-${index}`}
-            >
-              TV Connect
-            </Button>
-          </HStack>
-
+  <Button
+    {...primaryBtn}
+    flex={1}
+    fontSize="xs"
+    py={5}
+    onClick={() => handleTvOpen(readResultTokenLink(result, "tv"))}
+    data-testid={`button-tv-${index}`}
+  >
+    📺 TV Connect
+  </Button>
+</HStack>
+          
           <Box px={4} pb={4}>
             <Button
               {...ghostDarkBtn}
@@ -1874,54 +1881,45 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         </Box>
 
         <HStack px={4} pb={4} spacing={2}>
-          <Button
-            flex={1}
-            bg={
-              copiedStates[`${index}-android`]
-                ? "linear-gradient(90deg,#00c853,#00e676)"
-                : "linear-gradient(90deg, #1a56db 0%, #6c47ff 100%)"
-            }
-            color="white"
-            fontWeight="700"
-            borderWidth="0"
-            borderRadius="10px"
-            fontSize="sm"
-            py={6}
-            _hover={{ filter: "brightness(1.15)" }}
-            onClick={() =>
-              handleCopyWithFeedback(`${index}-android`, () =>
-                handleAndroidCopy(readResultTokenLink(result, "android"))
-              )
-            }
-            data-testid={`button-std-android-${index}`}
-          >
-            {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile"}
-          </Button>
+  <Button
+    flex={1}
+    bg={
+      copiedStates[`${index}-pc`]
+        ? "linear-gradient(90deg,#00c853,#00e676)"
+        : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"
+    }
+    color="white"
+    fontWeight="800"
+    borderWidth="0"
+    borderRadius="12px"
+    fontSize="sm"
+    py={6}
+    _hover={{ filter: "brightness(1.15)" }}
+    onClick={() =>
+      handleCopyWithFeedback(`${index}-pc`, () =>
+        handlePcCopy(readResultTokenLink(result, "pc"))
+      )
+    }
+    data-testid={`button-std-pc-${index}`}
+  >
+    {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
+  </Button>
 
-          <Button
-            flex={1}
-            bg={
-              copiedStates[`${index}-pc`]
-                ? "linear-gradient(90deg,#00c853,#00e676)"
-                : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"
-            }
-            color="white"
-            fontWeight="700"
-            borderWidth="0"
-            borderRadius="10px"
-            fontSize="sm"
-            py={6}
-            _hover={{ filter: "brightness(1.15)" }}
-            onClick={() =>
-              handleCopyWithFeedback(`${index}-pc`, () =>
-                handlePcCopy(readResultTokenLink(result, "pc"))
-              )
-            }
-            data-testid={`button-std-pc-${index}`}
-          >
-            {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
-          </Button>
-        </HStack>
+  <Button
+    {...primaryBtn}
+    flex={1}
+    fontSize="sm"
+    py={6}
+    onClick={() =>
+      handleCopyWithFeedback(`${index}-android`, () =>
+        handleAndroidCopy(readResultTokenLink(result, "android"))
+      )
+    }
+    data-testid={`button-std-android-${index}`}
+  >
+    {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile"}
+  </Button>
+</HStack>
       </Box>
     );
   })}
