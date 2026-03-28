@@ -1698,17 +1698,10 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 
           <HStack px={4} pb={3} spacing={2}>
   <Button
+    {...successBtn}
     flex={1}
-    bg={copiedStates[`${index}-pc`]
-      ? "linear-gradient(90deg,#00c853,#00e676)"
-      : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"}
-    color="white"
-    fontWeight="800"
-    borderRadius="12px"
-    borderWidth="0"
     fontSize="xs"
     py={5}
-    _hover={{ filter: "brightness(1.15)" }}
     onClick={() =>
       handleCopyWithFeedback(`${index}-pc`, () =>
         handlePcCopy(readResultTokenLink(result, "pc"))
@@ -1720,7 +1713,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </Button>
 
   <Button
-    {...primaryBtn}
+    {...mobileBtn}
     flex={1}
     fontSize="xs"
     py={5}
@@ -1735,7 +1728,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </Button>
 
   <Button
-    {...primaryBtn}
+    {...tvBtn}
     flex={1}
     fontSize="xs"
     py={5}
@@ -1925,19 +1918,10 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 
         <HStack px={4} pb={4} spacing={2}>
   <Button
+    {...successBtn}
     flex={1}
-    bg={
-      copiedStates[`${index}-pc`]
-        ? "linear-gradient(90deg,#00c853,#00e676)"
-        : "linear-gradient(90deg, #00d563 0%, #00b050 100%)"
-    }
-    color="white"
-    fontWeight="800"
-    borderWidth="0"
-    borderRadius="12px"
     fontSize="sm"
     py={6}
-    _hover={{ filter: "brightness(1.15)" }}
     onClick={() =>
       handleCopyWithFeedback(`${index}-pc`, () =>
         handlePcCopy(readResultTokenLink(result, "pc"))
@@ -1949,7 +1933,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </Button>
 
   <Button
-    {...primaryBtn}
+    {...mobileBtn}
     flex={1}
     fontSize="sm"
     py={6}
