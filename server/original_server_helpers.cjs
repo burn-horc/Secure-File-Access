@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
 
 const COOKIE_META_KEYS = new Set([
   'domain',
@@ -29,6 +30,11 @@ const DIRECT_COOKIE_FIELDS = ['cookie', 'cookieheader', 'cookiestring', 'header'
 const DEFAULT_WORKER_COUNT = 1;
 const MIN_WORKER_COUNT = 1;
 const MAX_WORKER_COUNT = 5;
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 function toCookiePair(name, value) {
   const cookieName = String(name ?? '').trim();
