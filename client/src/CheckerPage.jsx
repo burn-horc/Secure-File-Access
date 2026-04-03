@@ -1229,6 +1229,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 >
   <VStack align="stretch" spacing={3}>
     <Text
+      textAlign="center"
       fontSize="xs"
       fontWeight="700"
       letterSpacing="0.1em"
@@ -1238,9 +1239,15 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       Guide
     </Text>
 
-    <HStack spacing={2} flexWrap="wrap">
+    <HStack
+      spacing={2}
+      justify="center"
+      flexWrap="wrap"
+    >
       <Button
         {...guidePcBtn}
+        minW="88px"
+        justifyContent="center"
         onClick={() =>
           setActiveMainGuide((prev) => (prev === "pc" ? null : "pc"))
         }
@@ -1250,6 +1257,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 
       <Button
         {...guideAndroidBtn}
+        minW="120px"
+        justifyContent="center"
         onClick={() =>
           setActiveMainGuide((prev) => (prev === "android" ? null : "android"))
         }
@@ -1259,6 +1268,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 
       <Button
         {...guideTvBtn}
+        minW="88px"
+        justifyContent="center"
         onClick={() =>
           setActiveMainGuide((prev) => (prev === "tv" ? null : "tv"))
         }
@@ -1274,8 +1285,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         color="rgba(255,255,255,0.85)"
         fontSize="sm"
       >
-        <Text fontWeight="700" mb={2}>🖥 PC WATCH</Text>
-        <Text lineHeight="1.8">
+        <Text textAlign="center" fontWeight="700" mb={2}>🖥 PC WATCH</Text>
+        <Text textAlign="center" lineHeight="1.8">
           Open your browser and paste the provided link to access the account.
         </Text>
       </Box>
@@ -1288,8 +1299,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         color="rgba(255,255,255,0.85)"
         fontSize="sm"
       >
-        <Text fontWeight="700" mb={2}>📱 MOBILE WATCH</Text>
-        <Text lineHeight="1.8">
+        <Text textAlign="center" fontWeight="700" mb={2}>📱 MOBILE WATCH</Text>
+        <Text textAlign="center" lineHeight="1.8">
           Make sure you have the Netflix app installed.
           <br />
           Ensure there is no other Netflix account logged in on your app or browser.
@@ -1310,8 +1321,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         color="rgba(255,255,255,0.85)"
         fontSize="sm"
       >
-        <Text fontWeight="700" mb={2}>📺 TV CONNECT</Text>
-        <Text lineHeight="1.8">
+        <Text textAlign="center" fontWeight="700" mb={2}>📺 TV CONNECT</Text>
+        <Text textAlign="center" lineHeight="1.8">
           Open Netflix on your Smart TV and choose <b>Login via Code</b>.
           <br />
           Click TV Connect.
