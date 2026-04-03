@@ -296,7 +296,8 @@ const isPremiumPage = mode === "premium";
 });
   const [recheckStates, setRecheckStates] = useState({});
   const [isMinimized, setIsMinimized] = useState(false);
-
+  const [activeMainGuide, setActiveMainGuide] = useState(null);
+  
   useEffect(() => {
     if (bulkValidResults && bulkValidResults.length > 0) {
       setIsBulkModalOpen(true);
@@ -511,7 +512,6 @@ const isPremiumPage = mode === "premium";
   };
 
   const [showGuide, setShowGuide] = useState(false);
-  const [activeGuideTab, setActiveGuideTab] = useState(null);
   const [copiedStates, setCopiedStates] = useState({});
   const [copyAllDone, setCopyAllDone] = useState(false);
   
@@ -737,6 +737,51 @@ const tvBtn = {
   fontWeight: "800",
   transition: "all 0.2s ease",
   _hover: { filter: "brightness(1.12)" },
+  _active: { filter: "brightness(0.96)" },
+};
+
+  const guidePcBtn = {
+  borderRadius: "10px",
+  borderWidth: "0",
+  bg: "linear-gradient(90deg, #00d563 0%, #00b050 100%)",
+  color: "white",
+  fontWeight: "700",
+  fontSize: "11px",
+  h: "34px",
+  minH: "34px",
+  px: 3,
+  transition: "all 0.2s ease",
+  _hover: { filter: "brightness(1.1)" },
+  _active: { filter: "brightness(0.96)" },
+};
+
+const guideAndroidBtn = {
+  borderRadius: "10px",
+  borderWidth: "0",
+  bg: "linear-gradient(90deg, #2563eb 0%, #6366f1 100%)",
+  color: "white",
+  fontWeight: "700",
+  fontSize: "11px",
+  h: "34px",
+  minH: "34px",
+  px: 3,
+  transition: "all 0.2s ease",
+  _hover: { filter: "brightness(1.1)" },
+  _active: { filter: "brightness(0.96)" },
+};
+
+const guideTvBtn = {
+  borderRadius: "10px",
+  borderWidth: "0",
+  bg: "linear-gradient(90deg, #7c3aed 0%, #a855f7 100%)",
+  color: "white",
+  fontWeight: "700",
+  fontSize: "11px",
+  h: "34px",
+  minH: "34px",
+  px: 3,
+  transition: "all 0.2s ease",
+  _hover: { filter: "brightness(1.1)" },
   _active: { filter: "brightness(0.96)" },
 };
   
