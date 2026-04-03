@@ -282,11 +282,13 @@ export default function CheckerPage({
   const isFreePage = mode === "free";
 const isPremiumPage = mode === "premium";
   const isTrialPage = mode === "trial";
+  const showBackButton = isPremiumPage || isTrialPage;
   const HISTORY_KEY = 'netflix-checker:history:v1';
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [bulkRecheckState, setBulkRecheckState] = useState({ loading: false, done: 0, total: 0 });
   const [accountHistory, setAccountHistory] = useState(() => {
+    
   try {
     if (typeof window === "undefined") return [];
     return JSON.parse(window.localStorage.getItem("netflix-checker:history:v1") || "[]");
