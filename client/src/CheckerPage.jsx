@@ -823,17 +823,45 @@ const guideTvBtn = {
               bg="transparent"
             >
               <Grid
-                minH="40px"
-                templateColumns="2.5rem 1fr 2.5rem"
-                alignItems="center"
-                borderBottomWidth="1px"
-                borderBottomColor={sessionUnlocked ? "rgba(255,185,0,0.22)" : "rgba(120,60,220,0.18)"}
-                bg={sessionUnlocked ? "rgba(20,15,3,0.7)" : "rgba(10,10,24,0.7)"}
-                px={3}
-              >
-                <Box aria-hidden="true" display="flex" alignItems="center">
-                  <SiNetflix color="#e50914" size="22px" />
-                </Box>
+  minH="40px"
+  templateColumns="auto 1fr auto"
+  alignItems="center"
+  borderBottomWidth="1px"
+  borderBottomColor={sessionUnlocked ? "rgba(255,185,0,0.22)" : "rgba(120,60,220,0.18)"}
+  bg={sessionUnlocked ? "rgba(20,15,3,0.7)" : "rgba(10,10,24,0.7)"}
+  px={3}
+  columnGap={2}
+>
+                <HStack spacing={2} align="center">
+  <Box aria-hidden="true" display="flex" alignItems="center">
+    <SiNetflix color="#e50914" size="22px" />
+  </Box>
+
+  {showBackButton && (
+    <Button
+      size="xs"
+      h="28px"
+      minW="56px"
+      borderRadius="10px"
+      borderWidth="1px"
+      borderColor="rgba(255,255,255,0.12)"
+      bg="rgba(255,255,255,0.04)"
+      color="rgba(255,255,255,0.88)"
+      fontSize="11px"
+      fontWeight="700"
+      onClick={() => setLocation("/")}
+      _hover={{
+        bg: "rgba(255,255,255,0.08)",
+        borderColor: "rgba(139,92,246,0.45)",
+      }}
+      _active={{
+        bg: "rgba(255,255,255,0.12)",
+      }}
+    >
+      ← Back
+    </Button>
+  )}
+</HStack>
                 <Text
                   m={0}
                   noOfLines={1}
@@ -847,7 +875,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 >
                   {isPremiumPage ? "PREMIUM" : isTrialPage ? "RANDOM" : "CHECKER"}
                 </Text>
-                <Box aria-hidden="true" />
+                <Box w={showBackButton ? "56px" : "22px"} />
               </Grid>
 
               <Box
