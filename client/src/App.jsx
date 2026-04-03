@@ -1748,6 +1748,7 @@ return (
             trialCodeError={trialCodeError}
             trialLoading={trialLoading}
             handleTrialSubmit={handleTrialSubmit}
+            goBackToChecker={goBackToChecker}
           />
         </Route>
 
@@ -1802,6 +1803,7 @@ return (
             trialCodeError={trialCodeError}
             trialLoading={trialLoading}
             handleTrialSubmit={handleTrialSubmit}
+            goBackToChecker={goBackToChecker}
           />
         </Route>
 
