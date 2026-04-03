@@ -1,11 +1,12 @@
-const CACHE_NAME = "burn-horc-v1";
+const CACHE_NAME = "burn-horc-v2";
 const APP_SHELL = [
   "/",
   "/manifest.json",
   "/favicon.png",
   "/apple-touch-icon.png",
   "/icon-192.png",
-  "/icon-512.png"
+  "/icon-512.png",
+  "/offline.html"
 ];
 
 self.addEventListener("install", (event) => {
@@ -34,22 +35,22 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
+    fetch(request)
+      .then((response) => {
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(request, responseClone);
+        });
+        return response;
+      })
+      .catch(() => {
+        return caches.match(request).then((cached) => {
+          if (cached) return cached;
 
-      return fetch(request)
-        .then((response) => {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => {
           if (request.mode === "navigate") {
-            return caches.match("/");
+            return caches.match("/offline.html");
           }
         });
-    })
+      })
   );
 });
