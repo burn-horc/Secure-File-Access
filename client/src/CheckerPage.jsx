@@ -850,7 +850,13 @@ const guideTvBtn = {
       color="rgba(255,255,255,0.88)"
       fontSize="11px"
       fontWeight="700"
-      onClick={() => setLocation("/")}
+      onClick={() => {
+  if (goBackToChecker) {
+    goBackToChecker();
+  } else {
+    setLocation("/");
+  }
+}}
       _hover={{
         bg: "rgba(255,255,255,0.08)",
         borderColor: "rgba(139,92,246,0.45)",
