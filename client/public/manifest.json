@@ -1,25 +1,30 @@
 {
-  "name": "Netflix Generator",
-  "short_name": "Burn Horc",
+  "name": "Burn Horc",
+  "short_name": "Burn",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d0f18",
   "theme_color": "#0d0f18",
+  "orientation": "portrait",
+  "scope": "/",
   "icons": [
     {
       "src": "/apple-touch-icon.png",
       "sizes": "180x180",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
