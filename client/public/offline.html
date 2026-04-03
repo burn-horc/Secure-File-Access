@@ -1,26 +1,64 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>Offline</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      background: #050509;
-      color: white;
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <div>
-    <h1>⚠️ Offline</h1>
-    <p>No internet connection.</p>
-    <p>Reconnect to check cookies.</p>
-  </div>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Offline</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top, #111827 0%, #050509 60%);
+        color: white;
+        text-align: center;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 360px;
+        padding: 28px 22px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(139, 92, 246, 0.25);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+      }
+
+      .logo {
+        font-size: 56px;
+        font-weight: 900;
+        color: #e50914;
+        line-height: 1;
+        margin-bottom: 18px;
+        letter-spacing: -2px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 24px;
+      }
+
+      p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.72);
+        line-height: 1.6;
+        font-size: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="logo">N</div>
+      <h1>You're offline</h1>
+      <p>Reconnect to continue checking cookies and loading live account data.</p>
+    </div>
+  </body>
 </html>
