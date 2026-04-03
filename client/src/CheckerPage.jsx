@@ -1342,7 +1342,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   isOpen={isBulkModalOpen && !isMinimized}
   onClose={() => setIsBulkModalOpen(false)}
   isCentered
-  size={{ base: "full", md: "3xl" }}
+  size={{ base: "xl", md: "3xl" }}
 >
   <ModalOverlay bg="rgba(0,0,0,0.62)" backdropFilter="blur(2px)" />
 
@@ -1352,8 +1352,11 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   borderColor="rgba(139,92,246,0.22)"
   boxShadow="0 0 0 1px rgba(139,92,246,0.08), 0 16px 48px rgba(0,0,0,0.8)"
   color="#ffffff"
-  mx={{ base: 0, md: 3 }}
-  borderRadius={{ base: 0, md: "20px" }}
+  mx={{ base: 2, md: 3 }}
+  my={{ base: 4, md: 6 }}
+  maxH={{ base: "92vh", md: "85vh" }}
+  borderRadius="20px"
+  overflow="hidden"
 >
    <ModalHeader
   borderBottomWidth="1px"
@@ -1454,7 +1457,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 
     <ModalCloseButton />
 
-    <ModalBody p={{ base: 3, sm: 4 }} maxH="70vh" overflowY="auto">
+    <ModalBody p={{ base: 3, sm: 4 }} overflowY="auto">
   {showHistory ? (
     <Box>
       <HStack justify="space-between" mb={3}>
