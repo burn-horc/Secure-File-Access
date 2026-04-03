@@ -277,6 +277,7 @@ export default function CheckerPage({
   trialCodeError,
   trialLoading,
   handleTrialSubmit,
+  goBackToChecker,
 }) {
   const [, setLocation] = useLocation();
   const isFreePage = mode === "free";
