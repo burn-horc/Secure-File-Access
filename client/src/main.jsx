@@ -19,3 +19,18 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </QueryClientProvider>
   </React.StrictMode>
 );
+
+window.requestAnimationFrame(() => {
+  const loader = document.getElementById("app-loader");
+  if (loader) {
+    loader.classList.add("loader-hidden");
+  }
+});
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((error) => {
+      console.error("Service worker registration failed:", error);
+    });
+  });
+}
