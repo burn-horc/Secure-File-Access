@@ -764,6 +764,22 @@ const [showTrialResults, setShowTrialResults] = useState(false);
   
   const canAccessAdmin = sessionUnlocked; 
 
+  const goBackToChecker = () => {
+  setSessionUnlocked(false);
+  setVerifiedPasscode("");
+  setPasscodeInput("");
+  setPasscodeError("");
+  setPasscodeLoading(false);
+    setIsPasscodeModalOpen(false);
+  setBulkValidResults([]);
+  setCheckLogs([]);
+  setCheckProgress({ completed: 0, total: null });
+  setLiveValidCount(0);
+  setLiveInvalidCount(0);
+  setLiveResultIds(new Set());
+  setIsLoading(false);
+  setLocation("/");
+};
   
   const toggleSound = () => setSoundEnabled(prev => {
     const next = !prev;
