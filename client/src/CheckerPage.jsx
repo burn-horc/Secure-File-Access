@@ -2156,6 +2156,17 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   >
     {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile"}
   </Button>
+
+  <Button
+    {...tvBtn}
+    flex={1}
+    fontSize="sm"
+    py={6}
+    onClick={() => handleTvOpen(readResultTokenLink(result, "tv"))}
+    data-testid={`button-std-tv-${index}`}
+  >
+    📺 TV Connect
+  </Button>
 </HStack>
       </Box>
     );
