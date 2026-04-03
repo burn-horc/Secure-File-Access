@@ -511,8 +511,10 @@ const isPremiumPage = mode === "premium";
   };
 
   const [showGuide, setShowGuide] = useState(false);
+  const [activeGuideTab, setActiveGuideTab] = useState(null);
   const [copiedStates, setCopiedStates] = useState({});
   const [copyAllDone, setCopyAllDone] = useState(false);
+  
   
   const handleCopyWithFeedback = async (key, copyFn) => {
   const copied = await copyFn();
