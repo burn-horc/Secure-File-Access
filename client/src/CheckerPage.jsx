@@ -1219,6 +1219,109 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     </Button>
   )}
 </Grid>
+                <Box
+  borderWidth="1px"
+  borderColor="rgba(139,92,246,0.18)"
+  borderRadius="16px"
+  bg="rgba(255,255,255,0.02)"
+  px={3}
+  py={3}
+>
+  <VStack align="stretch" spacing={3}>
+    <Text
+      fontSize="xs"
+      fontWeight="700"
+      letterSpacing="0.1em"
+      textTransform="uppercase"
+      color="rgba(255,255,255,0.62)"
+    >
+      Guide
+    </Text>
+
+    <HStack spacing={2} flexWrap="wrap">
+      <Button
+        {...guidePcBtn}
+        onClick={() =>
+          setActiveMainGuide((prev) => (prev === "pc" ? null : "pc"))
+        }
+      >
+        🖥 PC
+      </Button>
+
+      <Button
+        {...guideAndroidBtn}
+        onClick={() =>
+          setActiveMainGuide((prev) => (prev === "android" ? null : "android"))
+        }
+      >
+        📱 Android
+      </Button>
+
+      <Button
+        {...guideTvBtn}
+        onClick={() =>
+          setActiveMainGuide((prev) => (prev === "tv" ? null : "tv"))
+        }
+      >
+        📺 TV
+      </Button>
+    </HStack>
+
+    {activeMainGuide === "pc" && (
+      <Box
+        {...softCard}
+        p={4}
+        color="rgba(255,255,255,0.85)"
+        fontSize="sm"
+      >
+        <Text fontWeight="700" mb={2}>🖥 PC WATCH</Text>
+        <Text lineHeight="1.8">
+          Open your browser and paste the provided link to access the account.
+        </Text>
+      </Box>
+    )}
+
+    {activeMainGuide === "android" && (
+      <Box
+        {...softCard}
+        p={4}
+        color="rgba(255,255,255,0.85)"
+        fontSize="sm"
+      >
+        <Text fontWeight="700" mb={2}>📱 MOBILE WATCH</Text>
+        <Text lineHeight="1.8">
+          Make sure you have the Netflix app installed.
+          <br />
+          Ensure there is no other Netflix account logged in on your app or browser.
+          <br />
+          Paste the provided link into your main browser (Chrome/Safari).
+          <br />
+          You will be redirected to Netflix — tap the “Open in App” button.
+          <br />
+          <i>Note: Language may vary depending on account country.</i>
+        </Text>
+      </Box>
+    )}
+
+    {activeMainGuide === "tv" && (
+      <Box
+        {...softCard}
+        p={4}
+        color="rgba(255,255,255,0.85)"
+        fontSize="sm"
+      >
+        <Text fontWeight="700" mb={2}>📺 TV CONNECT</Text>
+        <Text lineHeight="1.8">
+          Open Netflix on your Smart TV and choose <b>Login via Code</b>.
+          <br />
+          Click TV Connect.
+          <br />
+          Enter the code shown on your TV screen.
+        </Text>
+      </Box>
+    )}
+  </VStack>
+</Box>
               </Box>
             </Flex>
           </Box>
