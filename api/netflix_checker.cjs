@@ -432,6 +432,18 @@ class NetflixAccountChecker {
       }
 
       const models = reactContext.models || {};
+      const profilesList =
+  this.getNestedValue(models, [
+    'profiles',
+    'data',
+    'profiles'
+  ]) || [];
+
+const profileNames = Array.isArray(profilesList)
+  ? profilesList
+      .map(p => this.decodeEscapedText(p?.profileName || p?.firstName, true))
+      .filter(Boolean)
+  : [];
       const signupContextData = this.getNestedValue(models, ['signupContext', 'data']) || {};
       const flow =
         signupContextData.flow ||
@@ -499,6 +511,7 @@ class NetflixAccountChecker {
         userGuid: userInfo.userGuid || userInfo.guid || null,
         authURL: userInfo.authURL || null,
         email: userInfo.emailAddress || null,
+        profiles: profileNames,
         plan,
         planId,
         memberSinceIso,
