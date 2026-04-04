@@ -541,16 +541,22 @@ function sanitizeCheckerResultForClient(result, cookieHeader) {
     normalizeCookieHeaderCandidate(cookieHeader) ||
     normalizeCookieHeaderCandidate(source?.cookieHeader) ||
     null;
-  const { nftoken, nftokenLink: ignoredNftokenLink, ...safeFields } = source;
-  void nftoken;
-  void ignoredNftokenLink;
+  const {
+  nftoken,
+  nftokenLink: ignoredNftokenLink,
+  profiles,
+  ...safeFields
+} = source;
+void nftoken;
+void ignoredNftokenLink;
 
-  return {
-    ...safeFields,
-    nftokenLink: resolvedTokenLink || null,
-    hasTokenLink: Boolean(resolvedTokenLink),
-    cookieHeader: normalizedCookieHeader,
-  };
+return {
+  ...safeFields,
+  profiles: Array.isArray(profiles) ? profiles : [],
+  nftokenLink: resolvedTokenLink || null,
+  hasTokenLink: Boolean(resolvedTokenLink),
+  cookieHeader: normalizedCookieHeader,
+};
 }
 
 function writeSseEvent(res, eventName, payload) {
