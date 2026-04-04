@@ -1873,11 +1873,32 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                     >
                       {label}:
                     </Text>
-                    <Text fontSize="sm" fontWeight="600" color="rgba(255,255,255,0.92)">
-                      {label === "COUNTRY"
-                        ? `${getCountryFlag(value)} ${displayValue(value)}`
-                        : displayValue(value)}
-                    </Text>
+                    {label === "PROFILES" ? (
+  <HStack spacing={2} flexWrap="wrap">
+    {getProfileNames(result?.profiles).map((profileName, profileIndex) => (
+      <Badge
+        key={`${profileName}-${profileIndex}`}
+        bg="rgba(139,92,246,0.14)"
+        color="#c4b5fd"
+        borderWidth="1px"
+        borderColor="rgba(139,92,246,0.30)"
+        borderRadius="full"
+        px={2.5}
+        py={1}
+        fontSize="10px"
+        fontWeight="700"
+      >
+        {profileName}
+      </Badge>
+    ))}
+  </HStack>
+) : (
+  <Text fontSize="sm" fontWeight="600" color="rgba(255,255,255,0.92)">
+    {label === "COUNTRY"
+      ? `${getCountryFlag(value)} ${displayValue(value)}`
+      : displayValue(value)}
+  </Text>
+)}
                   </Box>
                 ) : null
               )}
@@ -2127,15 +2148,36 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                   >
                     {label}:
                   </Text>
-                  <Text
-                    fontSize="sm"
-                    fontWeight="600"
-                    color="rgba(255,255,255,0.92)"
-                  >
-                    {label === "COUNTRY"
-                      ? `${getCountryFlag(value)} ${displayValue(value)}`
-                      : displayValue(value)}
-                  </Text>
+                  {label === "PROFILES" ? (
+  <HStack spacing={2} flexWrap="wrap">
+    {getProfileNames(result?.profiles).map((profileName, profileIndex) => (
+      <Badge
+        key={`${profileName}-${profileIndex}`}
+        bg="rgba(139,92,246,0.14)"
+        color="#c4b5fd"
+        borderWidth="1px"
+        borderColor="rgba(139,92,246,0.30)"
+        borderRadius="full"
+        px={2.5}
+        py={1}
+        fontSize="10px"
+        fontWeight="700"
+      >
+        {profileName}
+      </Badge>
+    ))}
+  </HStack>
+) : (
+  <Text
+    fontSize="sm"
+    fontWeight="600"
+    color="rgba(255,255,255,0.92)"
+  >
+    {label === "COUNTRY"
+      ? `${getCountryFlag(value)} ${displayValue(value)}`
+      : displayValue(value)}
+  </Text>
+)}
                 </Box>
               ) : null
             )}
