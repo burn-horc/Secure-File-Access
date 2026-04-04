@@ -1742,6 +1742,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     </Box>
   ) : null}
     {!showHistory && bulkValidResults?.map((result, index) => {
+  console.log("RESULT OBJECT:", result);
+  console.log("RESULT PROFILES:", result?.profiles);
     if (sessionUnlocked) {
       const premiumFields = [
   ["EMAIL", result?.email],
