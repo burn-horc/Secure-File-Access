@@ -96,6 +96,20 @@ function readResultTokenLink(result, type = "default") {
   );
 }
 
+function getProfileNames(profiles) {
+  if (!Array.isArray(profiles)) return [];
+
+  return profiles
+    .map((profile) => {
+      if (typeof profile === "string") return profile.trim();
+      if (profile && typeof profile === "object") {
+        return String(profile.name ?? "").trim();
+      }
+      return "";
+    })
+    .filter(Boolean);
+}
+
 function extractNFToken(link) {
   try {
     const url = new URL(link);
@@ -1730,14 +1744,15 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     {!showHistory && bulkValidResults?.map((result, index) => {
     if (sessionUnlocked) {
       const premiumFields = [
-        ["EMAIL", result?.email],
-        ["PLAN", result?.plan],
-        ["COUNTRY", result?.countryOfSignup],
-        ["RENEWAL DATE", result?.nextBilling],
-        ["MEMBER SINCE", result?.memberSince],
-        ["PAYMENT", result?.paymentMethod],
-        ["PHONE", result?.phone],
-      ];
+  ["EMAIL", result?.email],
+  ["PLAN", result?.plan],
+  ["COUNTRY", result?.countryOfSignup],
+  ["RENEWAL DATE", result?.nextBilling],
+  ["MEMBER SINCE", result?.memberSince],
+  ["PAYMENT", result?.paymentMethod],
+  ["PHONE", result?.phone],
+  ["PROFILES", getProfileNames(result?.profiles).join(", ")],
+];
 
       const theme = getPlanTheme(result?.plan);
       const expiryBadge = getExpiryBadge(result?.nextBilling);
@@ -2020,17 +2035,18 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     }
 
         const modalDetailItems = [
-      ["EMAIL", result?.email],
-      ["PLAN", result?.plan],
-      ["COUNTRY", result?.countryOfSignup],
-      ["PRICE", result?.price],
-      ["MEMBERSHIP", result?.membershipStatus],
-      ["MEMBER SINCE", result?.memberSince],
-      ["NEXT BILLING", result?.nextBilling],
-      ["EMAIL VERIFIED", displayBoolean(result?.emailVerified)],
-      ["PHONE", result?.phone],
-      ["PHONE VERIFIED", displayBoolean(result?.phoneVerified)],
-    ];
+  ["EMAIL", result?.email],
+  ["PLAN", result?.plan],
+  ["COUNTRY", result?.countryOfSignup],
+  ["PRICE", result?.price],
+  ["MEMBERSHIP", result?.membershipStatus],
+  ["MEMBER SINCE", result?.memberSince],
+  ["NEXT BILLING", result?.nextBilling],
+  ["EMAIL VERIFIED", displayBoolean(result?.emailVerified)],
+  ["PHONE", result?.phone],
+  ["PHONE VERIFIED", displayBoolean(result?.phoneVerified)],
+  ["PROFILES", getProfileNames(result?.profiles).join(", ")],
+];
 
     return (
       <Box
