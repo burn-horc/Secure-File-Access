@@ -269,6 +269,27 @@ class NetflixAccountChecker {
     return m ? m[1] : null;
   }
 
+extractProfiles(html) {
+  const profiles = new Set();
+
+  try {
+    // modern Netflix JSON
+    const matches = html.matchAll(/"profileName"\s*:\s*"([^"]+)"/g);
+    for (const m of matches) {
+      profiles.add(this.decodeEscapedText(m[1], true));
+    }
+
+    // fallback
+    const alt = html.matchAll(/"firstName"\s*:\s*"([^"]+)"/g);
+    for (const m of alt) {
+      profiles.add(this.decodeEscapedText(m[1], true));
+    }
+
+  } catch {}
+
+  return Array.from(profiles).slice(0, 10);
+}
+  
   extractAssignedObjectBlocks(source, marker) {
     const input = typeof source === 'string' ? source : '';
     if (!input) {
@@ -1435,6 +1456,7 @@ class NetflixAccountChecker {
       isActive: Boolean(account.isActive),
       isPremium: Boolean(account.isPremium),
       paymentMethod: clean(account.paymentMethod),
+      profiles: account.profiles || [],
       nftoken: clean(account.nftoken),
       nftokenLink: clean(account.nftokenLink),
       nftokenStage: clean(account.nftokenStage),
