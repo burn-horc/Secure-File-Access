@@ -1618,7 +1618,7 @@ extractProfiles(html) {
 
       let html = res.data;
       let account = this.extractAccountData(html);
-account.profiles = this.extractProfiles(html);
+
 
 console.log('PROFILES DEBUG:', account.profiles);
       let isLoggedIn = this.isLoggedIn(html, finalUrl);
