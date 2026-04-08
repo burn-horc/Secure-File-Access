@@ -1,6 +1,26 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
 
+const GENERATE_ACCOUNT_DAILY_LIMIT = 3;
+
+function getClientIp(req: VercelRequest) {
+  const xff = req.headers["x-forwarded-for"];
+  if (typeof xff === "string" && xff.length > 0) {
+    return xff.split(",")[0].trim();
+  }
+
+  const realIp = req.headers["x-real-ip"];
+  if (typeof realIp === "string" && realIp.length > 0) {
+    return realIp;
+  }
+
+  return "unknown";
+}
+
+function getTodayDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -9,12 +29,66 @@ const supabase = createClient(
   }
 );
 
+async function getDailyGenerateUsage(ip: string) {
+  const today = getTodayDate();
+
+  const { data, error } = await supabase
+    .from("generate_usage")
+    .select("count")
+    .eq("ip", ip)
+    .eq("date", today)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  return data?.count ?? 0;
+}
+
+async function incrementDailyGenerateUsage(ip: string) {
+  const today = getTodayDate();
+  const current = await getDailyGenerateUsage(ip);
+
+  if (current === 0) {
+    const { error } = await supabase.from("generate_usage").insert({
+      ip,
+      date: today,
+      count: 1,
+    });
+
+    if (error) throw new Error(error.message);
+    return 1;
+  }
+
+  const { error } = await supabase
+    .from("generate_usage")
+    .update({ count: current + 1 })
+    .eq("ip", ip)
+    .eq("date", today);
+
+  if (error) throw new Error(error.message);
+
+  return current + 1;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
   }
 
   try {
+    const ip = getClientIp(req);
+
+    const todayUsage = await getDailyGenerateUsage(ip);
+
+    if (todayUsage >= GENERATE_ACCOUNT_DAILY_LIMIT) {
+      return res.status(429).json({
+        success: false,
+        error: "You have reached the 3 daily limit for Random Account. Try again tomorrow.",
+      });
+    }
+
+    await incrementDailyGenerateUsage(ip);
+
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
 
     await supabase
@@ -111,11 +185,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       result,
       results: [result],
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("trial create server error:", err);
     return res.status(500).json({
       success: false,
-      error: "Server error",
+      error: err?.message || "Server error",
     });
   }
 }
