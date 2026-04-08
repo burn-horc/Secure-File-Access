@@ -19,6 +19,7 @@ function getClientIp(req: VercelRequest) {
 }
 
 const GENERATE_ACCOUNT_DAILY_LIMIT = 3;
+const ADMIN_IPS = ["111.90.240.255"];
 
 function getTodayDate() {
   return new Date().toISOString().slice(0, 10);
@@ -195,16 +196,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     await clearFailures(ip);
 
-    const todayUsage = await getDailyGenerateUsage(ip);
+    const isAdmin = ADMIN_IPS.includes(ip);
 
-    if (todayUsage >= GENERATE_ACCOUNT_DAILY_LIMIT) {
-      return res.status(429).json({
-        success: false,
-        error: "You have reached the 3 daily limit for Generate Account. Try again tomorrow.",
-      });
-    }
+if (!isAdmin) {
+  const todayUsage = await getDailyGenerateUsage(ip);
 
-    await incrementDailyGenerateUsage(ip);
+  if (todayUsage >= GENERATE_ACCOUNT_DAILY_LIMIT) {
+    return res.status(429).json({
+      success: false,
+      error: "You have reached the 3 daily limit for Generate Account. Try again tomorrow.",
+    });
+  }
+
+  await incrementDailyGenerateUsage(ip);
+}
 
     const { data: cookieRows, error: cookieError } = await supabase
       .from("cookies")
