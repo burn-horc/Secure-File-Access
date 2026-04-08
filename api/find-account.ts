@@ -196,7 +196,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     await clearFailures(ip);
 
-    const isAdmin = ADMIN_IPS.includes(ip);
+    const isAdmin = passcodeCheck.passcodeRow.is_admin === true;
 
 if (!isAdmin) {
   const todayUsage = await getDailyGenerateUsage(ip);
