@@ -159,13 +159,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const { success } = await ipRateLimit.limit(ip);
-    if (!success) {
-      return res.status(429).json({
-        success: false,
-        error: "Too many requests. Please slow down.",
-      });
-    }
+    // Global rate limit (basic protection)
+const { success: basicLimit } = await ipRateLimit.limit(ip);
+if (!basicLimit) {
+  return res.status(429).json({
+    success: false,
+    error: "Too many requests. Please slow down.",
+  });
+}
+
+// 🔥 Stronger check-specific limiter (for /api/check)
+const { success: checkLimit } = await checkRateLimit.limit(ip);
+if (!checkLimit) {
+  return res.status(429).json({
+    success: false,
+    error: "Too many check requests. Please slow down.",
+  });
+}
 
     const body = req.body || {};
     console.log("Body keys:", Object.keys(body || {}));
