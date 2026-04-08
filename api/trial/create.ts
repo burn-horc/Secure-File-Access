@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
 
-const GENERATE_ACCOUNT_DAILY_LIMIT = 3;
+const GENERATE_ACCOUNT_DAILY_LIMIT = 2;
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
