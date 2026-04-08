@@ -1422,7 +1422,7 @@ const handleTrialSubmit = async () => {
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       signal: abortController.signal,
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ passcode: code }),
     });
 
     if (!response.ok) {
