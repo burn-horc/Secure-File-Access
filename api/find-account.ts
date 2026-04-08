@@ -19,7 +19,7 @@ function getClientIp(req: VercelRequest) {
 }
 
 const GENERATE_ACCOUNT_DAILY_LIMIT = 3;
-const ADMIN_IPS = ["111.90.240.255"];
+
 
 function getTodayDate() {
   return new Date().toISOString().slice(0, 10);
