@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { ipRateLimit } from "../lib/rateLimit.js";
 import { isLockedOut, recordFailure, clearFailures } from "../lib/antiBruteforce.js";
 import crypto from "crypto";
+import { checkRateLimit } from "../lib/checkRateLimit.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
