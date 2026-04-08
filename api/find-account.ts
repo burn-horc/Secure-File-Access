@@ -18,6 +18,12 @@ function getClientIp(req: VercelRequest) {
   return "unknown";
 }
 
+const GENERATE_ACCOUNT_DAILY_LIMIT = 3;
+
+function getTodayDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -72,6 +78,47 @@ async function incrementPasscodeUsage(passcodeId: string, currentUses: number | 
   }
 }
 
+async function getDailyGenerateUsage(ip: string) {
+  const today = getTodayDate();
+
+  const { data, error } = await supabase
+    .from("generate_usage")
+    .select("count")
+    .eq("ip", ip)
+    .eq("date", today)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  return data?.count ?? 0;
+}
+
+async function incrementDailyGenerateUsage(ip: string) {
+  const today = getTodayDate();
+  const current = await getDailyGenerateUsage(ip);
+
+  if (current === 0) {
+    const { error } = await supabase.from("generate_usage").insert({
+      ip,
+      date: today,
+      count: 1,
+    });
+
+    if (error) throw new Error(error.message);
+    return 1;
+  }
+
+  const { error } = await supabase
+    .from("generate_usage")
+    .update({ count: current + 1 })
+    .eq("ip", ip)
+    .eq("date", today);
+
+  if (error) throw new Error(error.message);
+
+  return current + 1;
+}
+
 async function savePassedCheckAudits(results: any[]) {
   const passed = (results || []).filter((r) => r?.valid);
   if (!passed.length) return;
@@ -92,23 +139,25 @@ async function savePassedCheckAudits(results: any[]) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const ip = getClientIp(req);
-   const { success } = await ipRateLimit.limit(ip);
 
-if (!success) {
-  return res.status(429).json({
-    success: false,
-    error: "Too many requests. Try again later.",
-  });
-}
-const locked = await isLockedOut(ip);
+    const { success } = await ipRateLimit.limit(ip);
 
-if (locked) {
-  return res.status(429).json({
-    success: false,
-    error: "Too many failed attempts. Try again later.",
-  });
-}
-    
+    if (!success) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many requests. Try again later.",
+      });
+    }
+
+    const locked = await isLockedOut(ip);
+
+    if (locked) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many failed attempts. Try again later.",
+      });
+    }
+
     console.log("find-account method:", req.method);
 
     if (req.method !== "POST") {
@@ -129,9 +178,10 @@ if (locked) {
     }
 
     const passcodeCheck = await isPasscodeValid(passcode);
+
     if (!passcodeCheck.ok) {
-    await clearFailures(ip);
-      
+      await recordFailure(ip);
+
       return res.status(401).json({
         success: false,
         error: passcodeCheck.error,
@@ -142,6 +192,19 @@ if (locked) {
       passcodeCheck.passcodeRow.id,
       passcodeCheck.passcodeRow.uses ?? 0
     );
+
+    await clearFailures(ip);
+
+    const todayUsage = await getDailyGenerateUsage(ip);
+
+    if (todayUsage >= GENERATE_ACCOUNT_DAILY_LIMIT) {
+      return res.status(429).json({
+        success: false,
+        error: "You have reached the 3 daily limit for Generate Account. Try again tomorrow.",
+      });
+    }
+
+    await incrementDailyGenerateUsage(ip);
 
     const { data: cookieRows, error: cookieError } = await supabase
       .from("cookies")
