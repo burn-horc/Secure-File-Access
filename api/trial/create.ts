@@ -83,7 +83,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (todayUsage >= GENERATE_ACCOUNT_DAILY_LIMIT) {
       return res.status(429).json({
         success: false,
-        error: "You have reached the 3 daily limit for Random Account. Try again tomorrow.",
+        error: "You have reached the 2 daily limit for Random Account. Try again tomorrow.",
       });
     }
 
