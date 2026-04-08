@@ -45,7 +45,7 @@ const { getCookieHeaders, runDirectCheck } =
 async function isPasscodeValid(passcode: string) {
   const { data, error } = await supabase
     .from("passcodes")
-    .select("id, code, is_active, expires_at, uses, max_uses")
+    .select("id, code, is_active, is_admin, expires_at, uses, max_uses")
     .eq("code", passcode)
     .eq("is_active", true)
     .maybeSingle();
