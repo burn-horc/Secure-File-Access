@@ -186,8 +186,10 @@ function scorePremiumCookie(row: any) {
 async function getPremiumCookiePool() {
   const { data, error } = await supabase
     .from("checked_cookies")
-    .select("cookie_header, plan, checked_at, expires_at")
+    .select("cookie_header, plan, checked_at, expires_at, is_live, status")
     .ilike("plan", "%premium%")
+    .eq("is_live", true)
+    .eq("status", "valid")
     .not("cookie_header", "is", null)
     .order("checked_at", { ascending: false })
     .limit(PREMIUM_POOL_FETCH_LIMIT);
