@@ -31,79 +31,47 @@ function getClientIp(req: VercelRequest) {
   return "unknown";
 }
 
-async function upsertCheckedCookie(row: {
-  account_id?: string;
-  cookie_header: string;
-  plan?: string | null;
-  country?: string | null;
-  checked_at?: string;
-  expires_at?: string | null;
-  is_live: boolean;
-  status: string;
-}) {
-  const { error } = await supabase
-    .from("checked_cookies")
-    .upsert(
-      [
-        {
-          account_id: row.account_id || crypto.randomUUID(),
-          cookie_header: row.cookie_header,
-          plan: row.plan ?? null,
-          country: row.country ?? null,
-          checked_at: row.checked_at ?? new Date().toISOString(),
-          expires_at: row.expires_at ?? null,
-          is_live: row.is_live,
-          status: row.status,
-        },
-      ],
-      { onConflict: "cookie_header" }
-    );
-
-  if (error) {
-    console.error("checked_cookies upsert error:", error.message);
-  }
-}
-
 async function savePassedCheckAudits(
   results: any[],
   source: "single-check" | "bulk-check"
 ) {
-  const checkedAt = new Date().toISOString();
-  const rows = Array.isArray(results) ? results : [];
+  const passed = (results || []).filter((r) => r?.valid);
+  if (!passed.length) return;
 
-  const passed = rows.filter((r) => r?.valid);
-  if (passed.length > 0) {
-    const liveRows = passed.map((item) => ({
+  const liveRows = passed.map((item) => ({
+    account_id: item.accountId || crypto.randomUUID(),
+    status: "passed",
+    cookie_header: item.cookieHeader || null,
+    plan: item.plan || null,
+    country: item.countryOfSignup || null,
+    checked_at: new Date().toISOString(),
+    expires_at: item.nextBillingRaw || null,
+  }));
+
+  const { error: liveError } = await supabase.from("live_checks").insert(liveRows);
+
+  if (liveError) {
+    console.error("savePassedCheckAudits live_checks error:", liveError.message);
+  }
+
+  const cookieRows = passed
+    .filter((item) => item?.cookieHeader)
+    .map((item) => ({
       account_id: item.accountId || crypto.randomUUID(),
-      status: "passed",
       cookie_header: item.cookieHeader || null,
       plan: item.plan || null,
       country: item.countryOfSignup || null,
-      checked_at: checkedAt,
-      expires_at: item.nextBillingRaw || item.nextBilling || null,
+      checked_at: new Date().toISOString(),
     }));
 
-    const { error: liveError } = await supabase.from("live_checks").insert(liveRows);
+  if (cookieRows.length > 0) {
+    const { error: cookieError } = await supabase
+  .from("checked_cookies")
+  .upsert(cookieRows, { onConflict: "cookie_header" });
 
-    if (liveError) {
-      console.error("savePassedCheckAudits live_checks error:", liveError.message);
+    if (cookieError) {
+      console.error("save cookies error:", cookieError.message);
     }
-  }
-
-  for (const item of rows) {
-    const cookieHeader = item?.cookieHeader;
-    if (!cookieHeader) continue;
-
-    await upsertCheckedCookie({
-      account_id: item.accountId || crypto.randomUUID(),
-      cookie_header: cookieHeader,
-      plan: item.plan || null,
-      country: item.countryOfSignup || null,
-      checked_at: checkedAt,
-      expires_at: item.nextBillingRaw || item.nextBilling || null,
-      is_live: !!item.valid,
-      status: item.valid ? "valid" : "dead",
-    });
   }
 }
 
@@ -121,7 +89,7 @@ async function saveStreamValidCookie(result: any) {
       plan: result.plan || null,
       country: result.countryOfSignup || null,
       checked_at: checkedAt,
-      expires_at: result.nextBillingRaw || result.nextBilling || null,
+      expires_at: result.nextBillingRaw || null,
     },
   ]);
 
@@ -129,16 +97,24 @@ async function saveStreamValidCookie(result: any) {
     console.error("stream live_checks insert error:", liveError.message);
   }
 
-  await upsertCheckedCookie({
-    account_id: accountId,
-    cookie_header: result.cookieHeader,
-    plan: result.plan || null,
-    country: result.countryOfSignup || null,
-    checked_at: checkedAt,
-    expires_at: result.nextBillingRaw || result.nextBilling || null,
-    is_live: true,
-    status: "valid",
-  });
+  const { error: cookieError } = await supabase
+    .from("checked_cookies")
+    .upsert(
+      [
+        {
+          account_id: accountId,
+          cookie_header: result.cookieHeader,
+          plan: result.plan || null,
+          country: result.countryOfSignup || null,
+          checked_at: checkedAt,
+        },
+      ],
+      { onConflict: "cookie_header" }
+    );
+
+  if (cookieError) {
+    console.error("stream checked_cookies upsert error:", cookieError.message);
+  }
 }
 function isRetryableFailure(result: any) {
   const reason = String(result?.reason || result?.error || "").toLowerCase();
