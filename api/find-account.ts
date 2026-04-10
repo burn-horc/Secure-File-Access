@@ -180,6 +180,9 @@ function scorePremiumCookie(row: any) {
     }
   }
 
+  if (row?.is_live === true) score += 10;
+  if (row?.status === "valid") score += 4;
+
   return score;
 }
 
