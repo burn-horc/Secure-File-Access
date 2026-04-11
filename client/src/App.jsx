@@ -4,6 +4,8 @@ const previewAllowed =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("preview") === "burnpogi";
 
+import TVSubmit from "./TVSubmit";
+import TVScreen from "./TVScreen";
 import SupportPage from "./SupportPage";
 import { useLocation } from "wouter";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -1806,6 +1808,14 @@ return (
             goBackToChecker={goBackToChecker}
           />
         </Route>
+
+        <Route path="/tv-submit">
+  <TVSubmit />
+</Route>
+
+<Route path="/tv">
+  <TVScreen />
+</Route>
 
         <Route path="/support">
           <SupportPage />
