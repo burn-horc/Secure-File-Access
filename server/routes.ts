@@ -8,6 +8,12 @@ import express from "express";
 import NetflixAccountChecker from "./netflix_checker.cjs";
 import originalServerHelpers from "./original_server_helpers.cjs";
 
+const tvCodes = new Map<string, any>();
+
+function generateCode() {
+  return Math.floor(10000000 + Math.random() * 90000000).toString();
+}
+
 const {
   getCookieHeaders,
   normalizeWorkerCount,
@@ -273,6 +279,45 @@ export async function registerRoutes(
 
     next();
   });
+
+  // Generate TV code
+app.get("/api/tv-code", (req, res) => {
+  const code = generateCode();
+
+  tvCodes.set(code, {
+    status: "pending",
+    createdAt: Date.now(),
+  });
+
+  res.json({ code });
+});
+
+// Submit code from phone
+app.post("/api/tv-submit", (req, res) => {
+  const { code, user } = req.body;
+
+  if (!tvCodes.has(code)) {
+    return res.status(400).json({ error: "Invalid code" });
+  }
+
+  tvCodes.set(code, {
+    status: "approved",
+    user,
+  });
+
+  res.json({ success: true });
+});
+
+// TV checks if approved
+app.get("/api/tv-status/:code", (req, res) => {
+  const code = req.params.code;
+
+  if (!tvCodes.has(code)) {
+    return res.status(400).json({ error: "Invalid code" });
+  }
+
+  res.json(tvCodes.get(code));
+});
 
   app.use(async (req: Request, res: Response, next: NextFunction) => {
     if ((req.session as any)?.isAdmin === true) return next();
