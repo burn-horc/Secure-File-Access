@@ -18,7 +18,7 @@ function getClientIp(req: VercelRequest) {
   return "unknown";
 }
 
-const GENERATE_ACCOUNT_DAILY_LIMIT = 10;
+const GENERATE_ACCOUNT_DAILY_LIMIT = 3;
 
 
 function getTodayDate() {
