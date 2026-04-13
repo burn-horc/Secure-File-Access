@@ -1,21 +1,24 @@
-import { tvSessions } from "../../lib/tvStore";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { cleanupOldTVSessions, generateTVCode, tvSessions } from "../../lib/tvStore";
 
-function makeCode() {
-  return Math.floor(10000000 + Math.random() * 90000000).toString();
-}
-
-export default function handler(req, res) {
-  if (req.method !== "POST" && req.method !== "GET") {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
   }
 
-  const code = makeCode();
+  cleanupOldTVSessions();
+
+  const code = generateTVCode();
 
   tvSessions.set(code, {
-    connected: false,
+    code,
     createdAt: Date.now(),
+    connected: false,
     payload: null,
   });
 
-  return res.status(200).json({ success: true, code });
+  return res.status(200).json({
+    success: true,
+    code,
+  });
 }
