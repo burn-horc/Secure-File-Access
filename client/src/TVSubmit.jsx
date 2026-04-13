@@ -1,5 +1,4 @@
-
-import { Box, Button, HStack, Input, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 
 export default function TVSubmit() {
@@ -30,6 +29,34 @@ export default function TVSubmit() {
         refs.current[index - 1]?.focus();
       }
     }
+
+    if (event.key === "ArrowLeft" && index > 0) {
+      refs.current[index - 1]?.focus();
+    }
+
+    if (event.key === "ArrowRight" && index < 7) {
+      refs.current[index + 1]?.focus();
+    }
+  };
+
+  const handlePaste = (event) => {
+    event.preventDefault();
+    const pasted = event.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 8);
+
+    if (!pasted) return;
+
+    const updated = Array(8).fill("");
+    pasted.split("").forEach((char, i) => {
+      updated[i] = char;
+    });
+
+    setDigits(updated);
+
+    const focusIndex = Math.min(pasted.length, 7);
+    refs.current[focusIndex]?.focus();
   };
 
   const code = digits.join("");
@@ -103,31 +130,37 @@ export default function TVSubmit() {
           >
             <HStack spacing={{ base: 2, sm: 3 }} justify="center" flexWrap="nowrap">
               {digits.slice(0, 4).map((digit, index) => (
-                <Input
-  key={index}
-  ref={(el) => (refs.current[index] = el)}
-  value={digit || ""}
-  onChange={(e) => handleChange(index, e.target.value)}
-  onKeyDown={(e) => handleKeyDown(index, e)}
-  type="tel"
-  inputMode="numeric"
-  pattern="[0-9]*"
-  maxLength={1}
-  textAlign="center"
-  w={{ base: "56px", sm: "68px" }}
-  h={{ base: "72px", sm: "84px" }}
-  borderRadius="18px"
-  borderWidth="1px"
-  borderColor="rgba(255,255,255,0.12)"
-  bg="rgba(8,12,28,0.45)"
-  fontSize={{ base: "2xl", sm: "3xl" }}
-  fontWeight="700"
-  color="white"
-  _focus={{
-    borderColor: "#7d72ff",
-    boxShadow: "0 0 0 1px #7d72ff",
-  }}
-/>
+                <Box
+                  key={index}
+                  as="input"
+                  ref={(el) => (refs.current[index] = el)}
+                  value={digit || ""}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={handlePaste}
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={1}
+                  textAlign="center"
+                  w={{ base: "56px", sm: "68px" }}
+                  h={{ base: "72px", sm: "84px" }}
+                  borderRadius="18px"
+                  border="1px solid rgba(255,255,255,0.12)"
+                  bg="rgba(8,12,28,0.45)"
+                  fontSize={{ base: "2xl", sm: "3xl" }}
+                  fontWeight="700"
+                  color="white"
+                  caretColor="white"
+                  sx={{
+                    WebkitTextFillColor: "white",
+                    outline: "none",
+                  }}
+                  _focusWithin={{
+                    borderColor: "#7d72ff",
+                    boxShadow: "0 0 0 1px #7d72ff",
+                  }}
+                />
               ))}
 
               <Text
@@ -142,29 +175,33 @@ export default function TVSubmit() {
               {digits.slice(4).map((digit, i) => {
                 const index = i + 4;
                 return (
-                  <Input
+                  <Box
                     key={index}
+                    as="input"
                     ref={(el) => (refs.current[index] = el)}
-                    value={digit}
+                    value={digit || ""}
                     onChange={(e) => handleChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
+                    onPaste={handlePaste}
                     type="tel"
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    caretColor="white"
-                    sx={{ WebkitTextFillColor: "white" }}
                     maxLength={1}
                     textAlign="center"
                     w={{ base: "56px", sm: "68px" }}
                     h={{ base: "72px", sm: "84px" }}
                     borderRadius="18px"
-                    borderWidth="1px"
-                    borderColor="rgba(255,255,255,0.12)"
+                    border="1px solid rgba(255,255,255,0.12)"
                     bg="rgba(8,12,28,0.45)"
                     fontSize={{ base: "2xl", sm: "3xl" }}
                     fontWeight="700"
                     color="white"
-                    _focus={{
+                    caretColor="white"
+                    sx={{
+                      WebkitTextFillColor: "white",
+                      outline: "none",
+                    }}
+                    _focusWithin={{
                       borderColor: "#7d72ff",
                       boxShadow: "0 0 0 1px #7d72ff",
                     }}
