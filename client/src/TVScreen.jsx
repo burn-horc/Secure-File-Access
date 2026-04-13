@@ -41,7 +41,7 @@ function CodeBoxes({ code = "" }) {
 
       {right.map((digit, index) => (
         <Box key={`r-${index}`} {...boxStyle}>
-          {digit.trim() ? digit : ""}
+          {digit || ""}
         </Box>
       ))}
     </HStack>
@@ -53,6 +53,11 @@ export default function TVScreen() {
   const [status, setStatus] = useState("waiting");
   const [result, setResult] = useState(null);
 
+const handleInput = (value) => {
+  const clean = value.replace(/[^0-9]/g, "").slice(0, 8);
+  setCode(clean);
+};
+  
   useEffect(() => {
     async function init() {
       const res = await fetch("/api/tv/generate", { method: "POST" });
@@ -73,6 +78,18 @@ export default function TVScreen() {
 
     init();
   }, []);
+
+  useEffect(() => {
+  document.addEventListener("keydown", (e) => {
+    if (/^[0-9]$/.test(e.key)) {
+      setCode((prev) => (prev + e.key).slice(0, 8));
+    }
+
+    if (e.key === "Backspace") {
+      setCode((prev) => prev.slice(0, -1));
+    }
+  });
+}, []);
 
   return (
     <Box minH="100vh" bg="#0b1020" color="white">
@@ -124,7 +141,17 @@ export default function TVScreen() {
                   px={{ base: 3, sm: 6 }}
                   py={{ base: 5, sm: 7 }}
                 >
-                  <CodeBoxes code={code} />
+                  <input
+  type="text"
+  value={code}
+  onChange={(e) => handleInput(e.target.value)}
+  maxLength={8}
+  style={{
+    position: "absolute",
+    opacity: 0,
+    pointerEvents: "none",
+  }}
+/>
 
                   <Text
                     mt={5}
