@@ -26,6 +26,7 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { SiNetflix, SiFacebook, SiTelegram } from "react-icons/si";
+import Navigation from "./Navigation";
 
 import { showAppToast } from "./appToast.jsx";
 
@@ -529,6 +530,7 @@ const isPremiumPage = mode === "premium";
   };
 
   const [showGuide, setShowGuide] = useState(false);
+  const [showNav, setShowNav] = useState(false);
   const [copiedStates, setCopiedStates] = useState({});
   const [copyAllDone, setCopyAllDone] = useState(false);
   
