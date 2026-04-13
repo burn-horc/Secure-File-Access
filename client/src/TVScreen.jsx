@@ -96,7 +96,7 @@ export default function TVScreen() {
             {status === "waiting" && (
               <>
                 <Text color="#1fe0c1" fontSize={{ base: "3xl", sm: "4xl" }} fontWeight="700">
-                  Hi!
+                  
                 </Text>
 
                 <Text
@@ -191,7 +191,7 @@ export default function TVScreen() {
           color="rgba(255,255,255,0.45)"
           fontSize={{ base: "sm", sm: "lg" }}
         >
-          © Fyodor Dostoevsky. All Rights Reserved.
+          © SATISACROH. All Rights Reserved.
         </Text>
       </Box>
     </Box>
