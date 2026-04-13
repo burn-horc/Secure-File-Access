@@ -1,4 +1,4 @@
-import { Box, Button, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { useLocation } from "wouter";
 
@@ -57,9 +57,7 @@ export default function TVSubmit() {
     });
 
     setDigits(updated);
-
-    const nextIndex = Math.min(pasted.length, 7);
-    refs.current[nextIndex]?.focus();
+    refs.current[Math.min(pasted.length, 7)]?.focus();
   };
 
   const code = digits.join("");
@@ -91,7 +89,7 @@ export default function TVSubmit() {
 
   return (
     <Box minH="100vh" bg="#0d0f18" color="white" px={3} py={4}>
-      <Box maxW="560px" mx="auto">
+      <Box maxW="480px" mx="auto">
         <HStack mb={3} justify="space-between" align="center">
           <Button
             size="sm"
@@ -140,7 +138,7 @@ export default function TVSubmit() {
               textAlign="center"
               color="rgba(255,255,255,0.58)"
               fontSize={{ base: "md", sm: "lg" }}
-              maxW="420px"
+              maxW="360px"
               lineHeight="1.5"
             >
               Confirm or enter the 8-digit code below.
@@ -154,15 +152,14 @@ export default function TVSubmit() {
               bg="rgba(10,14,30,0.35)"
               px={{ base: 2, sm: 3 }}
               py={{ base: 4, sm: 5 }}
-              overflow="hidden"
             >
-              <HStack spacing={{ base: 1.5, sm: 2 }} justify="center">
+              <HStack spacing="8px" justify="center">
                 {digits.slice(0, 4).map((digit, index) => (
                   <Box
                     key={index}
                     as="input"
                     ref={(el) => (refs.current[index] = el)}
-                    value={digit || ""}
+                    value={digit}
                     onChange={(e) => handleChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={handlePaste}
@@ -170,29 +167,35 @@ export default function TVSubmit() {
                     inputMode="numeric"
                     pattern="[0-9]*"
                     maxLength={1}
+                    width="44px"
+                    minWidth="44px"
+                    height="58px"
                     textAlign="center"
-                    width={{ base: "44px", sm: "52px" }}
-                    minW={{ base: "44px", sm: "52px" }}
-                    height={{ base: "58px", sm: "64px" }}
                     borderRadius="16px"
                     border="1px solid rgba(255,255,255,0.12)"
                     bg="rgba(8,12,28,0.45)"
-                    fontSize={{ base: "20px", sm: "24px" }}
-                    fontWeight="700"
-                    color="white"
-                    caretColor="white"
+                    color="#ffffff"
+                    fontSize="28px"
+                    fontWeight="800"
+                    outline="none"
+                    appearance="none"
+                    WebkitAppearance="none"
                     sx={{
-                      WebkitTextFillColor: "white",
-                      outline: "none",
+                      WebkitTextFillColor: "#ffffff",
+                      caretColor: "#ffffff",
+                    }}
+                    _focus={{
+                      borderColor: "#7d72ff",
+                      boxShadow: "0 0 0 1px #7d72ff",
                     }}
                   />
                 ))}
 
                 <Text
-                  mx={{ base: 0.5, sm: 1 }}
-                  fontSize={{ base: "20px", sm: "24px" }}
+                  fontSize="26px"
                   color="#6f63ff"
-                  fontWeight="700"
+                  fontWeight="800"
+                  px={1}
                 >
                   -
                 </Text>
@@ -204,7 +207,7 @@ export default function TVSubmit() {
                       key={index}
                       as="input"
                       ref={(el) => (refs.current[index] = el)}
-                      value={digit || ""}
+                      value={digit}
                       onChange={(e) => handleChange(index, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(index, e)}
                       onPaste={handlePaste}
@@ -212,20 +215,26 @@ export default function TVSubmit() {
                       inputMode="numeric"
                       pattern="[0-9]*"
                       maxLength={1}
+                      width="44px"
+                      minWidth="44px"
+                      height="58px"
                       textAlign="center"
-                      width={{ base: "44px", sm: "52px" }}
-                      minW={{ base: "44px", sm: "52px" }}
-                      height={{ base: "58px", sm: "64px" }}
                       borderRadius="16px"
                       border="1px solid rgba(255,255,255,0.12)"
                       bg="rgba(8,12,28,0.45)"
-                      fontSize={{ base: "20px", sm: "24px" }}
-                      fontWeight="700"
-                      color="white"
-                      caretColor="white"
+                      color="#ffffff"
+                      fontSize="28px"
+                      fontWeight="800"
+                      outline="none"
+                      appearance="none"
+                      WebkitAppearance="none"
                       sx={{
-                        WebkitTextFillColor: "white",
-                        outline: "none",
+                        WebkitTextFillColor: "#ffffff",
+                        caretColor: "#ffffff",
+                      }}
+                      _focus={{
+                        borderColor: "#7d72ff",
+                        boxShadow: "0 0 0 1px #7d72ff",
                       }}
                     />
                   );
@@ -236,7 +245,7 @@ export default function TVSubmit() {
                 mt={4}
                 textAlign="center"
                 color="rgba(255,255,255,0.52)"
-                fontSize={{ base: "sm", sm: "md" }}
+                fontSize="sm"
                 fontWeight="600"
               >
                 8-digit TV code
@@ -245,7 +254,7 @@ export default function TVSubmit() {
 
             <Button
               w="full"
-              h={{ base: "58px", sm: "64px" }}
+              h="56px"
               borderRadius="18px"
               bg="linear-gradient(90deg, #6c63ff 0%, #7d72ff 100%)"
               color="white"
