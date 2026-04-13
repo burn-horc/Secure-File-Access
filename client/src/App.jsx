@@ -1,8 +1,4 @@
 
-const maintenanceMode = false;
-const previewAllowed =
-  typeof window !== "undefined" &&
-  new URLSearchParams(window.location.search).get("preview") === "burnpogi";
 
 import TVSubmit from "./TVSubmit";
 import TVScreen from "./TVScreen";
@@ -26,6 +22,12 @@ const MAX_WORKER_COUNT = 3;
 const MAX_CHECK_LOG_LINES = 1000;
 const FILE_PICKER_ACCEPT = ".json,.txt,.csv";
 const STORAGE_KEY = "netflix-checker:checked-cookies:v1";
+
+
+const maintenanceMode = false;
+const previewAllowed =
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).get("preview") === "burnpogi";
 
 function extractCookies(text) {
   return text
