@@ -37,20 +37,25 @@ export default function TVSubmit() {
   const handleSubmit = async () => {
     if (code.length !== 8) return;
 
-    const res = await fetch("/api/tv/connect", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ code }),
-    });
+    try {
+      const res = await fetch("/api/tv/connect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.success) {
-      alert("Connected!");
-    } else {
-      alert(data.error || "Failed");
+      if (data.success) {
+        alert("Connected!");
+      } else {
+        alert(data.error || "Failed");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Request failed");
     }
   };
 
@@ -104,7 +109,11 @@ export default function TVSubmit() {
                   value={digit}
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
+                  type="tel"
                   inputMode="numeric"
+                  pattern="[0-9]*"
+                  caretColor="white"
+                  sx={{ WebkitTextFillColor: "white" }}
                   maxLength={1}
                   textAlign="center"
                   w={{ base: "56px", sm: "68px" }}
@@ -144,8 +153,8 @@ export default function TVSubmit() {
                     type="tel"
                     inputMode="numeric"
                     pattern="[0-9]*"
-caretColor="white"
-sx={{ WebkitTextFillColor: "white" }}
+                    caretColor="white"
+                    sx={{ WebkitTextFillColor: "white" }}
                     maxLength={1}
                     textAlign="center"
                     w={{ base: "56px", sm: "68px" }}
