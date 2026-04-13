@@ -183,7 +183,7 @@ export default function TVScreen() {
               </Box>
             )}
           </VStack>
-       
+       </Box>
     </Box>
   );
 }
