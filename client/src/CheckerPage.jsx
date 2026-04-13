@@ -2441,6 +2441,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     </ModalBody>
   </ModalContent>
 </Modal>
+      {showNav && <Navigation onClose={() => setShowNav(false)} />}
 </Box>
 
 );
