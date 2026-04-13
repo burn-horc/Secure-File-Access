@@ -1,41 +1,109 @@
-import { Box, Button, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { Link } from "wouter";
 
 export default function Navigation({ onClose }) {
+  const itemStyle = {
+    h: "72px",
+    w: "full",
+    borderRadius: "24px",
+    justifyContent: "flex-start",
+    px: 8,
+    fontSize: "18px",
+    fontWeight: "700",
+    color: "white",
+    bg: "rgba(255,255,255,0.03)",
+    borderWidth: "1px",
+    borderColor: "rgba(255,255,255,0.10)",
+    _hover: {
+      bg: "rgba(255,255,255,0.06)",
+      borderColor: "rgba(124,108,255,0.35)",
+    },
+    _active: {
+      bg: "rgba(255,255,255,0.08)",
+    },
+  };
+
   return (
-    <Box
-      position="fixed"
-      top="0"
-      right="0"
-      h="100vh"
-      w="min(82vw, 420px)"
-      bg="#12172a"
-      borderLeft="1px solid rgba(255,255,255,0.08)"
-      zIndex="1000"
-      p={6}
-    >
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={8}>
-        <Text color="#7c6cff" fontWeight="800" letterSpacing="0.08em">
-          NAVIGATION
-        </Text>
-        <Button onClick={onClose} variant="ghost">
-          ×
-        </Button>
+    <>
+      <Box
+        position="fixed"
+        inset="0"
+        bg="rgba(0,0,0,0.45)"
+        backdropFilter="blur(2px)"
+        zIndex="999"
+        onClick={onClose}
+      />
+
+      <Box
+        position="fixed"
+        top="0"
+        right="0"
+        h="100vh"
+        w={{ base: "82vw", sm: "420px" }}
+        bg="linear-gradient(180deg, #10162a 0%, #0d1430 100%)"
+        borderLeft="1px solid rgba(255,255,255,0.08)"
+        boxShadow="-20px 0 40px rgba(0,0,0,0.45)"
+        zIndex="1000"
+        overflow="hidden"
+      >
+        <Box
+          px={8}
+          py={7}
+          borderBottom="1px solid rgba(255,255,255,0.06)"
+        >
+          <HStack justify="space-between" align="center">
+            <Text
+              color="#6f63ff"
+              fontWeight="800"
+              fontSize="16px"
+              letterSpacing="0.12em"
+            >
+              NAVIGATION
+            </Text>
+
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              minW="56px"
+              h="56px"
+              borderRadius="18px"
+              color="white"
+              bg="rgba(255,255,255,0.03)"
+              border="1px solid rgba(255,255,255,0.10)"
+              fontSize="28px"
+              _hover={{ bg: "rgba(255,255,255,0.06)" }}
+            >
+              ×
+            </Button>
+          </HStack>
+        </Box>
+
+        <VStack spacing={6} align="stretch" px={8} pt={10}>
+          <Link href="/">
+            <Button
+              {...itemStyle}
+              onClick={onClose}
+              bg="rgba(111,99,255,0.16)"
+              borderColor="rgba(111,99,255,0.65)"
+              boxShadow="0 0 0 1px rgba(111,99,255,0.15) inset"
+            >
+              <HStack spacing={6}>
+                <Text fontSize="24px">⌂</Text>
+                <Text>Cookie Checker</Text>
+              </HStack>
+            </Button>
+          </Link>
+
+          <Link href="/tv">
+            <Button {...itemStyle} variant="outline" onClick={onClose}>
+              <HStack spacing={6}>
+                <Text fontSize="22px">🖥</Text>
+                <Text>TV Access</Text>
+              </HStack>
+            </Button>
+          </Link>
+        </VStack>
       </Box>
-
-      <VStack spacing={4} align="stretch">
-        <Link href="/">
-          <Button h="72px" w="full" borderRadius="24px" onClick={onClose}>
-            Home
-          </Button>
-        </Link>
-
-        <Link href="/support">
-          <Button h="72px" w="full" borderRadius="24px" variant="outline" onClick={onClose}>
-            Guide
-          </Button>
-        </Link>
-      </VStack>
-    </Box>
+    </>
   );
 }
