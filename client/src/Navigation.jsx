@@ -30,7 +30,7 @@ export default function Navigation({ onClose }) {
           </Button>
         </Link>
 
-        <Link href="/guide">
+        <Link href="/support">
           <Button h="72px" w="full" borderRadius="24px" variant="outline" onClick={onClose}>
             Guide
           </Button>
