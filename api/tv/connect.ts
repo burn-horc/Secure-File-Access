@@ -1,9 +1,12 @@
-import { tvSessions } from "../../lib/tvStore";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { cleanupOldTVSessions, tvSessions } from "../../lib/tvStore";
 
-export default async function handler(req, res) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
   }
+
+  cleanupOldTVSessions();
 
   const code = String(req.body?.code || "").trim();
 
@@ -22,6 +25,7 @@ export default async function handler(req, res) {
     connected: true,
     payload: {
       connectedAt: Date.now(),
+      status: "paired",
     },
   });
 
