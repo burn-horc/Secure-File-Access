@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 function CodeBoxes({ code = "" }) {
@@ -90,14 +90,10 @@ export default function TVScreen() {
           boxShadow="0 10px 40px rgba(0,0,0,0.45)"
           overflow="hidden"
         >
-          
-
           <VStack spacing={8} px={{ base: 3, sm: 6 }} py={{ base: 10, sm: 14 }}>
             {status === "waiting" && (
               <>
-                <Text color="#1fe0c1" fontSize={{ base: "3xl", sm: "4xl" }} fontWeight="700">
-                  
-                </Text>
+                
 
                 <Text
                   textAlign="center"
@@ -183,7 +179,10 @@ export default function TVScreen() {
               </Box>
             )}
           </VStack>
-       </Box>
+        </Box>
+
+       
+      </Box>
     </Box>
   );
 }
