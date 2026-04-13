@@ -1817,7 +1817,7 @@ return (
 </Route>
 
 <Route path="/tv">
-  <TVScreen />
+  <TVSubmit />
 </Route>
 
         <Route path="/support">
