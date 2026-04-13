@@ -1,5 +1,5 @@
 
-
+import Navigation from "./Navigation";
 import TVSubmit from "./TVSubmit";
 import TVScreen from "./TVScreen";
 import SupportPage from "./SupportPage";
@@ -736,6 +736,7 @@ function upsertStoredCookieChecksFromResults(results) {
 
 export default function App() {
   const toast = useToast();
+  const [showNav, setShowNav] = useState(false);
   const [input, setInput] = useState("");
   const [uploadedInputSource, setUploadedInputSource] = useState(null);
   const [checkLogs, setCheckLogs] = useState([]);
