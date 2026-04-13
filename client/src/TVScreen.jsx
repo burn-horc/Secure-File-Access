@@ -90,41 +90,7 @@ export default function TVScreen() {
           boxShadow="0 10px 40px rgba(0,0,0,0.45)"
           overflow="hidden"
         >
-          <Flex
-            justify="space-between"
-            align="center"
-            px={5}
-            py={4}
-            borderBottom="1px solid rgba(255,255,255,0.06)"
-          >
-            <HStack spacing={3}>
-              <Box fontSize="36px">🧑‍🚀</Box>
-              <VStack spacing={0} align="start">
-                <HStack spacing={2}>
-                  <Text color="#20e3b2" fontWeight="800" letterSpacing="0.08em">
-                    BURN24
-                  </Text>
-                  <Text color="rgba(255,255,255,0.45)" fontWeight="700">
-                    ONLINE
-                  </Text>
-                </HStack>
-                <Text fontSize="2xl" fontWeight="500">
-                  TV Submit
-                </Text>
-              </VStack>
-            </HStack>
-
-            <Button
-              variant="ghost"
-              color="#7c6cff"
-              fontSize="30px"
-              minW="44px"
-              h="44px"
-              p={0}
-            >
-              ☰
-            </Button>
-          </Flex>
+          
 
           <VStack spacing={8} px={{ base: 3, sm: 6 }} py={{ base: 10, sm: 14 }}>
             {status === "waiting" && (
