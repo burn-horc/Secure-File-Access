@@ -1,5 +1,5 @@
 
-import Navigation from "./Navigation";
+import Navigation from "./Navigation.jsx";
 import TVSubmit from "./TVSubmit";
 import TVScreen from "./TVScreen";
 import SupportPage from "./SupportPage";
