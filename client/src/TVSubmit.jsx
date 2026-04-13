@@ -141,7 +141,11 @@ export default function TVSubmit() {
                     value={digit}
                     onChange={(e) => handleChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
+                    type="tel"
                     inputMode="numeric"
+                    pattern="[0-9]*"
+caretColor="white"
+sx={{ WebkitTextFillColor: "white" }}
                     maxLength={1}
                     textAlign="center"
                     w={{ base: "56px", sm: "68px" }}
