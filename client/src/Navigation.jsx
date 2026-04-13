@@ -1,4 +1,5 @@
 import { Box, Button, Text, VStack } from "@chakra-ui/react";
+import { Link } from "wouter";
 
 export default function Navigation({ onClose }) {
   return (
@@ -23,9 +24,17 @@ export default function Navigation({ onClose }) {
       </Box>
 
       <VStack spacing={4} align="stretch">
-        <Button h="72px" borderRadius="24px">Home</Button>
-        <Button h="72px" borderRadius="24px" variant="outline">TV Access</Button>
-        <Button h="72px" borderRadius="24px" variant="outline">Guide</Button>
+        <Link href="/">
+          <Button h="72px" w="full" borderRadius="24px" onClick={onClose}>
+            Home
+          </Button>
+        </Link>
+
+        <Link href="/guide">
+          <Button h="72px" w="full" borderRadius="24px" variant="outline" onClick={onClose}>
+            Guide
+          </Button>
+        </Link>
       </VStack>
     </Box>
   );
