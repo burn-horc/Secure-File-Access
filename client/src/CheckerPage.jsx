@@ -854,6 +854,16 @@ const guideTvBtn = {
     <SiNetflix color="#e50914" size="22px" />
   </Box>
 
+                  <Button
+    size="xs"
+    h="28px"
+    minW="28px"
+    borderRadius="8px"
+    onClick={() => setShowNav(true)}
+  >
+    ☰
+  </Button>
+
   {showBackButton && (
     <Button
       size="xs"
