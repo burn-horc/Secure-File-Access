@@ -25,9 +25,7 @@ export default function TVSubmit() {
         return;
       }
 
-      if (index > 0) {
-        refs.current[index - 1]?.focus();
-      }
+      if (index > 0) refs.current[index - 1]?.focus();
     }
 
     if (event.key === "ArrowLeft" && index > 0) {
@@ -41,6 +39,7 @@ export default function TVSubmit() {
 
   const handlePaste = (event) => {
     event.preventDefault();
+
     const pasted = event.clipboardData
       .getData("text")
       .replace(/\D/g, "")
@@ -89,22 +88,22 @@ export default function TVSubmit() {
   return (
     <Box minH="100vh" bg="#0b1020" color="white" px={4} py={8}>
       <Box
-        maxW="820px"
+        maxW="520px"
         mx="auto"
         borderWidth="1px"
         borderColor="rgba(139,92,246,0.18)"
-        borderRadius="28px"
+        borderRadius="24px"
         bg="linear-gradient(180deg, #10162a 0%, #0d1430 100%)"
         boxShadow="0 10px 40px rgba(0,0,0,0.45)"
-        px={{ base: 4, sm: 6 }}
-        py={{ base: 10, sm: 14 }}
+        px={6}
+        py={10}
       >
-        <VStack spacing={8}>
+        <VStack spacing={6}>
           <Text
             textAlign="center"
-            fontSize={{ base: "4xl", sm: "6xl" }}
+            fontSize="3xl"
             fontWeight="800"
-            lineHeight="1.05"
+            lineHeight="1.1"
           >
             Match the code on your TV
           </Text>
@@ -112,23 +111,21 @@ export default function TVSubmit() {
           <Text
             textAlign="center"
             color="rgba(255,255,255,0.58)"
-            fontSize={{ base: "lg", sm: "2xl" }}
-            maxW="900px"
+            fontSize="lg"
           >
             Confirm or enter the 8-digit code below.
           </Text>
 
           <Box
             w="full"
-            maxW="980px"
             borderWidth="1px"
             borderColor="rgba(255,255,255,0.08)"
-            borderRadius="30px"
+            borderRadius="24px"
             bg="rgba(10,14,30,0.35)"
-            px={{ base: 3, sm: 6 }}
-            py={{ base: 5, sm: 7 }}
+            px={4}
+            py={5}
           >
-            <HStack spacing={{ base: 2, sm: 3 }} justify="center" flexWrap="nowrap">
+            <HStack spacing={2} justify="center">
               {digits.slice(0, 4).map((digit, index) => (
                 <Box
                   key={index}
@@ -143,12 +140,12 @@ export default function TVSubmit() {
                   pattern="[0-9]*"
                   maxLength={1}
                   textAlign="center"
-                  w={{ base: "56px", sm: "68px" }}
-                  h={{ base: "72px", sm: "84px" }}
-                  borderRadius="18px"
+                  w="48px"
+                  h="60px"
+                  borderRadius="14px"
                   border="1px solid rgba(255,255,255,0.12)"
                   bg="rgba(8,12,28,0.45)"
-                  fontSize={{ base: "2xl", sm: "3xl" }}
+                  fontSize="22px"
                   fontWeight="700"
                   color="white"
                   caretColor="white"
@@ -156,19 +153,10 @@ export default function TVSubmit() {
                     WebkitTextFillColor: "white",
                     outline: "none",
                   }}
-                  _focusWithin={{
-                    borderColor: "#7d72ff",
-                    boxShadow: "0 0 0 1px #7d72ff",
-                  }}
                 />
               ))}
 
-              <Text
-                mx={{ base: 1, sm: 2 }}
-                fontSize={{ base: "2xl", sm: "3xl" }}
-                color="#6f63ff"
-                fontWeight="700"
-              >
+              <Text fontSize="22px" color="#6f63ff" fontWeight="700">
                 -
               </Text>
 
@@ -188,12 +176,12 @@ export default function TVSubmit() {
                     pattern="[0-9]*"
                     maxLength={1}
                     textAlign="center"
-                    w={{ base: "56px", sm: "68px" }}
-                    h={{ base: "72px", sm: "84px" }}
-                    borderRadius="18px"
+                    w="48px"
+                    h="60px"
+                    borderRadius="14px"
                     border="1px solid rgba(255,255,255,0.12)"
                     bg="rgba(8,12,28,0.45)"
-                    fontSize={{ base: "2xl", sm: "3xl" }}
+                    fontSize="22px"
                     fontWeight="700"
                     color="white"
                     caretColor="white"
@@ -201,20 +189,16 @@ export default function TVSubmit() {
                       WebkitTextFillColor: "white",
                       outline: "none",
                     }}
-                    _focusWithin={{
-                      borderColor: "#7d72ff",
-                      boxShadow: "0 0 0 1px #7d72ff",
-                    }}
                   />
                 );
               })}
             </HStack>
 
             <Text
-              mt={5}
+              mt={4}
               textAlign="center"
               color="rgba(255,255,255,0.52)"
-              fontSize={{ base: "lg", sm: "2xl" }}
+              fontSize="sm"
               fontWeight="600"
             >
               8-digit TV code
@@ -223,18 +207,15 @@ export default function TVSubmit() {
 
           <Button
             w="full"
-            maxW="980px"
-            h={{ base: "72px", sm: "88px" }}
-            borderRadius="24px"
+            h="64px"
+            borderRadius="20px"
             bg="linear-gradient(90deg, #6c63ff 0%, #7d72ff 100%)"
             color="white"
-            fontSize={{ base: "2xl", sm: "3xl" }}
+            fontSize="xl"
             fontWeight="700"
             letterSpacing="0.08em"
             isDisabled={code.length !== 8}
             onClick={handleSubmit}
-            _hover={{ filter: "brightness(1.05)" }}
-            _active={{ filter: "brightness(0.98)" }}
           >
             CONTINUE
           </Button>
