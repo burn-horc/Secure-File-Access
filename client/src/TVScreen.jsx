@@ -1,28 +1,87 @@
-import { Box, Button, HStack, Input, Text, VStack } from "@chakra-ui/react";
-import { useRef, useState } from "react";
+import { Box, HStack, Text, VStack } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 
-export default function CodeEntryPage() {
-  const [digits, setDigits] = useState(Array(8).fill(""));
-  const refs = useRef([]);
+function CodeBoxes({ code = "" }) {
+  const padded = code.padEnd(8, " ").slice(0, 8).split("");
+  const left = padded.slice(0, 4);
+  const right = padded.slice(4, 8);
 
-  const handleChange = (index, value) => {
-    const next = value.replace(/\D/g, "").slice(-1);
-    const updated = [...digits];
-    updated[index] = next;
-    setDigits(updated);
-
-    if (next && index < 7) {
-      refs.current[index + 1]?.focus();
-    }
+  const boxStyle = {
+    w: { base: "56px", sm: "68px" },
+    h: { base: "72px", sm: "84px" },
+    borderRadius: "18px",
+    borderWidth: "1px",
+    borderColor: "rgba(255,255,255,0.12)",
+    bg: "rgba(8,12,28,0.45)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: { base: "2xl", sm: "3xl" },
+    fontWeight: "700",
+    color: "white",
   };
 
-  const handleKeyDown = (index, event) => {
-    if (event.key === "Backspace" && !digits[index] && index > 0) {
-      refs.current[index - 1]?.focus();
-    }
-  };
+  return (
+    <HStack spacing={{ base: 2, sm: 3 }} justify="center" flexWrap="nowrap">
+      {left.map((digit, index) => (
+        <Box key={`l-${index}`} {...boxStyle}>
+          {digit.trim() ? digit : ""}
+        </Box>
+      ))}
 
-  const code = digits.join("");
+      <Text
+        mx={{ base: 1, sm: 2 }}
+        fontSize={{ base: "2xl", sm: "3xl" }}
+        color="#6f63ff"
+        fontWeight="700"
+      >
+        -
+      </Text>
+
+      {right.map((digit, index) => (
+        <Box key={`r-${index}`} {...boxStyle}>
+          {digit.trim() ? digit : ""}
+        </Box>
+      ))}
+    </HStack>
+  );
+}
+
+export default function TVScreen() {
+  const [code, setCode] = useState("");
+  const [status, setStatus] = useState("waiting");
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    let interval;
+
+    async function init() {
+      const res = await fetch("/api/tv/generate", {
+        method: "POST",
+      });
+
+      const data = await res.json();
+      const generatedCode = String(data.code || "");
+      setCode(generatedCode);
+
+      interval = setInterval(async () => {
+        const r = await fetch(`/api/tv/status/${generatedCode}`);
+        const s = await r.json();
+
+        if (s.status === "connected") {
+          setStatus("connected");
+          setResult(s.result || null);
+          clearInterval(interval);
+        }
+      }, 2000);
+    }
+
+    init();
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, []);
 
   return (
     <Box minH="100vh" bg="#0b1020" color="white" px={4} py={8}>
@@ -38,127 +97,82 @@ export default function CodeEntryPage() {
         py={{ base: 10, sm: 14 }}
       >
         <VStack spacing={8}>
-          <Text
-            textAlign="center"
-            fontSize={{ base: "4xl", sm: "6xl" }}
-            fontWeight="800"
-            lineHeight="1.05"
-          >
-            Enter your code
-          </Text>
-
-          <Text
-            textAlign="center"
-            color="rgba(255,255,255,0.58)"
-            fontSize={{ base: "lg", sm: "2xl" }}
-            maxW="900px"
-          >
-            Confirm or enter the 8-digit code below.
-          </Text>
-
-          <Box
-            w="full"
-            maxW="980px"
-            borderWidth="1px"
-            borderColor="rgba(255,255,255,0.08)"
-            borderRadius="30px"
-            bg="rgba(10,14,30,0.35)"
-            px={{ base: 3, sm: 6 }}
-            py={{ base: 5, sm: 7 }}
-          >
-            <HStack spacing={{ base: 2, sm: 3 }} justify="center" flexWrap="nowrap">
-              {digits.slice(0, 4).map((digit, index) => (
-                <Input
-                  key={index}
-                  ref={(el) => (refs.current[index] = el)}
-                  value={digit}
-                  onChange={(e) => handleChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  inputMode="numeric"
-                  maxLength={1}
-                  textAlign="center"
-                  w={{ base: "56px", sm: "68px" }}
-                  h={{ base: "72px", sm: "84px" }}
-                  borderRadius="18px"
-                  borderWidth="1px"
-                  borderColor="rgba(255,255,255,0.12)"
-                  bg="rgba(8,12,28,0.45)"
-                  fontSize={{ base: "2xl", sm: "3xl" }}
-                  fontWeight="700"
-                  color="white"
-                  _focus={{
-                    borderColor: "#7d72ff",
-                    boxShadow: "0 0 0 1px #7d72ff",
-                  }}
-                />
-              ))}
-
+          {status === "waiting" && (
+            <>
               <Text
-                mx={{ base: 1, sm: 2 }}
-                fontSize={{ base: "2xl", sm: "3xl" }}
-                color="#6f63ff"
-                fontWeight="700"
+                textAlign="center"
+                fontSize={{ base: "4xl", sm: "6xl" }}
+                fontWeight="800"
+                lineHeight="1.05"
               >
-                -
+                Match the code on your TV
               </Text>
 
-              {digits.slice(4, 8).map((digit, i) => {
-                const index = i + 4;
-                return (
-                  <Input
-                    key={index}
-                    ref={(el) => (refs.current[index] = el)}
-                    value={digit}
-                    onChange={(e) => handleChange(index, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    inputMode="numeric"
-                    maxLength={1}
-                    textAlign="center"
-                    w={{ base: "56px", sm: "68px" }}
-                    h={{ base: "72px", sm: "84px" }}
-                    borderRadius="18px"
-                    borderWidth="1px"
-                    borderColor="rgba(255,255,255,0.12)"
-                    bg="rgba(8,12,28,0.45)"
-                    fontSize={{ base: "2xl", sm: "3xl" }}
-                    fontWeight="700"
-                    color="white"
-                    _focus={{
-                      borderColor: "#7d72ff",
-                      boxShadow: "0 0 0 1px #7d72ff",
-                    }}
-                  />
-                );
-              })}
-            </HStack>
+              <Text
+                textAlign="center"
+                color="rgba(255,255,255,0.58)"
+                fontSize={{ base: "lg", sm: "2xl" }}
+                maxW="900px"
+              >
+                Enter this 8-digit code on your other device.
+              </Text>
 
-            <Text
-              mt={5}
-              textAlign="center"
-              color="rgba(255,255,255,0.52)"
-              fontSize={{ base: "lg", sm: "2xl" }}
-              fontWeight="600"
-            >
-              8-digit code
-            </Text>
-          </Box>
+              <Box
+                w="full"
+                maxW="980px"
+                borderWidth="1px"
+                borderColor="rgba(255,255,255,0.08)"
+                borderRadius="30px"
+                bg="rgba(10,14,30,0.35)"
+                px={{ base: 3, sm: 6 }}
+                py={{ base: 5, sm: 7 }}
+              >
+                <CodeBoxes code={code} />
 
-          <Button
-            w="full"
-            maxW="980px"
-            h={{ base: "72px", sm: "88px" }}
-            borderRadius="24px"
-            bg="linear-gradient(90deg, #6c63ff 0%, #7d72ff 100%)"
-            color="white"
-            fontSize={{ base: "2xl", sm: "3xl" }}
-            fontWeight="700"
-            letterSpacing="0.08em"
-            isDisabled={code.length !== 8}
-            _hover={{ filter: "brightness(1.05)" }}
-            _active={{ filter: "brightness(0.98)" }}
-          >
-            CONTINUE
-          </Button>
+                <Text
+                  mt={5}
+                  textAlign="center"
+                  color="rgba(255,255,255,0.52)"
+                  fontSize={{ base: "lg", sm: "2xl" }}
+                  fontWeight="600"
+                >
+                  8-digit TV code
+                </Text>
+              </Box>
+            </>
+          )}
+
+          {status === "connected" && (
+            <>
+              <Text
+                textAlign="center"
+                fontSize={{ base: "3xl", sm: "4xl" }}
+                fontWeight="800"
+                color="#00d563"
+              >
+                Connected
+              </Text>
+
+              <Box
+                w="full"
+                maxW="980px"
+                borderWidth="1px"
+                borderColor="rgba(0,213,99,0.25)"
+                borderRadius="24px"
+                bg="rgba(0,213,99,0.06)"
+                p={6}
+              >
+                <Box
+                  as="pre"
+                  whiteSpace="pre-wrap"
+                  fontSize="sm"
+                  color="rgba(255,255,255,0.88)"
+                >
+                  {JSON.stringify(result, null, 2)}
+                </Box>
+              </Box>
+            </>
+          )}
         </VStack>
       </Box>
     </Box>
