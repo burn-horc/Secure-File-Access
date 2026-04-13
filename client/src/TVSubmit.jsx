@@ -104,32 +104,30 @@ export default function TVSubmit() {
             <HStack spacing={{ base: 2, sm: 3 }} justify="center" flexWrap="nowrap">
               {digits.slice(0, 4).map((digit, index) => (
                 <Input
-                  key={index}
-                  ref={(el) => (refs.current[index] = el)}
-                  value={digit}
-                  onChange={(e) => handleChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  type="tel"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  caretColor="white"
-                  sx={{ WebkitTextFillColor: "white" }}
-                  maxLength={1}
-                  textAlign="center"
-                  w={{ base: "56px", sm: "68px" }}
-                  h={{ base: "72px", sm: "84px" }}
-                  borderRadius="18px"
-                  borderWidth="1px"
-                  borderColor="rgba(255,255,255,0.12)"
-                  bg="rgba(8,12,28,0.45)"
-                  fontSize={{ base: "2xl", sm: "3xl" }}
-                  fontWeight="700"
-                  color="white"
-                  _focus={{
-                    borderColor: "#7d72ff",
-                    boxShadow: "0 0 0 1px #7d72ff",
-                  }}
-                />
+  key={index}
+  ref={(el) => (refs.current[index] = el)}
+  value={digit || ""}
+  onChange={(e) => handleChange(index, e.target.value)}
+  onKeyDown={(e) => handleKeyDown(index, e)}
+  type="tel"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  maxLength={1}
+  textAlign="center"
+  w={{ base: "56px", sm: "68px" }}
+  h={{ base: "72px", sm: "84px" }}
+  borderRadius="18px"
+  borderWidth="1px"
+  borderColor="rgba(255,255,255,0.12)"
+  bg="rgba(8,12,28,0.45)"
+  fontSize={{ base: "2xl", sm: "3xl" }}
+  fontWeight="700"
+  color="white"
+  _focus={{
+    borderColor: "#7d72ff",
+    boxShadow: "0 0 0 1px #7d72ff",
+  }}
+/>
               ))}
 
               <Text
