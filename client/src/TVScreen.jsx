@@ -183,17 +183,7 @@ export default function TVScreen() {
               </Box>
             )}
           </VStack>
-        </Box>
-
-        <Text
-          textAlign="center"
-          mt={6}
-          color="rgba(255,255,255,0.45)"
-          fontSize={{ base: "sm", sm: "lg" }}
-        >
-          © SATISACROH. All Rights Reserved.
-        </Text>
-      </Box>
+       
     </Box>
   );
 }
