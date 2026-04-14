@@ -1,10 +1,13 @@
 import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { useLocation } from "wouter";
+import { supabase } from "./supabaseClient";
 
 export default function TVSubmit() {
   const [, setLocation] = useLocation();
   const [digits, setDigits] = useState(Array(8).fill(""));
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const refs = useRef([]);
 
   const handleChange = (index, value) => {
@@ -60,25 +63,38 @@ export default function TVSubmit() {
   const handleSubmit = async () => {
     if (code.length !== 8) return;
 
+    setLoading(true);
+    setMessage("");
+
     try {
-      const res = await fetch("/api/tv/connect", {
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token;
+
+      if (!accessToken) {
+        throw new Error("Please sign in first.");
+      }
+
+      const res = await fetch("/api/tv/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ code }),
       });
 
-      const data = await res.json();
+      const payload = await res.json();
 
-      if (data.success) {
-        alert("Connected!");
-      } else {
-        alert(data.error || "Failed");
+      if (!res.ok || !payload.ok) {
+        throw new Error(payload.message || "Failed to connect TV.");
       }
+
+      setMessage("TV linked successfully!");
     } catch (err) {
       console.error(err);
-      alert("Request failed");
+      setMessage(err.message || "Request failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -244,13 +260,24 @@ export default function TVSubmit() {
             fontSize={{ base: "xl", sm: "2xl" }}
             fontWeight="700"
             letterSpacing="0.08em"
-            isDisabled={code.length !== 8}
+            isDisabled={code.length !== 8 || loading}
+            isLoading={loading}
             onClick={handleSubmit}
             _hover={{ filter: "brightness(1.05)" }}
             _active={{ filter: "brightness(0.98)" }}
           >
             CONTINUE
           </Button>
+
+          {message ? (
+            <Text
+              textAlign="center"
+              color={message.includes("successfully") ? "#00d563" : "#ff6b6b"}
+              fontWeight="700"
+            >
+              {message}
+            </Text>
+          ) : null}
         </VStack>
       </Box>
     </Box>
