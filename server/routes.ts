@@ -111,54 +111,7 @@ const VPN_EXEMPT_PATHS = new Set([
 
 const VPN_EXEMPT_PREFIXES = ["/api/auth/", "/__replauthuser", "/api/login", "/api/logout"];
 
-const tvCodes = new Map();
 
-function generateCode() {
-  return Math.floor(10000000 + Math.random() * 90000000).toString();
-}
-
-
-
-  // Generate TV code
-  app.get("/api/tv-code", (req, res) => {
-    const code = generateCode();
-
-    tvCodes.set(code, {
-      status: "pending",
-      createdAt: Date.now()
-    });
-
-    res.json({ code });
-  });
-
-  // Submit code from phone
-  app.post("/api/tv-submit", (req, res) => {
-    const { code, user } = req.body;
-
-    if (!tvCodes.has(code)) {
-      return res.status(400).json({ error: "Invalid code" });
-    }
-
-    tvCodes.set(code, {
-      status: "approved",
-      user
-    });
-
-    res.json({ success: true });
-  });
-
-  // TV checks if approved
-  app.get("/api/tv-status/:code", (req, res) => {
-    const code = req.params.code;
-
-    if (!tvCodes.has(code)) {
-      return res.status(400).json({ error: "Invalid code" });
-    }
-
-    res.json(tvCodes.get(code));
-  });
-
-}
 
 function isVpnExempt(pathname: string): boolean {
   if (VPN_EXEMPT_PATHS.has(pathname)) return true;
