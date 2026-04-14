@@ -8,11 +8,7 @@ import express from "express";
 import NetflixAccountChecker from "./netflix_checker.cjs";
 import originalServerHelpers from "./original_server_helpers.cjs";
 
-const tvCodes = new Map<string, any>();
 
-function generateCode() {
-  return Math.floor(10000000 + Math.random() * 90000000).toString();
-}
 
 const {
   getCookieHeaders,
