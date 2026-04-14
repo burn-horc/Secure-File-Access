@@ -61,10 +61,39 @@ export default function TVSubmit() {
   const code = digits.join("");
 
   const handleSubmit = async () => {
-    if (code.length !== 8) return;
+  try {
+    // 🔥 1. Get logged-in session
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    setLoading(true);
-    setMessage("");
+    if (!session) {
+      alert("Please sign in first.");
+      return;
+    }
+
+    // 🔥 2. Send request WITH token
+    const res = await fetch("/api/tv/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`, // ⭐ THIS IS THE FIX
+      },
+      body: JSON.stringify({ code }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to link TV");
+    }
+
+    // ✅ success
+    console.log("TV linked!");
+  } catch (err) {
+    console.error(err);
+  }
+};
 
     try {
       const { data } = await supabase.auth.getSession();
