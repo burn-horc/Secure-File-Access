@@ -7,7 +7,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(405).json({ ok: false, message: "Method not allowed" });
     }
 
-    // 🔥 1. Extract TV token
+    // 🔥 Extract TV token
     const authHeader = req.headers.authorization || "";
     const tvToken = authHeader.replace(/^Bearer\s+/i, "").trim();
 
@@ -18,14 +18,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // 🔥 2. Find TV session
-    const { data: session, error: sessionError } = await supabaseAdmin
+    // 🔥 Find TV session
+    const { data: session, error } = await supabaseAdmin
       .from("tv_sessions")
-      .select("user_id, status")
+      .select("status")
       .eq("tv_token", tvToken)
       .maybeSingle();
 
-    if (sessionError || !session) {
+    if (error || !session) {
       return res.status(404).json({
         ok: false,
         message: "Invalid TV session.",
@@ -39,29 +39,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // 🔥 3. Fetch user (FROM SUPABASE AUTH)
-    const { data: userData, error: userError } =
-      await supabaseAdmin.auth.admin.getUserById(session.user_id);
-
-    if (userError || !userData?.user) {
-      return res.status(404).json({
-        ok: false,
-        message: "User not found.",
-      });
-    }
-
-    const user = userData.user;
-
-    // 🔥 4. Return safe account data
+    // 🔥 NO LOGIN → return mock account
     return res.status(200).json({
       ok: true,
       account: {
-        id: user.id,
-        email: user.email,
-        display_name:
-          user.user_metadata?.name ||
-          user.user_metadata?.full_name ||
-          user.email,
+        id: "tv-user",
+        display_name: "Connected User",
       },
     });
   } catch (error: any) {
