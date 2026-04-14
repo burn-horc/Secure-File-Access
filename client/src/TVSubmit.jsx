@@ -95,37 +95,7 @@ export default function TVSubmit() {
   }
 };
 
-    try {
-      const { data } = await supabase.auth.getSession();
-      const accessToken = data.session?.access_token;
-
-      if (!accessToken) {
-        throw new Error("Please sign in first.");
-      }
-
-      const res = await fetch("/api/tv/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ code }),
-      });
-
-      const payload = await res.json();
-
-      if (!res.ok || !payload.ok) {
-        throw new Error(payload.message || "Failed to connect TV.");
-      }
-
-      setMessage("TV linked successfully!");
-    } catch (err) {
-      console.error(err);
-      setMessage(err.message || "Request failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+    
 
   return (
     <Box minH="100vh" bg="#0d0f18" color="white" px={4} py={6}>
