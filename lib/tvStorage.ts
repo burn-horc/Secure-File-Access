@@ -2,32 +2,20 @@ type TVSession = {
   code: string;
   createdAt: number;
   connected: boolean;
-  payload?: any;
+  payload: any;
 };
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __tvSessions: Map<string, TVSession> | undefined;
+export const tvSessions = new Map<string, TVSession>();
+
+export function generateTVCode(): string {
+  return Math.floor(10000000 + Math.random() * 90000000).toString();
 }
 
-const store = global.__tvSessions || new Map<string, TVSession>();
-global.__tvSessions = store;
-
-export const tvSessions = store;
-
-export function generateTVCode() {
-  let code = "";
-  do {
-    code = String(Math.floor(10000000 + Math.random() * 90000000));
-  } while (tvSessions.has(code));
-  return code;
-}
-
-export function cleanupOldTVSessions(maxAgeMs = 10 * 60 * 1000) {
+export function cleanupOldTVSessions() {
   const now = Date.now();
 
   for (const [code, session] of tvSessions.entries()) {
-    if (now - session.createdAt > maxAgeMs) {
+    if (now - session.createdAt > 5 * 60 * 1000) {
       tvSessions.delete(code);
     }
   }
