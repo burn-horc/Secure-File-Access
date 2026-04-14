@@ -17,13 +17,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const accessToken = getBearerToken(req);
-    if (!accessToken) {
-      return res.status(401).json({
-        ok: false,
-        message: "Not signed in.",
-      });
-    }
+    // 🔥 Get a random working account from your DB
+const { data: account } = await supabaseAdmin
+  .from("checked_cookies")
+  .select("*")
+  .limit(1)
+  .maybeSingle();
+
+if (!account) {
+  return res.status(500).json({
+    ok: false,
+    message: "No available account.",
+  });
+}
 
     const supabaseUserClient = createClient(
       process.env.SUPABASE_URL!,
