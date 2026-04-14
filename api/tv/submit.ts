@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "../../lib/supabaseAdmin.js";
-import { generateTvToken, getBearerToken, sanitizeCode } from "../../lib/tvAuth.js";
+import { generateTvToken, sanitizeCode } from "../../lib/tvAuth.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -10,6 +9,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const code = sanitizeCode(req.body?.code);
+
     if (code.length !== 8) {
       return res.status(400).json({
         ok: false,
@@ -17,45 +17,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const accessToken = getBearerToken(req);
-    if (!accessToken) {
-      return res.status(401).json({
-        ok: false,
-        message: "Missing access token.",
-      });
-    }
-
-    const supabaseUserClient = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_ANON_KEY!,
-      {
-        global: {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-        },
-      }
-    );
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseUserClient.auth.getUser();
-
-    if (userError || !user) {
-      return res.status(401).json({
-        ok: false,
-        message: "Invalid session.",
-      });
-    }
-
+    // 🔍 Find session
     const { data: tvSession, error: sessionError } = await supabaseAdmin
       .from("tv_sessions")
-      .select("code, status, expires_at")
+      .select("status, expires_at")
       .eq("code", code)
       .maybeSingle();
 
@@ -80,13 +45,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // 🔥 Generate token (NO LOGIN NEEDED)
     const tvToken = generateTvToken();
 
+    // 🔥 Link TV
     const { error: updateError } = await supabaseAdmin
       .from("tv_sessions")
       .update({
         status: "linked",
-        user_id: user.id,
         tv_token: tvToken,
         linked_at: new Date().toISOString(),
       })
