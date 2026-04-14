@@ -1,7 +1,7 @@
 import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { supabase } from "./supabaseClient";
+
 
 export default function TVSubmit() {
   const [, setLocation] = useLocation();
