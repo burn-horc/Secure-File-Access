@@ -1,6 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { supabaseAdmin } from "../../lib/supabaseAdmin.js";
-import { getBearerToken } from "../../lib/tvAuth.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -8,7 +7,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(405).json({ ok: false, message: "Method not allowed" });
     }
 
-    const tvToken = getBearerToken(req);
+    // 🔥 1. Extract TV token
+    const authHeader = req.headers.authorization || "";
+    const tvToken = authHeader.replace(/^Bearer\s+/i, "").trim();
+
     if (!tvToken) {
       return res.status(401).json({
         ok: false,
@@ -16,42 +18,51 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const { data: tvSession, error: sessionError } = await supabaseAdmin
+    // 🔥 2. Find TV session
+    const { data: session, error: sessionError } = await supabaseAdmin
       .from("tv_sessions")
-      .select("user_id, status, expires_at")
+      .select("user_id, status")
       .eq("tv_token", tvToken)
       .maybeSingle();
 
-    if (sessionError || !tvSession || tvSession.status !== "linked") {
-      return res.status(401).json({
+    if (sessionError || !session) {
+      return res.status(404).json({
         ok: false,
         message: "Invalid TV session.",
       });
     }
 
-    if (new Date(tvSession.expires_at).getTime() < Date.now()) {
-      return res.status(410).json({
+    if (session.status !== "linked") {
+      return res.status(403).json({
         ok: false,
-        message: "TV session expired.",
+        message: "TV not linked.",
       });
     }
 
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from("profiles")
-      .select("*")
-      .eq("user_id", tvSession.user_id)
-      .maybeSingle();
+    // 🔥 3. Fetch user (FROM SUPABASE AUTH)
+    const { data: userData, error: userError } =
+      await supabaseAdmin.auth.admin.getUserById(session.user_id);
 
-    if (profileError) {
-      return res.status(500).json({
+    if (userError || !userData?.user) {
+      return res.status(404).json({
         ok: false,
-        message: "Failed to load account profile.",
+        message: "User not found.",
       });
     }
 
+    const user = userData.user;
+
+    // 🔥 4. Return safe account data
     return res.status(200).json({
       ok: true,
-      account: profile ?? { user_id: tvSession.user_id },
+      account: {
+        id: user.id,
+        email: user.email,
+        display_name:
+          user.user_metadata?.name ||
+          user.user_metadata?.full_name ||
+          user.email,
+      },
     });
   } catch (error: any) {
     return res.status(500).json({
