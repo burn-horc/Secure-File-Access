@@ -117,7 +117,7 @@ function generateCode() {
   return Math.floor(10000000 + Math.random() * 90000000).toString();
 }
 
-export function registerRoutes(app) {
+
 
   // Generate TV code
   app.get("/api/tv-code", (req, res) => {
@@ -225,6 +225,31 @@ export async function registerRoutes(
 ): Promise<Server> {
   registerAuthRoutes(app);
 
+  /* ── TV PAIRING STORAGE ───────────────────────── */
+
+const tvCodes = new Map<
+  string,
+  {
+    status: "pending" | "approved";
+    createdAt: number;
+    user?: any;
+  }
+>();
+
+function generateCode() {
+  return Math.floor(10000000 + Math.random() * 90000000).toString();
+}
+
+// auto-clean expired codes (5 minutes)
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, data] of tvCodes.entries()) {
+    if (now - data.createdAt > 5 * 60 * 1000) {
+      tvCodes.delete(code);
+    }
+  }
+}, 60_000);
+
   storage.pruneOldGenerateUsage(getTodayDate()).catch(() => {});
 
   app.use(
@@ -280,8 +305,10 @@ export async function registerRoutes(
     next();
   });
 
-  // Generate TV code
-app.get("/api/tv-code", (req, res) => {
+/* ── TV ROUTES ───────────────────────── */
+
+// TV generates code
+app.post("/api/tv/generate", (req, res) => {
   const code = generateCode();
 
   tvCodes.set(code, {
@@ -289,34 +316,40 @@ app.get("/api/tv-code", (req, res) => {
     createdAt: Date.now(),
   });
 
-  res.json({ code });
+  res.json({ success: true, code });
 });
 
-// Submit code from phone
-app.post("/api/tv-submit", (req, res) => {
-  const { code, user } = req.body;
+// Phone submits code
+app.post("/api/tv/connect", (req, res) => {
+  const { code } = req.body;
 
-  if (!tvCodes.has(code)) {
-    return res.status(400).json({ error: "Invalid code" });
+  if (!code || !tvCodes.has(code)) {
+    return res.status(400).json({ success: false, error: "Invalid code" });
   }
 
+  const existing = tvCodes.get(code);
+
   tvCodes.set(code, {
+    ...existing,
     status: "approved",
-    user,
   });
 
   res.json({ success: true });
 });
 
-// TV checks if approved
-app.get("/api/tv-status/:code", (req, res) => {
+// TV polls status
+app.get("/api/tv/status/:code", (req, res) => {
   const code = req.params.code;
 
   if (!tvCodes.has(code)) {
-    return res.status(400).json({ error: "Invalid code" });
+    return res.status(400).json({ success: false, error: "Invalid code" });
   }
 
-  res.json(tvCodes.get(code));
+  const data = tvCodes.get(code);
+
+  res.json({
+    status: data.status === "approved" ? "connected" : "waiting",
+  });
 });
 
   app.use(async (req: Request, res: Response, next: NextFunction) => {
