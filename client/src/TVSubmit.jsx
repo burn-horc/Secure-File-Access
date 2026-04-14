@@ -62,39 +62,31 @@ export default function TVSubmit() {
 
   const handleSubmit = async () => {
   try {
-    // 🔥 1. Get logged-in session
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    setLoading(true);
+    setMessage("");
 
-    if (!session) {
-      alert("Please sign in first.");
-      return;
-    }
-
-    // 🔥 2. Send request WITH token
     const res = await fetch("/api/tv/submit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`, // ⭐ THIS IS THE FIX
       },
       body: JSON.stringify({ code }),
     });
 
     const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to link TV");
+    if (!res.ok || !data.ok) {
+      throw new Error(data.message || "Failed to connect TV.");
     }
 
-    // ✅ success
-    console.log("TV linked!");
+    setMessage("TV linked successfully!");
   } catch (err) {
     console.error(err);
+    setMessage(err.message || "Request failed");
+  } finally {
+    setLoading(false);
   }
 };
-
     
 
   return (
