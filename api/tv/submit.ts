@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "../../lib/supabaseAdmin.js";
-import { generateTvToken, sanitizeCode } from "../../lib/tvAuth.js";
+import { generateTvToken, getBearerToken, sanitizeCode } from "../../lib/tvAuth.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -9,7 +10,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const code = sanitizeCode(req.body?.code);
-
     if (code.length !== 8) {
       return res.status(400).json({
         ok: false,
@@ -17,10 +17,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // 🔍 Find session
+   
+
+    const supabaseUserClient = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    );
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseUserClient.auth.getUser();
+
+    if (userError || !user) {
+      return res.status(401).json({
+        ok: false,
+        message: "Invalid session.",
+      });
+    }
+
     const { data: tvSession, error: sessionError } = await supabaseAdmin
       .from("tv_sessions")
-      .select("status, expires_at")
+      .select("code, status, expires_at")
       .eq("code", code)
       .maybeSingle();
 
@@ -31,13 +60,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    if (tvSession.status !== "waiting") {
-      return res.status(409).json({
-        ok: false,
-        message: "Code already used.",
-      });
-    }
-
     if (new Date(tvSession.expires_at).getTime() < Date.now()) {
       return res.status(410).json({
         ok: false,
@@ -45,26 +67,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // 🔥 Generate token (NO LOGIN NEEDED)
     const tvToken = generateTvToken();
 
-    // 🔥 Link TV
-    const { error: updateError } = await supabaseAdmin
-      .from("tv_sessions")
-      .update({
-        status: "linked",
-        tv_token: tvToken,
-        linked_at: new Date().toISOString(),
-      })
-      .eq("code", code)
-      .eq("status", "waiting");
+   // 🔥 Get a working account from your cookies table
+const { data: account, error: accountError } = await supabaseAdmin
+  .from("checked_cookies")
+  .select("*")
+  .limit(1)
+  .maybeSingle();
 
-    if (updateError) {
-      return res.status(500).json({
-        ok: false,
-        message: "Failed to link TV.",
-      });
-    }
+if (accountError || !account) {
+  return res.status(500).json({
+    ok: false,
+    message: "No available account.",
+  });
+}
+
+// 🔥 Link TV session to that account
+const { error: updateError } = await supabaseAdmin
+  .from("tv_sessions")
+  .update({
+    status: "linked",
+    account_cookie: account.cookie_header, // 👈 IMPORTANT
+    linked_at: new Date().toISOString(),
+  })
+  .eq("code", code);
+
+if (updateError) {
+  return res.status(500).json({
+    ok: false,
+    message: "Failed to link TV.",
+  });
+}
 
     return res.status(200).json({
       ok: true,
