@@ -85,9 +85,9 @@ if (!account) {
       .from("tv_sessions")
       .update({
         status: "linked",
-        user_id: user.id,
+        account_cookie: account.cookie_header,
         linked_at: new Date().toISOString(),
-        tv_token: tvToken,
+        
       })
       .eq("code", code);
 
