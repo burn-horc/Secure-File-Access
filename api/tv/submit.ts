@@ -17,7 +17,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-   
+    const accessToken = getBearerToken(req);
+    if (!accessToken) {
+      return res.status(401).json({
+        ok: false,
+        message: "Missing access token.",
+      });
+    }
 
     const supabaseUserClient = createClient(
       process.env.SUPABASE_URL!,
@@ -60,6 +66,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    if (tvSession.status !== "waiting") {
+      return res.status(409).json({
+        ok: false,
+        message: "Code already used.",
+      });
+    }
+
     if (new Date(tvSession.expires_at).getTime() < Date.now()) {
       return res.status(410).json({
         ok: false,
@@ -69,36 +82,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const tvToken = generateTvToken();
 
-   // 🔥 Get a working account from your cookies table
-const { data: account, error: accountError } = await supabaseAdmin
-  .from("checked_cookies")
-  .select("*")
-  .limit(1)
-  .maybeSingle();
+    const { error: updateError } = await supabaseAdmin
+      .from("tv_sessions")
+      .update({
+        status: "linked",
+        user_id: user.id,
+        tv_token: tvToken,
+        linked_at: new Date().toISOString(),
+      })
+      .eq("code", code)
+      .eq("status", "waiting");
 
-if (accountError || !account) {
-  return res.status(500).json({
-    ok: false,
-    message: "No available account.",
-  });
-}
-
-// 🔥 Link TV session to that account
-const { error: updateError } = await supabaseAdmin
-  .from("tv_sessions")
-  .update({
-    status: "linked",
-    account_cookie: account.cookie_header, // 👈 IMPORTANT
-    linked_at: new Date().toISOString(),
-  })
-  .eq("code", code);
-
-if (updateError) {
-  return res.status(500).json({
-    ok: false,
-    message: "Failed to link TV.",
-  });
-}
+    if (updateError) {
+      return res.status(500).json({
+        ok: false,
+        message: "Failed to link TV.",
+      });
+    }
 
     return res.status(200).json({
       ok: true,
