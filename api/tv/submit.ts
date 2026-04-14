@@ -17,19 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // 🔥 Get a random working account from your DB
-const { data: account } = await supabaseAdmin
-  .from("checked_cookies")
-  .select("*")
-  .limit(1)
-  .maybeSingle();
-
-if (!account) {
-  return res.status(500).json({
-    ok: false,
-    message: "No available account.",
-  });
-}
+   
 
     const supabaseUserClient = createClient(
       process.env.SUPABASE_URL!,
@@ -81,22 +69,36 @@ if (!account) {
 
     const tvToken = generateTvToken();
 
-    const { error: updateError } = await supabaseAdmin
-      .from("tv_sessions")
-      .update({
-        status: "linked",
-        account_cookie: account.cookie_header,
-        linked_at: new Date().toISOString(),
-        
-      })
-      .eq("code", code);
+   // 🔥 Get a working account from your cookies table
+const { data: account, error: accountError } = await supabaseAdmin
+  .from("checked_cookies")
+  .select("*")
+  .limit(1)
+  .maybeSingle();
 
-    if (updateError) {
-      return res.status(500).json({
-        ok: false,
-        message: "Failed to link TV.",
-      });
-    }
+if (accountError || !account) {
+  return res.status(500).json({
+    ok: false,
+    message: "No available account.",
+  });
+}
+
+// 🔥 Link TV session to that account
+const { error: updateError } = await supabaseAdmin
+  .from("tv_sessions")
+  .update({
+    status: "linked",
+    account_cookie: account.cookie_header, // 👈 IMPORTANT
+    linked_at: new Date().toISOString(),
+  })
+  .eq("code", code);
+
+if (updateError) {
+  return res.status(500).json({
+    ok: false,
+    message: "Failed to link TV.",
+  });
+}
 
     return res.status(200).json({
       ok: true,
