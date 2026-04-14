@@ -1,0 +1,105 @@
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "../../lib/supabaseAdmin.js";
+import { generateTvToken, getBearerToken, sanitizeCode } from "../../lib/tvAuth.js";
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  try {
+    if (req.method !== "POST") {
+      return res.status(405).json({ ok: false, message: "Method not allowed" });
+    }
+
+    const code = sanitizeCode(req.body?.code);
+    if (code.length !== 8) {
+      return res.status(400).json({
+        ok: false,
+        message: "Please enter a valid 8-digit code.",
+      });
+    }
+
+    const accessToken = getBearerToken(req);
+    if (!accessToken) {
+      return res.status(401).json({
+        ok: false,
+        message: "Not signed in.",
+      });
+    }
+
+    const supabaseUserClient = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    );
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseUserClient.auth.getUser();
+
+    if (userError || !user) {
+      return res.status(401).json({
+        ok: false,
+        message: "Invalid session.",
+      });
+    }
+
+    const { data: tvSession, error: sessionError } = await supabaseAdmin
+      .from("tv_sessions")
+      .select("code, status, expires_at")
+      .eq("code", code)
+      .maybeSingle();
+
+    if (sessionError || !tvSession) {
+      return res.status(404).json({
+        ok: false,
+        message: "Code not found.",
+      });
+    }
+
+    if (new Date(tvSession.expires_at).getTime() < Date.now()) {
+      return res.status(410).json({
+        ok: false,
+        message: "Code expired.",
+      });
+    }
+
+    const tvToken = generateTvToken();
+
+    const { error: updateError } = await supabaseAdmin
+      .from("tv_sessions")
+      .update({
+        status: "linked",
+        user_id: user.id,
+        linked_at: new Date().toISOString(),
+        tv_token: tvToken,
+      })
+      .eq("code", code);
+
+    if (updateError) {
+      return res.status(500).json({
+        ok: false,
+        message: "Failed to link TV.",
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      message: "TV linked successfully!",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      ok: false,
+      message: error?.message || "Unexpected server error",
+    });
+  }
+}
