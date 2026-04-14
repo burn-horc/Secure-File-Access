@@ -1812,11 +1812,7 @@ return (
           />
         </Route>
 
-        <Route path="/tv-submit">
-  <TVSubmit />
-</Route>
-
-<Route path="/tv">
+        <Route path="/tv">
   <TVScreen />
 </Route>
 
