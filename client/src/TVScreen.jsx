@@ -4,59 +4,56 @@ import { useEffect, useState } from "react";
 export default function TVScreen() {
   const [code, setCode] = useState("");
   const [status, setStatus] = useState("loading");
+  const [tvToken, setTvToken] = useState("");
+  const [account, setAccount] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    let interval;
+    let intervalId;
+    let cancelled = false;
 
     async function init() {
       try {
-        const res = await fetch("/api/tv/generate", {
+        const res = await fetch("/api/tv/create", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
         });
 
-        const text = await res.text();
-        console.log("tv/generate status:", res.status);
-        console.log("tv/generate body:", text);
+        const data = await res.json();
 
-        if (!res.ok) {
-          setStatus("error");
-          return;
+        if (!res.ok || !data.ok || !data.code) {
+          throw new Error(data.message || "Failed to create TV code.");
         }
 
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch {
-          setStatus("error");
-          return;
-        }
-
-        if (!data.success || !data.code) {
-          setStatus("error");
-          return;
-        }
+        if (cancelled) return;
 
         setCode(data.code);
         setStatus("waiting");
 
-        interval = setInterval(async () => {
+        intervalId = setInterval(async () => {
           try {
-            const r = await fetch(`/api/tv/status/${data.code}`);
-            const s = await r.json();
+            const pollRes = await fetch(`/api/tv/status?code=${data.code}`);
+            const pollData = await pollRes.json();
 
-            if (s.status === "connected") {
-              setStatus("connected");
-              clearInterval(interval);
+            if (!pollRes.ok) {
+              throw new Error(pollData.message || "Failed to check TV status.");
             }
-          } catch {
-            // ignore polling error
+
+            if (pollData.status === "linked" && pollData.tvToken) {
+              clearInterval(intervalId);
+              setTvToken(pollData.tvToken);
+              setStatus("linked");
+            }
+          } catch (err) {
+            console.error("TV polling error:", err);
           }
         }, 2000);
       } catch (err) {
-        console.error("tv/generate request failed:", err);
+        console.error("TV init failed:", err);
+        if (cancelled) return;
+        setErrorMessage(err.message || "Failed to generate code");
         setStatus("error");
       }
     }
@@ -64,9 +61,49 @@ export default function TVScreen() {
     init();
 
     return () => {
-      if (interval) clearInterval(interval);
+      cancelled = true;
+      if (intervalId) clearInterval(intervalId);
     };
   }, []);
+
+  useEffect(() => {
+    if (!tvToken || status !== "linked") return;
+
+    let cancelled = false;
+
+    async function loadAccount() {
+      try {
+        const res = await fetch("/api/tv/account", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${tvToken}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.message || "Failed to load account.");
+        }
+
+        if (cancelled) return;
+
+        setAccount(data.account || null);
+        setStatus("ready");
+      } catch (err) {
+        console.error("Load account failed:", err);
+        if (cancelled) return;
+        setErrorMessage(err.message || "Failed to load account");
+        setStatus("error");
+      }
+    }
+
+    loadAccount();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tvToken, status]);
 
   const digits = code.padEnd(8, " ").split("");
 
@@ -98,10 +135,10 @@ export default function TVScreen() {
           )}
 
           {status === "error" && (
-            <Text color="#ff6b6b">Failed to generate code</Text>
+            <Text color="#ff6b6b">{errorMessage || "Failed to generate code"}</Text>
           )}
 
-          {(status === "waiting" || status === "connected") && (
+          {(status === "waiting" || status === "linked" || status === "ready") && !account && (
             <>
               <Box
                 w="full"
@@ -170,10 +207,44 @@ export default function TVScreen() {
                 </Text>
               </Box>
 
-              <Text color={status === "connected" ? "#00d563" : "rgba(255,255,255,0.65)"}>
-                {status === "connected" ? "Connected!" : "Waiting for code entry..."}
+              <Text color={status === "linked" ? "#00d563" : "rgba(255,255,255,0.65)"}>
+                {status === "linked" ? "Connected! Loading account..." : "Waiting for code entry..."}
               </Text>
             </>
+          )}
+
+          {status === "ready" && account && (
+            <Box
+              w="full"
+              borderWidth="1px"
+              borderColor="rgba(255,255,255,0.08)"
+              borderRadius="24px"
+              bg="rgba(10,14,30,0.35)"
+              px={{ base: 4, sm: 6 }}
+              py={{ base: 5, sm: 6 }}
+            >
+              <Text
+                textAlign="center"
+                fontSize={{ base: "2xl", sm: "3xl" }}
+                fontWeight="800"
+                mb={4}
+              >
+                Account Linked
+              </Text>
+
+              <Text textAlign="center" color="rgba(255,255,255,0.72)">
+                {account.display_name || account.name || account.email || "Your account"}
+              </Text>
+
+              <Text
+                mt={4}
+                textAlign="center"
+                color="#00d563"
+                fontWeight="700"
+              >
+                You can start watching now
+              </Text>
+            </Box>
           )}
         </VStack>
       </Box>
