@@ -21,7 +21,10 @@ export default function TVSubmit() {
   };
 
 const handleContinue = async () => {
-  if (cleanCode.length !== 8) return;
+  if (!isValid || loading) return;
+
+  setLoading(true);
+  setError("");
 
   try {
     const res = await fetch("/api/tv/submit", {
@@ -35,9 +38,17 @@ const handleContinue = async () => {
     const data = await res.json();
 
     if (!res.ok || !data?.ok) {
-      alert(data?.message || "Failed to connect");
-      return;
+      throw new Error(data?.message || "Failed to connect");
     }
+
+    window.location.href = `/tv-connect?code=${cleanCode}`;
+  } catch (err) {
+    console.error(err);
+    setError(err?.message || "Error connecting TV");
+  } finally {
+    setLoading(false);
+  }
+};
 
     // 🔥 AFTER linking, go to TV connect page
     window.location.href = `/tv-connect?code=${cleanCode}`;
