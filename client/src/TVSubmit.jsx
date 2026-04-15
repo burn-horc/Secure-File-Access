@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Box, Button, HStack, Input, Text, VStack } from "@chakra-ui/react";
+import { supabase } from "./supabaseClient"; 
 
 export default function TVSubmit() {
   const [value, setValue] = useState("");
@@ -21,35 +22,48 @@ export default function TVSubmit() {
   };
 
   const handleContinue = async () => {
-    if (!isValid || loading) return;
+  if (!isValid || loading) return;
 
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    try {
-      const res = await fetch("/api/tv/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ code: cleanCode }),
-      });
+  try {
+    // 🔥 get session from Supabase
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
 
-      const data = await res.json();
-
-      if (!res.ok || !data?.ok) {
-        throw new Error(data?.message || "Failed to connect");
-      }
-
-      window.location.href = `/tv-connect?code=${cleanCode}`;
-    } catch (err) {
-      console.error(err);
-      setError(err?.message || "Error connecting TV");
-    } finally {
-      setLoading(false);
+    if (sessionError || !session?.access_token) {
+      throw new Error("You must be logged in.");
     }
-  };
 
+    // 🔥 send token to backend
+    const res = await fetch("/api/tv/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ code: cleanCode }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data?.ok) {
+      throw new Error(data?.message || "Failed to connect TV");
+    }
+
+    // 🔥 redirect after success
+    window.location.href = `/tv-connect?code=${cleanCode}`;
+
+  } catch (err) {
+    console.error(err);
+    setError(err?.message || "Error connecting TV");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <Box minH="100vh" bg="#050b1d" px={4} py={8} color="white">
       <VStack maxW="760px" mx="auto" spacing={6} align="stretch">
