@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "../../lib/supabaseAdmin.js";
-import { generateTvToken, getBearerToken, sanitizeCode } from "../../lib/tvAuth.js";
+import { getBearerToken, sanitizeCode } from "../../lib/tvAuth.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -17,7 +17,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-   
+    const accessToken = getBearerToken(req);
+    if (!accessToken) {
+      return res.status(401).json({
+        ok: false,
+        message: "Missing session.",
+      });
+    }
 
     const supabaseUserClient = createClient(
       process.env.SUPABASE_URL!,
@@ -67,38 +73,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const tvToken = generateTvToken();
+    if (tvSession.status === "linked") {
+      return res.status(409).json({
+        ok: false,
+        message: "Code already used.",
+      });
+    }
 
-   // 🔥 Get a working account from your cookies table
-const { data: account, error: accountError } = await supabaseAdmin
-  .from("checked_cookies")
-  .select("*")
-  .limit(1)
-  .maybeSingle();
+    const { data: account, error: accountError } = await supabaseAdmin
+      .from("checked_cookies")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-if (accountError || !account) {
-  return res.status(500).json({
-    ok: false,
-    message: "No available account.",
-  });
-}
+    if (accountError || !account) {
+      return res.status(500).json({
+        ok: false,
+        message: "No available account.",
+      });
+    }
 
-// 🔥 Link TV session to that account
-const { error: updateError } = await supabaseAdmin
-  .from("tv_sessions")
-  .update({
-    status: "linked",
-    account_cookie: account.cookie_header, // 👈 IMPORTANT
-    linked_at: new Date().toISOString(),
-  })
-  .eq("code", code);
+    const { error: updateError } = await supabaseAdmin
+      .from("tv_sessions")
+      .update({
+        status: "linked",
+        account_cookie: account.cookie_header,
+        linked_at: new Date().toISOString(),
+        linked_user_id: user.id,
+      })
+      .eq("code", code);
 
-if (updateError) {
-  return res.status(500).json({
-    ok: false,
-    message: "Failed to link TV.",
-  });
-}
+    if (updateError) {
+      return res.status(500).json({
+        ok: false,
+        message: "Failed to link TV.",
+      });
+    }
 
     return res.status(200).json({
       ok: true,
