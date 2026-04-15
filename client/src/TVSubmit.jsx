@@ -20,46 +20,36 @@ export default function TVSubmit() {
     setValue(e.target.value.replace(/\D/g, "").slice(0, 8));
   };
 
-const handleContinue = async () => {
-  if (!isValid || loading) return;
+  const handleContinue = async () => {
+    if (!isValid || loading) return;
 
-  setLoading(true);
-  setError("");
+    setLoading(true);
+    setError("");
 
-  try {
-    const res = await fetch("/api/tv/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ code: cleanCode }),
-    });
+    try {
+      const res = await fetch("/api/tv/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code: cleanCode }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok || !data?.ok) {
-      throw new Error(data?.message || "Failed to connect");
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.message || "Failed to connect");
+      }
+
+      window.location.href = `/tv-connect?code=${cleanCode}`;
+    } catch (err) {
+      console.error(err);
+      setError(err?.message || "Error connecting TV");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    window.location.href = `/tv-connect?code=${cleanCode}`;
-  } catch (err) {
-    console.error(err);
-    setError(err?.message || "Error connecting TV");
-  } finally {
-    setLoading(false);
-  }
-};
-
-    // 🔥 AFTER linking, go to TV connect page
-    window.location.href = `/tv-connect?code=${cleanCode}`;
-
-  } catch (err) {
-    console.error(err);
-    alert("Error connecting TV");
-  }
-};
-  
- 
   return (
     <Box minH="100vh" bg="#050b1d" px={4} py={8} color="white">
       <VStack maxW="760px" mx="auto" spacing={6} align="stretch">
