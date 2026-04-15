@@ -20,6 +20,34 @@ export default function TVSubmit() {
     setValue(e.target.value.replace(/\D/g, "").slice(0, 8));
   };
 
+const handleContinue = async () => {
+  if (cleanCode.length !== 8) return;
+
+  try {
+    const res = await fetch("/api/tv/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ code: cleanCode }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data?.ok) {
+      alert(data?.message || "Failed to connect");
+      return;
+    }
+
+    // 🔥 AFTER linking, go to TV connect page
+    window.location.href = `/tv-connect?code=${cleanCode}`;
+
+  } catch (err) {
+    console.error(err);
+    alert("Error connecting TV");
+  }
+};
+  
   const handleContinue = async () => {
     if (!isValid || loading) return;
 
