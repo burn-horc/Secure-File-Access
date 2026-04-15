@@ -48,38 +48,7 @@ const handleContinue = async () => {
   }
 };
   
-  const handleContinue = async () => {
-    if (!isValid || loading) return;
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch("/api/tv-submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: cleanCode }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data?.success || !data?.redirectUrl) {
-        throw new Error(data?.error || "Could not connect");
-      }
-
-      const win = window.open("about:blank", "_blank");
-      if (win) {
-        win.location.href = data.redirectUrl;
-      } else {
-        window.location.href = data.redirectUrl;
-      }
-    } catch (err) {
-      setError(err.message || "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+ 
   return (
     <Box minH="100vh" bg="#050b1d" px={4} py={8} color="white">
       <VStack maxW="760px" mx="auto" spacing={6} align="stretch">
