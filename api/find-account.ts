@@ -92,24 +92,22 @@ async function savePassedCheckAudits(results: any[]) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const ip = getClientIp(req);
-   const { success } = await ipRateLimit.limit(ip);
 
-if (!success) {
-  return res.status(429).json({
-    success: false,
-    error: "Too many requests. Try again later.",
-  });
-}
-const locked = await isLockedOut(ip);
+    const { success } = await ipRateLimit.limit(ip);
+    if (!success) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many requests. Try again later.",
+      });
+    }
 
-if (locked) {
-  return res.status(429).json({
-    success: false,
-    error: "Too many failed attempts. Try again later.",
-  });
-}
-    
-    console.log("find-account method:", req.method);
+    const locked = await isLockedOut(ip);
+    if (locked) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many failed attempts. Try again later.",
+      });
+    }
 
     if (req.method !== "POST") {
       return res.status(405).json({
@@ -119,9 +117,9 @@ if (locked) {
     }
 
     const passcode = String(req.body?.passcode ?? "").trim();
-    console.log("find-account passcode present:", !!passcode);
 
     if (!passcode) {
+      await recordFailure(ip);
       return res.status(400).json({
         success: false,
         error: "Passcode is required.",
@@ -130,26 +128,17 @@ if (locked) {
 
     const passcodeCheck = await isPasscodeValid(passcode);
     if (!passcodeCheck.ok) {
-    await clearFailures(ip);
-      
+      await recordFailure(ip);
       return res.status(401).json({
         success: false,
         error: passcodeCheck.error,
       });
     }
 
-    await incrementPasscodeUsage(
-      passcodeCheck.passcodeRow.id,
-      passcodeCheck.passcodeRow.uses ?? 0
-    );
-
     const { data: cookieRows, error: cookieError } = await supabase
       .from("cookies")
       .select("cookie")
       .order("created_at", { ascending: false });
-
-    console.log("cookie query error:", cookieError);
-    console.log("cookie row count:", cookieRows?.length ?? 0);
 
     if (cookieError) {
       return res.status(500).json({
@@ -162,8 +151,6 @@ if (locked) {
       .map((row: any) => row.cookie)
       .filter(Boolean);
 
-    console.log("storedCookies count:", storedCookies.length);
-
     if (!storedCookies.length) {
       return res.status(400).json({
         success: false,
@@ -174,12 +161,6 @@ if (locked) {
     const parsedInput = getCookieHeaders({
       input: storedCookies.join("\n"),
     });
-
-    console.log("parsedInput error:", parsedInput?.error ?? null);
-    console.log(
-      "parsed cookie count:",
-      Array.isArray(parsedInput?.cookies) ? parsedInput.cookies.length : 0
-    );
 
     if (parsedInput.error) {
       return res.status(400).json({
@@ -201,8 +182,6 @@ if (locked) {
       [cookies[i], cookies[j]] = [cookies[j], cookies[i]];
     }
 
-    console.log("starting scan:", cookies.length);
-
     for (const cookie of cookies) {
       const result = await runDirectCheck([cookie], 1, {
         skipNFToken: false,
@@ -219,12 +198,18 @@ if (locked) {
       const valid = results.find((r: any) => r?.valid);
 
       if (valid) {
-        console.log("valid cookie found");
+        await incrementPasscodeUsage(
+          passcodeCheck.passcodeRow.id,
+          passcodeCheck.passcodeRow.uses ?? 0
+        );
+
+        await clearFailures(ip);
+
         return res.status(200).json(result);
       }
     }
 
-    return res.status(200).json({
+    return res.status(404).json({
       success: false,
       error: "No valid account found from available cookies.",
     });
