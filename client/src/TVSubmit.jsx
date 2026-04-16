@@ -13,38 +13,48 @@ export default function TVSubmit() {
     setLoading(true);
 
     try {
-      // 🔥 STEP 1: Premium logic (get account)
       const res = await fetch("/api/find-account", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          passcode: "DEFAULT", // or remove if not needed
+          passcode: cleanCode,
         }),
       });
 
       const data = await res.json();
-      const result = data?.results?.[0];
+      console.log("find-account response:", data);
 
-      if (!result?.nftokenLink) {
-        alert("No account available");
+      if (!res.ok || data?.success === false) {
+        alert(data?.error || "Request failed");
         return;
       }
 
-      // 🔥 STEP 2: TV Connect logic (open link)
-      const win = window.open("about:blank", "_blank");
+      const result = data?.results?.[0];
 
-      if (win) {
-        win.location.href = result.nftokenLink;
+      if (!result) {
+        alert("No account result returned");
+        return;
       }
 
+      if (!result?.nftokenLink) {
+        alert("No link returned");
+        return;
+      }
+
+      const win = window.open("about:blank", "_blank");
+      if (win) {
+        win.location.href = result.nftokenLink;
+      } else {
+        window.location.href = result.nftokenLink;
+      }
     } catch (err) {
       console.error(err);
       alert("Something went wrong");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
