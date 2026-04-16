@@ -1250,37 +1250,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     Upload File
   </Button>
 
-  {(isFreePage || isPremiumPage) && (
-    <Button
-      {...primaryBtn}
-      type="button"
-      gridColumn="span 2"
-      minH="3.4rem"
-      fontSize="sm"
-      onClick={runFindAccount}
-      isDisabled={isLoading}
-      data-testid="button-find-account"
-      _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-    >
-      Premium Account
-    </Button>
-  )}
-
-  {(isFreePage || isTrialPage) && (
-    <Button
-      {...primaryBtn}
-      type="button"
-      gridColumn="span 2"
-      minH="3.4rem"
-      fontSize="sm"
-      onClick={() => runTrial?.()}
-      isDisabled={isLoading}
-      data-testid="button-trial"
-      _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-    >
-      Random Account
-    </Button>
-  )}
+ 
 </Grid>
                 <Box
   borderWidth="1px"
@@ -2441,7 +2411,13 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     </ModalBody>
   </ModalContent>
 </Modal>
-      {showNav && <Navigation onClose={() => setShowNav(false)} />}
+      {showNav && (
+  <Navigation
+    onClose={() => setShowNav(false)}
+    onPremiumClick={runFindAccount}
+    onRandomClick={runTrial}
+  />
+)}
 </Box>
 
 );
