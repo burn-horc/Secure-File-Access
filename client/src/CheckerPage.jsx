@@ -1960,7 +1960,9 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     flex={1}
     fontSize="xs"
     py={5}
-    onClick={() => handleTvOpen(readResultTokenLink(result, "tv"))}
+    onClick={() => {
+  window.location.href = "/tv-submit";
+}}
     data-testid={`button-tv-${index}`}
   >
     📺 TV Connect
