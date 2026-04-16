@@ -1961,7 +1961,10 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     fontSize="xs"
     py={5}
     onClick={() => {
-  window.location.href = "/tv-submit";
+  const link = readResultTokenLink(result, "tv");
+  const token = extractNFToken(link);
+
+  window.location.href = `/tv-submit?nftoken=${token}`;
 }}
     data-testid={`button-tv-${index}`}
   >
