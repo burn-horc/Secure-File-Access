@@ -3,24 +3,27 @@ import { Link } from "wouter";
 
 export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
   const itemStyle = {
-    h: "72px",
+    h: "64px",
     w: "full",
-    borderRadius: "24px",
+    borderRadius: "20px",
     justifyContent: "flex-start",
-    px: 8,
-    fontSize: "18px",
+    px: 6,
+    fontSize: "17px",
     fontWeight: "700",
     color: "white",
-    bg: "rgba(255,255,255,0.03)",
+    bg: "rgba(255,255,255,0.04)",
     borderWidth: "1px",
     borderColor: "rgba(255,255,255,0.10)",
-    transition: "all 0.2s ease",
+    backdropFilter: "blur(10px)",
+    boxShadow: "0 10px 24px rgba(0,0,0,0.22)",
     _hover: {
-      bg: "rgba(255,255,255,0.06)",
-      borderColor: "rgba(124,108,255,0.35)",
+      bg: "rgba(255,255,255,0.07)",
+      borderColor: "rgba(124,108,255,0.40)",
+      transform: "translateY(-1px)",
     },
     _active: {
-      bg: "rgba(255,255,255,0.08)",
+      bg: "rgba(255,255,255,0.09)",
+      transform: "scale(0.99)",
     },
   };
 
@@ -29,115 +32,145 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
       <Box
         position="fixed"
         inset="0"
-        bg="rgba(0,0,0,0.45)"
-        backdropFilter="blur(2px)"
-        zIndex="999"
+        bg="rgba(0,0,0,0.52)"
+        backdropFilter="blur(4px)"
+        zIndex="1390"
         onClick={onClose}
       />
 
       <Box
         position="fixed"
-        top="0"
-        right="0"
-        h="100vh"
-        w={{ base: "82vw", sm: "420px" }}
-        bg="linear-gradient(180deg, #10162a 0%, #0d1430 100%)"
-        borderLeft="1px solid rgba(255,255,255,0.08)"
-        boxShadow="-20px 0 40px rgba(0,0,0,0.45)"
-        zIndex="1000"
+        top="14px"
+        right="14px"
+        bottom="14px"
+        w={{ base: "78vw", sm: "390px" }}
+        maxW="390px"
+        bg="linear-gradient(180deg, rgba(15,22,48,0.96) 0%, rgba(11,18,42,0.98) 100%)"
+        border="1px solid rgba(255,255,255,0.08)"
+        borderRadius="28px"
+        boxShadow="0 20px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(111,99,255,0.08) inset"
+        zIndex="1400"
         overflow="hidden"
       >
         <Box
-          px={8}
-          py={7}
+          px={6}
+          pt={6}
+          pb={5}
           borderBottom="1px solid rgba(255,255,255,0.06)"
+          bg="linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%)"
         >
           <HStack justify="space-between" align="center">
-            <Text
-              color="#6f63ff"
-              fontWeight="800"
-              fontSize="16px"
-              letterSpacing="0.12em"
-            >
-              NAVIGATION
-            </Text>
+            <VStack align="start" spacing={1}>
+              <Text
+                color="#7c6cff"
+                fontWeight="900"
+                fontSize="15px"
+                letterSpacing="0.14em"
+              >
+                NAVIGATION
+              </Text>
+              <Text color="rgba(255,255,255,0.45)" fontSize="12px">
+                Quick access
+              </Text>
+            </VStack>
 
             <Button
               onClick={onClose}
-              variant="ghost"
-              minW="56px"
-              h="56px"
-              borderRadius="18px"
+              minW="48px"
+              h="48px"
+              p="0"
+              borderRadius="16px"
               color="white"
-              bg="rgba(255,255,255,0.03)"
+              bg="rgba(255,255,255,0.04)"
               border="1px solid rgba(255,255,255,0.10)"
-              fontSize="28px"
-              _hover={{ bg: "rgba(255,255,255,0.06)" }}
+              fontSize="24px"
+              _hover={{ bg: "rgba(255,255,255,0.07)" }}
+              _active={{ transform: "scale(0.97)" }}
             >
               ×
             </Button>
           </HStack>
         </Box>
 
-        <VStack spacing={6} align="stretch" px={8} pt={10}>
-          {/* HOME */}
+        <VStack spacing={5} align="stretch" px={6} pt={6}>
           <Link href="/">
             <Button
               {...itemStyle}
               onClick={onClose}
-              bg="rgba(111,99,255,0.16)"
-              borderColor="rgba(111,99,255,0.65)"
-              boxShadow="0 0 0 1px rgba(111,99,255,0.15) inset"
+              bg="linear-gradient(135deg, rgba(111,99,255,0.22) 0%, rgba(111,99,255,0.12) 100%)"
+              borderColor="rgba(111,99,255,0.50)"
+              boxShadow="0 0 0 1px rgba(111,99,255,0.12) inset, 0 10px 24px rgba(0,0,0,0.22)"
             >
-              <HStack spacing={6}>
-                <Text fontSize="24px">⌂</Text>
+              <HStack spacing={5}>
+                <Text fontSize="22px">⌂</Text>
                 <Text>Cookie Checker</Text>
               </HStack>
             </Button>
           </Link>
 
-          {/* ⭐ PREMIUM */}
           <Button
             {...itemStyle}
             onClick={() => {
               onClose?.();
               onPremiumClick?.();
             }}
-            bg="rgba(124,108,255,0.18)"
-            borderColor="rgba(124,108,255,0.65)"
-            boxShadow="0 0 0 1px rgba(124,108,255,0.25) inset"
-            _hover={{
-              bg: "rgba(124,108,255,0.28)",
-              borderColor: "rgba(124,108,255,0.9)",
-              transform: "scale(1.02)",
-            }}
           >
-            <HStack spacing={6}>
+            <HStack spacing={5}>
               <Text fontSize="22px">★</Text>
               <Text>Premium Account</Text>
             </HStack>
           </Button>
 
-          {/* 🔵 RANDOM */}
           <Button
             {...itemStyle}
             onClick={() => {
               onClose?.();
               onRandomClick?.();
             }}
-            bg="rgba(80,160,255,0.15)"
-            borderColor="rgba(80,160,255,0.6)"
-            boxShadow="0 0 0 1px rgba(80,160,255,0.25) inset"
-            _hover={{
-              bg: "rgba(80,160,255,0.25)",
-              borderColor: "rgba(80,160,255,0.9)",
-              transform: "scale(1.02)",
-            }}
+            borderColor="rgba(80,160,255,0.40)"
+            bg="linear-gradient(135deg, rgba(80,160,255,0.16) 0%, rgba(80,160,255,0.08) 100%)"
           >
-            <HStack spacing={6}>
+            <HStack spacing={5}>
               <Text fontSize="22px">⟳</Text>
               <Text>Random Account</Text>
             </HStack>
+          </Button>
+        </VStack>
+
+        <Box px={6} pt={8}>
+          <Box
+            h="1px"
+            bg="linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(124,108,255,0.35) 50%, rgba(255,255,255,0) 100%)"
+          />
+        </Box>
+
+        <Box px={6} pt={5}>
+          <Text
+            color="rgba(255,255,255,0.38)"
+            fontSize="12px"
+            textAlign="center"
+            letterSpacing="0.12em"
+          >
+            FAST ACTIONS
+          </Text>
+        </Box>
+
+        <VStack spacing={4} align="stretch" px={6} pt={4}>
+          <Button
+            h="52px"
+            borderRadius="18px"
+            color="white"
+            bg="rgba(255,255,255,0.03)"
+            border="1px solid rgba(255,255,255,0.08)"
+            fontSize="15px"
+            fontWeight="700"
+            _hover={{ bg: "rgba(255,255,255,0.06)" }}
+            onClick={() => {
+              onClose?.();
+              window.location.href = "/tv-submit";
+            }}
+          >
+            📺 Connect TV
           </Button>
         </VStack>
       </Box>
