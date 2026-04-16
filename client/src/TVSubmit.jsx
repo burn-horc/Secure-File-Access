@@ -19,7 +19,7 @@ export default function TVSubmit() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-  passcode: "YOUR_REAL_PASSCODE",
+  passcode: "10000001",
 }),
       });
 
