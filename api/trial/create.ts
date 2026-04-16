@@ -192,7 +192,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const result = checkData?.results?.[0] || checkData?.result || null;
+    const allResults = Array.isArray(checkData?.results)
+  ? checkData.results
+  : checkData?.result
+    ? [checkData.result]
+    : [];
+
+// 🔥 Only accept STRONG valid results
+const valid = allResults.find(
+  (r: any) =>
+    r?.valid &&
+    r?.nftokenLink &&
+    (r?.email || r?.plan || r?.countryOfSignup)
+);
+
+if (!valid) {
+  return res.status(404).json({
+    success: false,
+    error: "No usable random account found.",
+  });
+}
 
     if (!result) {
       return res.status(500).json({
