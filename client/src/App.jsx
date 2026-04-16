@@ -1461,26 +1461,46 @@ const handleTrialSubmit = async () => {
     latestPartialResultsRef.current = results;
     setCheckProgress({ completed: results.length, total: results.length });
 
-    const validResults = results.filter((r) => r?.valid);
-    const invalidResults = results.filter((r) => !r?.valid);
+const isUsableTrialResult = (result) => {
+  if (!result?.valid) return false;
 
-    setLiveValidCount(validResults.length);
-    setLiveInvalidCount(invalidResults.length);
-    setBulkValidResults(results);
+  const hasIdentity = Boolean(
+    String(result?.email || "").trim() ||
+    String(result?.plan || "").trim() ||
+    String(result?.countryOfSignup || "").trim()
+  );
 
-    results.forEach((result) => {
-      const planLabel = result?.plan?.trim() || "Unknown Plan";
-      const countryLabel = result?.countryOfSignup?.trim() || "Unknown Country";
+  const hasAccessLink = Boolean(
+    String(result?.nftokenLink || "").trim()
+  );
 
-      if (result?.valid) {
-        appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
-      } else {
-        appendCheckLog(
-          "invalid",
-          `INVALID - ${planLabel} - ${countryLabel} - ${result?.reason || "Unknown error"}`
-        );
-      }
-    });
+  return hasIdentity && hasAccessLink;
+};
+    
+    const usableResults = results.filter(isUsableTrialResult);
+const rejectedResults = results.filter((r) => !isUsableTrialResult(r));
+
+setLiveValidCount(usableResults.length);
+setLiveInvalidCount(rejectedResults.length);
+
+if (!usableResults.length) {
+  appendCheckLog("invalid", "No usable random account result returned.");
+  showToast("No usable random account found.");
+  return;
+}
+
+setBulkValidResults(usableResults);
+
+   results.forEach((result) => {
+  const planLabel = result?.plan?.trim() || "Unknown Plan";
+  const countryLabel = result?.countryOfSignup?.trim() || "Unknown Country";
+
+  if (isUsableTrialResult(result)) {
+    appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
+  } else {
+    appendCheckLog("invalid", `UNUSABLE - ${planLabel} - ${countryLabel} - Missing required data`);
+  }
+});
 
     appendCheckLog(
       "info",
