@@ -1,7 +1,7 @@
 import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { Link } from "wouter";
 
-export default function Navigation({ onClose }) {
+export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
   const itemStyle = {
     h: "72px",
     w: "full",
@@ -14,6 +14,7 @@ export default function Navigation({ onClose }) {
     bg: "rgba(255,255,255,0.03)",
     borderWidth: "1px",
     borderColor: "rgba(255,255,255,0.10)",
+    transition: "all 0.2s ease",
     _hover: {
       bg: "rgba(255,255,255,0.06)",
       borderColor: "rgba(124,108,255,0.35)",
@@ -79,6 +80,7 @@ export default function Navigation({ onClose }) {
         </Box>
 
         <VStack spacing={6} align="stretch" px={8} pt={10}>
+          {/* HOME */}
           <Link href="/">
             <Button
               {...itemStyle}
@@ -93,6 +95,50 @@ export default function Navigation({ onClose }) {
               </HStack>
             </Button>
           </Link>
+
+          {/* ⭐ PREMIUM */}
+          <Button
+            {...itemStyle}
+            onClick={() => {
+              onClose?.();
+              onPremiumClick?.();
+            }}
+            bg="rgba(124,108,255,0.18)"
+            borderColor="rgba(124,108,255,0.65)"
+            boxShadow="0 0 0 1px rgba(124,108,255,0.25) inset"
+            _hover={{
+              bg: "rgba(124,108,255,0.28)",
+              borderColor: "rgba(124,108,255,0.9)",
+              transform: "scale(1.02)",
+            }}
+          >
+            <HStack spacing={6}>
+              <Text fontSize="22px">★</Text>
+              <Text>Premium Account</Text>
+            </HStack>
+          </Button>
+
+          {/* 🔵 RANDOM */}
+          <Button
+            {...itemStyle}
+            onClick={() => {
+              onClose?.();
+              onRandomClick?.();
+            }}
+            bg="rgba(80,160,255,0.15)"
+            borderColor="rgba(80,160,255,0.6)"
+            boxShadow="0 0 0 1px rgba(80,160,255,0.25) inset"
+            _hover={{
+              bg: "rgba(80,160,255,0.25)",
+              borderColor: "rgba(80,160,255,0.9)",
+              transform: "scale(1.02)",
+            }}
+          >
+            <HStack spacing={6}>
+              <Text fontSize="22px">⟳</Text>
+              <Text>Random Account</Text>
+            </HStack>
+          </Button>
         </VStack>
       </Box>
     </>
