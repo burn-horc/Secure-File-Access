@@ -19,8 +19,8 @@ export default function TVSubmit() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          passcode: cleanCode,
-        }),
+  passcode: "YOUR_REAL_PASSCODE",
+}),
       });
 
       const data = await res.json();
