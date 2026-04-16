@@ -13,42 +13,26 @@ export default function TVSubmit() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/find-account", {
+      const res = await fetch("/api/tv/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-  passcode: "10000001",
-}),
+          code: cleanCode,
+        }),
       });
 
-      const data = await res.json();
-      console.log("find-account response:", data);
+      const data = await res.json().catch(() => ({}));
+      console.log("tv-submit response:", data);
 
-      if (!res.ok || data?.success === false) {
-        alert(data?.error || "Request failed");
+      if (!res.ok || !data?.ok) {
+        alert(data?.message || "Failed to connect TV");
         return;
       }
 
-      const result = data?.results?.[0];
-
-      if (!result) {
-        alert("No account result returned");
-        return;
-      }
-
-      if (!result?.nftokenLink) {
-        alert("No link returned");
-        return;
-      }
-
-      const win = window.open("about:blank", "_blank");
-      if (win) {
-        win.location.href = result.nftokenLink;
-      } else {
-        window.location.href = result.nftokenLink;
-      }
+      alert("TV linked successfully!");
+      window.location.href = "/tv";
     } catch (err) {
       console.error(err);
       alert("Something went wrong");
