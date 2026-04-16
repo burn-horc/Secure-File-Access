@@ -3,10 +3,13 @@ import { useState, useRef } from "react";
 export default function FloatingMenu({ setShowNav }) {
   const [pos, setPos] = useState({ x: 20, y: 100 });
   const dragging = useRef(false);
+  const moved = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
 
   const handleTouchStart = (e) => {
     dragging.current = true;
+    moved.current = false;
+
     offset.current = {
       x: e.touches[0].clientX - pos.x,
       y: e.touches[0].clientY - pos.y,
@@ -16,6 +19,9 @@ export default function FloatingMenu({ setShowNav }) {
   const handleTouchMove = (e) => {
     if (!dragging.current) return;
 
+    e.preventDefault();
+    moved.current = true;
+
     const x = e.touches[0].clientX - offset.current.x;
     const y = e.touches[0].clientY - offset.current.y;
 
@@ -24,6 +30,11 @@ export default function FloatingMenu({ setShowNav }) {
 
   const handleTouchEnd = () => {
     dragging.current = false;
+  };
+
+  const handleClick = () => {
+    if (moved.current) return;
+    setShowNav(true);
   };
 
   return (
@@ -36,10 +47,11 @@ export default function FloatingMenu({ setShowNav }) {
         left: pos.x,
         top: pos.y,
         zIndex: 3000,
+        touchAction: "none",
       }}
     >
       <button
-        onClick={() => setShowNav(true)}
+        onClick={handleClick}
         style={{
           height: "52px",
           width: "52px",
@@ -56,6 +68,7 @@ export default function FloatingMenu({ setShowNav }) {
             70% 100%, 30% 100%,
             0% 70%, 0% 30%
           )`,
+          WebkitTapHighlightColor: "transparent",
         }}
       >
         ≡
