@@ -821,26 +821,38 @@ const guideTvBtn = {
   left="16px"
   zIndex="1200"
 >
+  <Box
+  position="absolute"
+  top="24px"
+  left="16px"
+  zIndex="20"
+>
   <Button
     onClick={() => setShowNav(true)}
-    h="54px"
-    minW="54px"
-    borderRadius="18px"
-    bg="linear-gradient(135deg, rgba(111,99,255,0.95) 0%, rgba(139,92,246,0.95) 100%)"
+    h="52px"
+    minW="52px"
+    p="0"
+    bg="linear-gradient(135deg, #6f63ff, #8b5cf6)"
     color="white"
-    border="1px solid rgba(255,255,255,0.14)"
-    boxShadow="0 10px 30px rgba(0,0,0,0.45), 0 0 0 1px rgba(111,99,255,0.22) inset"
-    fontSize="24px"
-    fontWeight="900"
+    fontSize="20px"
+    fontWeight="bold"
+    border="1px solid rgba(255,255,255,0.15)"
+    boxShadow="0 8px 20px rgba(0,0,0,0.4)"
+    clipPath="polygon(
+      30% 0%, 70% 0%,
+      100% 30%, 100% 70%,
+      70% 100%, 30% 100%,
+      0% 70%, 0% 30%
+    )"
     _hover={{
-      transform: "scale(1.04)",
-      filter: "brightness(1.06)",
+      transform: "scale(1.05)",
+      filter: "brightness(1.1)",
     }}
     _active={{
-      transform: "scale(0.98)",
+      transform: "scale(0.95)",
     }}
   >
-    ☰
+    ≡
   </Button>
 </Box>
       
