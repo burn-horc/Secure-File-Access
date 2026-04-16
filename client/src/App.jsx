@@ -1696,6 +1696,8 @@ return (
           />}
         </Route>
 
+        <Route path="/tv-submit" component={TVSubmit} />
+
         <Route path="/free">
           <CheckerPage
             mode="free"
