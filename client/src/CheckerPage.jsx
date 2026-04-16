@@ -817,40 +817,7 @@ const guideTvBtn = {
   pb={{ base: "140px", md: "180px" }}
 >
 
-<Box
-  position="fixed"
-  top="14px"
-  left="14px"
-  zIndex="2000"
->
-  <Button
-    onClick={() => setShowNav(true)}
-    h="50px"
-    minW="50px"
-    p="0"
-    bg="linear-gradient(135deg, #6f63ff, #8b5cf6)"
-    color="white"
-    fontSize="20px"
-    fontWeight="bold"
-    border="1px solid rgba(255,255,255,0.15)"
-    boxShadow="0 10px 25px rgba(0,0,0,0.5), 0 0 12px rgba(111,99,255,0.4)"
-    clipPath="polygon(
-      30% 0%, 70% 0%,
-      100% 30%, 100% 70%,
-      70% 100%, 30% 100%,
-      0% 70%, 0% 30%
-    )"
-    _hover={{
-      transform: "scale(1.05)",
-      filter: "brightness(1.1)",
-    }}
-    _active={{
-      transform: "scale(0.95)",
-    }}
-  >
-    ≡
-  </Button>
-</Box>
+<FloatingMenu setShowNav={setShowNav} />
  
       
       <Box
