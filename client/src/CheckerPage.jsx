@@ -805,6 +805,18 @@ const guideTvBtn = {
 };
   
   return (
+
+    
+    <Box
+  as="main"
+  minH="100vh"
+  w="full"
+  overflowX="hidden"
+  bg="#0d0f18"
+  color="#ffffff"
+  pb={{ base: "140px", md: "180px" }}
+>
+
 <Box
   position="fixed"
   top="14px"
@@ -839,18 +851,6 @@ const guideTvBtn = {
     ≡
   </Button>
 </Box>
-    
-    <Box
-  as="main"
-  minH="100vh"
-  w="full"
-  overflowX="hidden"
-  bg="#0d0f18"
-  color="#ffffff"
-  pb={{ base: "140px", md: "180px" }}
->
-
-
  
       
       <Box
