@@ -123,22 +123,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .not("used_at", "is", null)
       .lte("used_at", tenMinutesAgo);
 
-    const { data, error } = await supabase
-      .from("trial_cookies")
-      .select("*")
-      .is("status", null)
-      .not("cookie", "is", null)
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .maybeSingle();
+    const { data: cookies, error } = await supabase
+  .from("trial_cookies")
+  .select("*")
+  .is("status", null)
+  .not("cookie", "is", null)
+  .order("created_at", { ascending: true })
+  .limit(5);
 
-    if (error) {
-      console.error("trial create supabase error:", error);
-      return res.status(500).json({
-        success: false,
-        error: error.message || "Database error",
-      });
-    }
+if (error) {
+  return res.status(500).json({
+    success: false,
+    error: error.message,
+  });
+}
+
+if (!cookies || !cookies.length) {
+  return res.status(404).json({
+    success: false,
+    error: "No free trial account available.",
+  });
+}
 
     if (!data) {
       return res.status(404).json({
@@ -225,5 +230,59 @@ if (!valid) {
       success: false,
       error: err?.message || "Server error",
     });
+  }
+}
+
+for (const row of cookies) {
+  const checkRes = await fetch(`${protocol}://${host}/api/check`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      input: row.cookie,
+      stream: false,
+    }),
+  });
+
+  const checkData = await checkRes.json().catch(() => ({}));
+
+  if (!checkRes.ok) continue;
+
+  const allResults = Array.isArray(checkData?.results)
+    ? checkData.results
+    : checkData?.result
+      ? [checkData.result]
+      : [];
+
+  const valid = allResults.find(
+    (r: any) =>
+      r?.valid &&
+      r?.nftokenLink &&
+      (r?.email || r?.plan || r?.countryOfSignup)
+  );
+
+  if (valid) {
+    // mark used
+    await supabase
+      .from("trial_cookies")
+      .update({
+        status: "used",
+        used_at: new Date().toISOString(),
+      })
+      .eq("id", row.id);
+
+    return res.status(200).json({
+      success: true,
+      result: valid,
+      results: [valid],
+      adminBypass: isAdmin,
+    });
+  } else {
+    // mark dead immediately 🔥
+    await supabase
+      .from("trial_cookies")
+      .update({
+        status: "dead",
+      })
+      .eq("id", row.id);
   }
 }
