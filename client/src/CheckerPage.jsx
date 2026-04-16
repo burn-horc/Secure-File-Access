@@ -814,6 +814,36 @@ const guideTvBtn = {
   color="#ffffff"
   pb={{ base: "140px", md: "180px" }}
 >
+
+<Box
+  position="fixed"
+  top="86px"
+  left="16px"
+  zIndex="1200"
+>
+  <Button
+    onClick={() => setShowNav(true)}
+    h="54px"
+    minW="54px"
+    borderRadius="18px"
+    bg="linear-gradient(135deg, rgba(111,99,255,0.95) 0%, rgba(139,92,246,0.95) 100%)"
+    color="white"
+    border="1px solid rgba(255,255,255,0.14)"
+    boxShadow="0 10px 30px rgba(0,0,0,0.45), 0 0 0 1px rgba(111,99,255,0.22) inset"
+    fontSize="24px"
+    fontWeight="900"
+    _hover={{
+      transform: "scale(1.04)",
+      filter: "brightness(1.06)",
+    }}
+    _active={{
+      transform: "scale(0.98)",
+    }}
+  >
+    ☰
+  </Button>
+</Box>
+      
       <Box
   mx="auto"
   w="full"
@@ -849,20 +879,12 @@ const guideTvBtn = {
   px={3}
   columnGap={2}
 >
-                <HStack spacing={2} align="center">
+                <HStack spacing={2} align="center" visibility="hidden">
   <Box aria-hidden="true" display="flex" alignItems="center">
     <SiNetflix color="#e50914" size="22px" />
   </Box>
 
-                  <Button
-    size="xs"
-    h="28px"
-    minW="28px"
-    borderRadius="8px"
-    onClick={() => setShowNav(true)}
-  >
-    ☰
-  </Button>
+                  
 
   {showBackButton && (
     <Button
