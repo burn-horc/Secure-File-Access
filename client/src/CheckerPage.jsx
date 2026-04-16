@@ -1960,12 +1960,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     flex={1}
     fontSize="xs"
     py={5}
-    onClick={() => {
-  const link = readResultTokenLink(result, "tv");
-  const token = extractNFToken(link);
-
-  window.location.href = `/tv-submit?nftoken=${token}`;
-}}
+    onClick={() => handleTvOpen(readResultTokenLink(result, "tv"))}
     data-testid={`button-tv-${index}`}
   >
     📺 TV Connect
