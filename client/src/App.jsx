@@ -1420,7 +1420,7 @@ const handleTrialSubmit = async () => {
       throw new DOMException("Check aborted", "AbortError");
     }
 
-    appendCheckLog("info", "Finding Valid NETFLIX Account...");
+    appendCheckLog("info", "Finding available resource...");
 
     const response = await fetch("/api/trial/create", {
       method: "POST",
@@ -1430,39 +1430,66 @@ const handleTrialSubmit = async () => {
       body: JSON.stringify({ passcode: code }),
     });
 
-    if (!response.ok) {
-      const msg = await readApiErrorMessage(response);
-      throw new Error(msg);
+    const data = await response.json().catch(() => ({}));
+
+    if (response.status === 404) {
+      const message = data?.error || "No available resource found.";
+      appendCheckLog("invalid", message);
+      showToast(message);
+      return;
     }
 
-    const data = await response.json();
-    const results = Array.isArray(data?.results) ? data.results : data?.result ? [data.result] : [];
+    if (!response.ok || data?.success === false) {
+      const message = data?.error || "Failed to load random account.";
+      appendCheckLog("invalid", message);
+      showToast(message);
+      return;
+    }
+
+    const results = Array.isArray(data?.results)
+      ? data.results
+      : data?.result
+        ? [data.result]
+        : [];
 
     if (!results.length) {
-      appendCheckLog("invalid", "No trial account result returned.");
+      appendCheckLog("invalid", "No result returned.");
+      showToast("No result returned.");
       return;
     }
 
     latestPartialResultsRef.current = results;
     setCheckProgress({ completed: results.length, total: results.length });
 
-    const validResults = results.filter((r) => r.valid);
-    const invalidResults = results.filter((r) => !r.valid);
+    const validResults = results.filter((r) => r?.valid);
+    const invalidResults = results.filter((r) => !r?.valid);
 
     setLiveValidCount(validResults.length);
     setLiveInvalidCount(invalidResults.length);
-   setBulkValidResults(results);
+    setBulkValidResults(results);
 
     results.forEach((result) => {
-      const planLabel = result.plan?.trim() || "Unknown Plan";
-      const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
+      const planLabel = result?.plan?.trim() || "Unknown Plan";
+      const countryLabel = result?.countryOfSignup?.trim() || "Unknown Country";
 
-      if (result.valid) {
+      if (result?.valid) {
         appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
       } else {
-        appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${result.reason || "Unknown error"}`);
+        appendCheckLog(
+          "invalid",
+          `INVALID - ${planLabel} - ${countryLabel} - ${result?.reason || "Unknown error"}`
+        );
       }
     });
+
+    appendCheckLog(
+      "info",
+      `Completed: ${validResults.length} valid, ${invalidResults.length} invalid.`
+    );
+
+    if (validResults.length > 0 && soundEnabled) {
+      playSuccessChime();
+    }
   } catch (caughtError) {
     if (isAbortError(caughtError)) {
       appendCheckLog("info", "Stopped.");
@@ -1471,6 +1498,7 @@ const handleTrialSubmit = async () => {
 
     const message =
       caughtError instanceof Error ? caughtError.message : "Unexpected client error";
+
     appendCheckLog("invalid", `Error: ${message}`);
     showToast(message);
   } finally {
