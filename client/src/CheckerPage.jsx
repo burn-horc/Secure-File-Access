@@ -815,12 +815,7 @@ const guideTvBtn = {
   pb={{ base: "140px", md: "180px" }}
 >
 
-<Box
-  position="fixed"
-  top="86px"
-  left="16px"
-  zIndex="1200"
->
+
   <Box
   position="absolute"
   top="24px"
