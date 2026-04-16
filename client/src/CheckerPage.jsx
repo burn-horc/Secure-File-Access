@@ -27,7 +27,7 @@ import {
 import { motion } from "framer-motion";
 import { SiNetflix, SiFacebook, SiTelegram } from "react-icons/si";
 import Navigation from "./Navigation";
-
+import FloatingMenu from "./FloatingMenu";
 import { showAppToast } from "./appToast.jsx";
 
 
