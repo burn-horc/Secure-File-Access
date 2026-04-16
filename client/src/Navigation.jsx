@@ -93,15 +93,6 @@ export default function Navigation({ onClose }) {
               </HStack>
             </Button>
           </Link>
-
-          <Link href="/tv">
-            <Button {...itemStyle} variant="outline" onClick={onClose}>
-              <HStack spacing={6}>
-                <Text fontSize="22px">🖥</Text>
-                <Text>TV Access</Text>
-              </HStack>
-            </Button>
-          </Link>
         </VStack>
       </Box>
     </>
