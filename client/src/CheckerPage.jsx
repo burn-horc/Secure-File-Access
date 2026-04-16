@@ -1926,34 +1926,42 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 
           <HStack px={4} pb={3} spacing={2}>
   <Button
-    {...successBtn}
-    flex={1}
-    fontSize="xs"
-    py={5}
-    onClick={() =>
-      handleCopyWithFeedback(`${index}-pc`, () =>
-        handlePcCopy(readResultTokenLink(result, "pc"))
-      )
+  flex={1}
+  fontSize="xs"
+  py={5}
+  bg="green.400"
+  onClick={() => {
+    const link = readResultTokenLink(result, "pc");
+
+    if (!link) {
+      alert("No PC link available");
+      return;
     }
-    data-testid={`button-pc-${index}`}
-  >
-    {copiedStates[`${index}-pc`] ? "✓ Copied!" : "🖥 PC Watch"}
-  </Button>
+
+    window.open(link, "_blank");
+  }}
+>
+  💻 PC Watch
+</Button>
 
   <Button
-    {...mobileBtn}
-    flex={1}
-    fontSize="xs"
-    py={5}
-    onClick={() =>
-      handleCopyWithFeedback(`${index}-android`, () =>
-        handleAndroidCopy(readResultTokenLink(result, "android"))
-      )
+  flex={1}
+  fontSize="xs"
+  py={5}
+  bg="blue.400"
+  onClick={() => {
+    const link = readResultTokenLink(result, "mobile");
+
+    if (!link) {
+      alert("No Mobile link available");
+      return;
     }
-    data-testid={`button-android-${index}`}
-  >
-    {copiedStates[`${index}-android`] ? "✓ Copied!" : "📱 Mobile Watch"}
-  </Button>
+
+    window.open(link, "_blank");
+  }}
+>
+  📱 Mobile Watch
+</Button>
 
   <Button
     {...tvBtn}
