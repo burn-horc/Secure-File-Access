@@ -213,19 +213,12 @@ if (!valid) {
   });
 }
 
-    if (!result) {
-      return res.status(500).json({
-        success: false,
-        error: "Trial account check returned no result",
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      result,
-      results: [result],
-      adminBypass: isAdmin,
-    });
+   return res.status(200).json({
+  success: true,
+  result: valid,
+  results: [valid],
+  adminBypass: isAdmin,
+});
   } catch (err: any) {
     console.error("trial create server error:", err);
     return res.status(500).json({
