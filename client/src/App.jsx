@@ -1503,13 +1503,13 @@ setBulkValidResults(usableResults);
 });
 
     appendCheckLog(
-      "info",
-      `Completed: ${validResults.length} valid, ${invalidResults.length} invalid.`
-    );
+  "info",
+  `Completed: ${usableResults.length} usable, ${rejectedResults.length} rejected.`
+);
 
-    if (validResults.length > 0 && soundEnabled) {
-      playSuccessChime();
-    }
+if (usableResults.length > 0 && soundEnabled) {
+  playSuccessChime();
+}
   } catch (caughtError) {
     if (isAbortError(caughtError)) {
       appendCheckLog("info", "Stopped.");
