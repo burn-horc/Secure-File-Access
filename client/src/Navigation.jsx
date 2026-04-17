@@ -159,18 +159,20 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
   <Button
     h="52px"
     borderRadius="18px"
-    color="rgba(255,255,255,0.55)"
-    bg="rgba(255,255,255,0.02)"
-    border="1px dashed rgba(255,255,255,0.10)"
+    color="white"
+    bg="linear-gradient(135deg, rgba(111,99,255,0.18) 0%, rgba(111,99,255,0.08) 100%)"
+    border="1px solid rgba(111,99,255,0.35)"
     fontSize="15px"
     fontWeight="700"
-    _hover={{ bg: "rgba(255,255,255,0.04)" }}
+    _hover={{ bg: "rgba(111,99,255,0.25)" }}
     onClick={() => {
       onClose?.();
-      alert("📺 Connect TV is coming soon.");
+      setTimeout(() => {
+        window.location.href = "/tv-submit";
+      }, 200);
     }}
   >
-    📺 Connect TV (Soon)
+    📺 Connect TV
   </Button>
 </VStack>
       </Box>
