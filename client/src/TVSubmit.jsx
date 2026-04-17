@@ -18,23 +18,15 @@ export default function TVSubmit() {
   }, []);
 
   const handleContinue = async () => {
-    if (!isValid || loading) return;
+    const finalLink = tvLink || "https://www.netflix.com/tv2";
 
-    setLoading(true);
+const win = window.open("about:blank", "_blank");
 
-    try {
-      if (!tvLink) {
-        alert("Missing TV link.");
-        return;
-      }
-
-      const win = window.open("about:blank", "_blank");
-
-      if (win) {
-        win.location.href = tvLink;
-      } else {
-        window.location.href = tvLink;
-      }
+if (win) {
+  win.location.href = finalLink;
+} else {
+  window.location.href = finalLink;
+}
     } catch (err) {
       console.error(err);
       alert("Something went wrong");
