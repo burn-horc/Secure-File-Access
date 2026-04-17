@@ -18,22 +18,27 @@ export default function TVSubmit() {
   }, []);
 
   const handleContinue = async () => {
+  if (!isValid || loading) return;
+
+  setLoading(true);
+
+  try {
     const finalLink = tvLink || "https://www.netflix.com/tv2";
 
-const win = window.open("about:blank", "_blank");
+    const win = window.open("about:blank", "_blank");
 
-if (win) {
-  win.location.href = finalLink;
-} else {
-  window.location.href = finalLink;
-}
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong");
-    } finally {
-      setLoading(false);
+    if (win) {
+      win.location.href = finalLink;
+    } else {
+      window.location.href = finalLink;
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const codeBoxes = Array.from({ length: 8 }, (_, index) => cleanCode[index] || "");
 
