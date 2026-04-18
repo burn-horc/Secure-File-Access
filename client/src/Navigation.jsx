@@ -157,21 +157,22 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
         <VStack spacing={4} align="stretch" px={6} pt={4}>
   <Button
-    h="52px"
-    borderRadius="18px"
-    color="rgba(255,255,255,0.55)"
-    bg="rgba(255,255,255,0.02)"
-    border="1px dashed rgba(255,255,255,0.10)"
-    fontSize="15px"
-    fontWeight="700"
-    _hover={{ bg: "rgba(255,255,255,0.04)" }}
-    onClick={() => {
-  onClose?.();
-  handleConnectTV();
-}}
-  >
-    📺 Connect TV
-  </Button>
+  h="52px"
+  borderRadius="18px"
+  color="white"
+  bg="#6f63ff"
+  border="1px solid rgba(111,99,255,0.6)"
+  fontSize="15px"
+  fontWeight="700"
+  _hover={{ bg: "#5e54db" }}
+  _active={{ bg: "#5248c7" }}
+  onClick={() => {
+    onClose?.();
+    handleConnectTV();
+  }}
+>
+  📺 Connect TV
+</Button>
 </VStack>
       </Box>
     </>
