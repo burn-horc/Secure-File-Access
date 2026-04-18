@@ -136,9 +136,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const { data: cookieRows, error: cookieError } = await supabase
-      .from("cookies")
-      .select("cookie")
-      .order("created_at", { ascending: false });
+      .from("checked_cookies")
+      .select("cookie_header")
+      .order("checked_at", { ascending: false });
 
     if (cookieError) {
       return res.status(500).json({
