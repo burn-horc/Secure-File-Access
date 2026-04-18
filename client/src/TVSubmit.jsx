@@ -46,17 +46,18 @@ export default function TVSubmit() {
     `);
 
     // ✅ use your working API
-    const res = await fetch("/api/find-account", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        passcode: "YOUR_PASSCODE_HERE",
-      }),
-    });
+    const res = await fetch("/api/get-tv-link", {
+  method: "POST"
+});
 
-    const data = await res.json();
+const data = await res.json();
+
+if (!data.ok || !data.tvLink) {
+  win.document.body.innerHTML = "<h2>Failed to connect</h2>";
+  return;
+}
+
+win.location.href = data.tvLink;
 
     console.log(data); // 🔥 debug
 
