@@ -55,10 +55,31 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
     `);
 
     // fetch token
-    const res = await fetch("/api/find-account");
+    const res = await fetch("/api/find-account", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    passcode: "YOUR_PASSCODE_HERE",
+  }),
+});
     const data = await res.json();
 
-    if (!data.ok || !data.account?.tvLink) {
+    const valid = data?.results?.find(r => r?.valid);
+
+const nftoken =
+  valid?.nftoken ||
+  valid?.nfToken ||
+  valid?.token;
+
+if (!nftoken) {
+  win.document.body.innerHTML = "<h2>Failed to connect</h2>";
+  return;
+}
+
+const tvLink = `https://www.netflix.com/tv8?nftoken=${nftoken}`;
+win.location.href = tvLink;
       win.document.body.innerHTML = "<h2>Failed to connect</h2>";
       return;
     }
