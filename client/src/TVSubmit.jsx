@@ -1,207 +1,182 @@
+import { Box, Button, Text, VStack, HStack, Input } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
+
+function sanitizeCode(value) {
+  return String(value || "").replace(/\D/g, "").slice(0, 8);
+}
 
 export default function TVSubmit() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  const cleanCode = code.replace(/\D/g, "").slice(0, 8);
-  const isValid = cleanCode.length === 8;
+  const digits = useMemo(() => sanitizeCode(code).padEnd(8, " ").split(""), [code]);
 
-  const formattedCode = useMemo(() => {
-    if (cleanCode.length <= 4) return cleanCode;
-    return `${cleanCode.slice(0, 4)}-${cleanCode.slice(4)}`;
-  }, [cleanCode]);
+  async function handleSubmit() {
+    const cleaned = sanitizeCode(code);
 
-  const tvLink = useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get("tvlink") || "";
-  }, []);
-
-  const handleContinue = async () => {
-  if (!isValid || loading) return;
-
-  setLoading(true);
-
-  try {
-    const finalLink = tvLink || "https://www.netflix.com/tv2";
-
-    const win = window.open("about:blank", "_blank");
-
-    if (win) {
-      win.location.href = finalLink;
-    } else {
-      window.location.href = finalLink;
+    if (cleaned.length !== 8) {
+      setError("Please enter the full 8-digit TV code.");
+      setMessage("");
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
 
-  const codeBoxes = Array.from({ length: 8 }, (_, index) => cleanCode[index] || "");
+    setLoading(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/tv/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: cleaned,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.message || "Failed to connect TV.");
+      }
+
+      setMessage("TV linked successfully.");
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(180deg, #070b18 0%, #050814 100%)",
-        color: "white",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "24px",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "420px",
-          textAlign: "center",
-        }}
+    <Box minH="100vh" bg="#0d0f18" color="white" px={4} py={8}>
+      <Box
+        maxW="720px"
+        mx="auto"
+        borderWidth="1px"
+        borderColor="rgba(139,92,246,0.18)"
+        borderRadius="28px"
+        bg="linear-gradient(180deg, #10162a 0%, #0d1430 100%)"
+        boxShadow="0 10px 40px rgba(0,0,0,0.45)"
+        px={{ base: 4, sm: 6 }}
+        py={{ base: 8, sm: 10 }}
       >
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "54px",
-            height: "54px",
-            borderRadius: "16px",
-            background: "rgba(124,108,255,0.15)",
-            border: "1px solid rgba(124,108,255,0.28)",
-            marginBottom: "18px",
-            fontSize: "24px",
-          }}
-        >
-          📺
-        </div>
+        <VStack spacing={6}>
+          <Text
+            textAlign="center"
+            fontSize={{ base: "2xl", sm: "4xl" }}
+            fontWeight="800"
+            lineHeight="1.1"
+          >
+            Match the code on your TV
+          </Text>
 
-        <h1
-          style={{
-            margin: 0,
-            fontSize: "28px",
-            fontWeight: 800,
-            letterSpacing: "0.02em",
-          }}
-        >
-          Enter TV Code
-        </h1>
+          <Box
+            w="full"
+            borderWidth="1px"
+            borderColor="rgba(255,255,255,0.08)"
+            borderRadius="24px"
+            bg="rgba(10,14,30,0.35)"
+            px={{ base: 3, sm: 5 }}
+            py={{ base: 5, sm: 6 }}
+          >
+            <HStack spacing={{ base: 2, sm: 3 }} justify="center">
+              {digits.slice(0, 4).map((digit, index) => (
+                <Box
+                  key={index}
+                  w={{ base: "52px", sm: "62px" }}
+                  h={{ base: "68px", sm: "76px" }}
+                  borderRadius="18px"
+                  border="1px solid rgba(255,255,255,0.12)"
+                  bg="rgba(8,12,28,0.45)"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  fontSize={{ base: "2xl", sm: "3xl" }}
+                  fontWeight="700"
+                >
+                  {digit.trim() || ""}
+                </Box>
+              ))}
 
-        <p
-          style={{
-            marginTop: "10px",
-            marginBottom: "28px",
-            color: "rgba(255,255,255,0.62)",
-            fontSize: "14px",
-            lineHeight: 1.6,
-          }}
-        >
-          Enter the 8-digit code shown on your TV screen to continue.
-        </p>
+              <Text
+                mx={{ base: 1, sm: 2 }}
+                fontSize={{ base: "2xl", sm: "3xl" }}
+                color="#6f63ff"
+                fontWeight="700"
+              >
+                -
+              </Text>
 
-        <input
-          value={cleanCode}
-          onChange={(e) => setCode(e.target.value)}
-          inputMode="numeric"
-          maxLength={8}
-          autoFocus
-          style={{
-            position: "absolute",
-            opacity: 0,
-            pointerEvents: "none",
-          }}
-        />
+              {digits.slice(4).map((digit, index) => (
+                <Box
+                  key={index + 4}
+                  w={{ base: "52px", sm: "62px" }}
+                  h={{ base: "68px", sm: "76px" }}
+                  borderRadius="18px"
+                  border="1px solid rgba(255,255,255,0.12)"
+                  bg="rgba(8,12,28,0.45)"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  fontSize={{ base: "2xl", sm: "3xl" }}
+                  fontWeight="700"
+                >
+                  {digit.trim() || ""}
+                </Box>
+              ))}
+            </HStack>
 
-        <div
-          onClick={() => {
-            const hiddenInput = document.getElementById("tv-hidden-code-input");
-            hiddenInput?.focus();
-          }}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "8px",
-            marginBottom: "18px",
-          }}
-        >
-          {codeBoxes.map((digit, index) => (
-            <div
-              key={index}
-              style={{
-                width: "38px",
-                height: "48px",
-                borderRadius: "12px",
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.10)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "22px",
-                fontWeight: 700,
-                boxShadow: digit ? "0 0 0 1px rgba(124,108,255,0.18) inset" : "none",
+            <Input
+              mt={5}
+              value={code}
+              onChange={(e) => setCode(sanitizeCode(e.target.value))}
+              placeholder="Enter 8-digit code"
+              inputMode="numeric"
+              maxLength={8}
+              textAlign="center"
+              fontSize="lg"
+              color="white"
+              borderColor="rgba(255,255,255,0.12)"
+              _placeholder={{ color: "rgba(255,255,255,0.4)" }}
+              _focus={{
+                borderColor: "#6f63ff",
+                boxShadow: "0 0 0 1px #6f63ff",
               }}
-            >
-              {digit}
-            </div>
-          ))}
-        </div>
+            />
+          </Box>
 
-        <input
-          id="tv-hidden-code-input"
-          value={cleanCode}
-          onChange={(e) => setCode(e.target.value)}
-          inputMode="numeric"
-          maxLength={8}
-          autoFocus
-          style={{
-            width: "1px",
-            height: "1px",
-            opacity: 0,
-            position: "absolute",
-            left: "-9999px",
-          }}
-        />
+          <Button
+            w="full"
+            h="56px"
+            borderRadius="18px"
+            bg="#6f63ff"
+            color="white"
+            _hover={{ bg: "#5e54db" }}
+            _active={{ bg: "#5248c7" }}
+            isLoading={loading}
+            loadingText="Connecting"
+            onClick={handleSubmit}
+          >
+            Continue
+          </Button>
 
-        <div
-          style={{
-            marginBottom: "24px",
-            fontSize: "13px",
-            color: "rgba(255,255,255,0.52)",
-            letterSpacing: "0.18em",
-          }}
-        >
-          {formattedCode || "____-____"}
-        </div>
+          {!!message && (
+            <Text color="#00d563" fontWeight="700" textAlign="center">
+              {message}
+            </Text>
+          )}
 
-        <button
-          onClick={handleContinue}
-          disabled={!isValid || loading}
-          style={{
-            width: "100%",
-            height: "56px",
-            borderRadius: "16px",
-            border: "none",
-            fontSize: "16px",
-            fontWeight: 800,
-            letterSpacing: "0.04em",
-            color: "white",
-            background:
-              !isValid || loading
-                ? "rgba(255,255,255,0.08)"
-                : "linear-gradient(135deg, #7c6cff 0%, #9d5cff 100%)",
-            cursor: !isValid || loading ? "not-allowed" : "pointer",
-            boxShadow:
-              !isValid || loading
-                ? "none"
-                : "0 16px 32px rgba(124,108,255,0.28)",
-          }}
-        >
-          {loading ? "CONNECTING..." : "CONTINUE"}
-        </button>
-      </div>
-    </div>
+          {!!error && (
+            <Text color="#ff6b6b" fontWeight="700" textAlign="center">
+              {error}
+            </Text>
+          )}
+        </VStack>
+      </Box>
+    </Box>
   );
 }
-
