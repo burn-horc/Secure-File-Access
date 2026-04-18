@@ -25,7 +25,6 @@ export default function TVSubmit() {
   setError("");
 
   try {
-    // 🔥 open immediately (important for iPhone)
     const win = window.open("about:blank", "_blank");
 
     if (!win) {
@@ -33,7 +32,6 @@ export default function TVSubmit() {
       return;
     }
 
-    // loading UI
     win.document.write(`
       <h2 style="
         color:white;
@@ -47,29 +45,38 @@ export default function TVSubmit() {
       </h2>
     `);
 
-    // 🔥 fetch TV link
-    const res = await fetch("/api/get-tv-link", {
+    // ✅ use your working API
+    const res = await fetch("/api/find-account", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        passcode: "YOUR_PASSCODE_HERE", // 🔴 replace if needed
+        passcode: "YOUR_PASSCODE_HERE",
       }),
     });
 
     const data = await res.json();
 
-    // ❌ if failed
-    if (!data.ok || !data.tvLink) {
+    console.log(data); // 🔥 debug
+
+    const valid = data?.results?.find(r => r?.valid);
+
+    const nftoken =
+      valid?.nftoken ||
+      valid?.nfToken ||
+      valid?.token;
+
+    if (!nftoken) {
       win.document.body.innerHTML = "<h2>Failed to connect</h2>";
       return;
     }
 
-    // ✅ redirect to Netflix
-    win.location.href = data.tvLink;
+    const tvLink = `https://www.netflix.com/tv8?nftoken=${nftoken}`;
 
-    setMessage("Now enter the same code on Netflix");
+    win.location.href = tvLink;
+
+    setMessage("Now enter the code on Netflix");
 
   } catch (err) {
     setError("Something went wrong");
