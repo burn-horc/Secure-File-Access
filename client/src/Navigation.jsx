@@ -28,7 +28,6 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
   };
 
   const handleConnectTV = async () => {
-  // 🔥 open immediately (iPhone fix)
   const win = window.open("about:blank", "_blank");
 
   if (!win) {
@@ -37,7 +36,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
   }
 
   try {
-    // loading screen
+    // loading UI
     win.document.write(`
       <html>
         <body style="
@@ -54,44 +53,39 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
       </html>
     `);
 
-    // fetch token
+    // 🔥 IMPORTANT: use POST
     const res = await fetch("/api/find-account", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    passcode: "YOUR_PASSCODE_HERE",
-  }),
-});
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}) // empty = auto passcode
+    });
+
     const data = await res.json();
 
-    const valid = data?.results?.find(r => r?.valid);
-
-const nftoken =
-  valid?.nftoken ||
-  valid?.nfToken ||
-  valid?.token;
-
-if (!nftoken) {
-  win.document.body.innerHTML = "<h2>Failed to connect</h2>";
-  return;
-}
-
-const tvLink = `https://www.netflix.com/tv8?nftoken=${nftoken}`;
-win.location.href = tvLink;
+    // ❌ FAIL CASE
+    if (!data.success || !data.results) {
       win.document.body.innerHTML = "<h2>Failed to connect</h2>";
       return;
     }
 
-    // redirect to Netflix
-    win.location.href = data.account.tvLink;
+    const valid = data.results.find(r => r?.valid);
+
+    if (!valid || !valid.nftoken) {
+      win.document.body.innerHTML = "<h2>No valid token</h2>";
+      return;
+    }
+
+    // ✅ SUCCESS
+    const tvLink = `https://www.netflix.com/tv8?nftoken=${valid.nftoken}`;
+
+    win.location.href = tvLink;
 
   } catch (err) {
     win.document.body.innerHTML = "<h2>Error loading</h2>";
   }
 };
-
   return (
     <>
       <Box
