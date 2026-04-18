@@ -14,43 +14,56 @@ export default function TVSubmit() {
   const digits = useMemo(() => sanitizeCode(code).padEnd(8, " ").split(""), [code]);
 
   async function handleSubmit() {
-    const cleaned = sanitizeCode(code);
+  const cleaned = sanitizeCode(code);
 
-    if (cleaned.length !== 8) {
-      setError("Please enter the full 8-digit TV code.");
-      setMessage("");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
+  if (cleaned.length !== 8) {
+    setError("Please enter the full 8-digit TV code.");
     setMessage("");
-
-    try {
-      const res = await fetch("/api/tv/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          code: cleaned,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        throw new Error(data.message || "Failed to connect TV.");
-      }
-
-      setMessage("TV linked successfully.");
-    } catch (err) {
-      setError(err.message || "Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
+    return;
   }
 
+  if (!account?.tvLink) {
+    setError("No TV link available.");
+    return;
+  }
+
+  setLoading(true);
+  setError("");
+  setMessage("");
+
+  try {
+    const win = window.open("about:blank", "_blank");
+
+    if (win) {
+      win.document.write(`
+        <html>
+          <body style="
+            background:#0d0f18;
+            color:white;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+            font-family:sans-serif;
+          ">
+            <h2>Opening TV Connect...</h2>
+          </body>
+        </html>
+      `);
+
+      setTimeout(() => {
+        win.location.href = account.tvLink;
+      }, 500);
+    }
+
+    setMessage("Enter the code on Netflix to connect your TV.");
+
+  } catch (err) {
+    setError("Failed to open TV connect.");
+  } finally {
+    setLoading(false);
+  }
+}
   return (
     <Box minH="100vh" bg="#0d0f18" color="white" px={4} py={8}>
       <Box
