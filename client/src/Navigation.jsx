@@ -27,6 +27,50 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
     },
   };
 
+  const handleConnectTV = async () => {
+  // 🔥 open immediately (iPhone fix)
+  const win = window.open("about:blank", "_blank");
+
+  if (!win) {
+    alert("Popup blocked");
+    return;
+  }
+
+  try {
+    // loading screen
+    win.document.write(`
+      <html>
+        <body style="
+          background:#0d0f18;
+          color:white;
+          display:flex;
+          justify-content:center;
+          align-items:center;
+          height:100vh;
+          font-family:sans-serif;
+        ">
+          <h2>Connecting...</h2>
+        </body>
+      </html>
+    `);
+
+    // fetch token
+    const res = await fetch("/api/find-account");
+    const data = await res.json();
+
+    if (!data.ok || !data.account?.tvLink) {
+      win.document.body.innerHTML = "<h2>Failed to connect</h2>";
+      return;
+    }
+
+    // redirect to Netflix
+    win.location.href = data.account.tvLink;
+
+  } catch (err) {
+    win.document.body.innerHTML = "<h2>Error loading</h2>";
+  }
+};
+
   return (
     <>
       <Box
