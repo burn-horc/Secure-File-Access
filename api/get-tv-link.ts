@@ -1,58 +1,64 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import handler from "./find-account";
+import { createClient } from "@supabase/supabase-js";
+import { createRequire } from "module";
 
-export default async function tvHandler(req: VercelRequest, res: VercelResponse) {
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+const require = createRequire(import.meta.url);
+const helpers = require("./original_server_helpers.cjs");
+
+const { getCookieHeaders, runDirectCheck } =
+  helpers.default ?? helpers;
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    // 🔥 create fake req/res to call your existing logic internally
-    let jsonData: any = null;
+    // 🔥 get cookies
+    const { data: cookieRows, error } = await supabase
+      .from("cookies")
+      .select("cookie");
 
-    const fakeReq: any = {
-      ...req,
-      method: "POST",
-      body: {
-        passcode: "AUTO" // won't matter, your DB logic handles it
-      }
-    };
-
-    const fakeRes: any = {
-      status(code: number) {
-        this.statusCode = code;
-        return this;
-      },
-      json(data: any) {
-        jsonData = data;
-        return this;
-      }
-    };
-
-    // 🔥 call your existing logic directly
-    await handler(fakeReq, fakeRes);
-
-    // ❌ if failed
-    if (!jsonData?.success || !jsonData?.results) {
-      return res.status(500).json({ ok: false });
+    if (error || !cookieRows?.length) {
+      return res.status(400).json({ ok: false });
     }
 
-    // 🔥 extract valid account
-    const valid = jsonData.results.find((r: any) => r?.valid);
+    const storedCookies = cookieRows.map((r: any) => r.cookie).filter(Boolean);
 
-    if (!valid || !valid.nftoken) {
-      return res.status(404).json({ ok: false });
-    }
-
-    // ✅ build TV link
-    const tvLink = `https://www.netflix.com/tv8?nftoken=${valid.nftoken}`;
-
-    return res.status(200).json({
-      ok: true,
-      tvLink
+    const parsed = getCookieHeaders({
+      input: storedCookies.join("\n"),
     });
+
+    if (parsed.error) {
+      return res.status(400).json({ ok: false });
+    }
+
+    const cookies = parsed.cookies;
+
+    // 🔥 try cookies
+    for (const cookie of cookies) {
+      const result = await runDirectCheck([cookie], 1, {
+        skipNFToken: false,
+        delayMs: 0,
+      });
+
+      const valid = result?.results?.find((r: any) => r?.valid);
+
+      if (valid?.nftoken) {
+        const tvLink = `https://www.netflix.com/tv8?nftoken=${valid.nftoken}`;
+
+        return res.status(200).json({
+          ok: true,
+          tvLink,
+        });
+      }
+    }
+
+    return res.status(404).json({ ok: false });
 
   } catch (err) {
-    console.error("get-tv-link crash:", err);
-    return res.status(500).json({
-      ok: false,
-      error: "Server error"
-    });
+    console.error("TV LINK ERROR:", err);
+    return res.status(500).json({ ok: false });
   }
 }
