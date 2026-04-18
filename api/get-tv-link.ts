@@ -43,7 +43,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         delayMs: 0,
       });
 
-      const valid = result?.results?.find((r: any) => r?.valid);
+      console.log("RESULT:", JSON.stringify(result, null, 2));
+
+const valid = result?.results?.find((r: any) => r?.valid);
 
       if (valid?.nftoken) {
         const tvLink = `https://www.netflix.com/tv8?nftoken=${valid.nftoken}`;
