@@ -34,22 +34,40 @@ export default function TVSubmit() {
     }
 
     // loading UI
-    win.document.write("<h2 style='color:white;background:#0d0f18;height:100vh;display:flex;align-items:center;justify-content:center;'>Connecting...</h2>");
+    win.document.write(`
+      <h2 style="
+        color:white;
+        background:#0d0f18;
+        height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+      ">
+        Connecting...
+      </h2>
+    `);
 
-    // fetch token
+    // 🔥 fetch TV link
     const res = await fetch("/api/get-tv-link", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ passcode }) // if needed
-});
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        passcode: "YOUR_PASSCODE_HERE", // 🔴 replace if needed
+      }),
+    });
 
-    if (!data.ok || !data.account?.tvLink) {
+    const data = await res.json();
+
+    // ❌ if failed
+    if (!data.ok || !data.tvLink) {
       win.document.body.innerHTML = "<h2>Failed to connect</h2>";
       return;
     }
 
-    // redirect
-    win.location.href = data.account.tvLink;
+    // ✅ redirect to Netflix
+    win.location.href = data.tvLink;
 
     setMessage("Now enter the same code on Netflix");
 
