@@ -157,56 +157,18 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
         <VStack spacing={4} align="stretch" px={6} pt={4}>
   <Button
-    h="52px"
-    borderRadius="18px"
-    color="rgba(255,255,255,0.55)"
-    bg="rgba(255,255,255,0.02)"
-    border="1px dashed rgba(255,255,255,0.10)"
-    fontSize="15px"
-    fontWeight="700"
-    _hover={{ bg: "rgba(255,255,255,0.04)" }}
-    const handleConnectTV = async () => {
-  try {
-    // 🔥 fetch fresh account + token
-    const res = await fetch("/api/find-account");
-    const data = await res.json();
-
-    if (!data.ok || !data.account?.tvLink) {
-      alert("Failed to get TV link");
-      return;
-    }
-
-    const win = window.open("about:blank", "_blank");
-
-    if (win) {
-      win.document.write(`
-        <html>
-          <body style="
-            background:#0d0f18;
-            color:white;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
-            font-family:sans-serif;
-          ">
-            <h2>Opening TV Connect...</h2>
-          </body>
-        </html>
-      `);
-
-      setTimeout(() => {
-        win.location.href = data.account.tvLink;
-      }, 400);
-    }
-
-  } catch (err) {
-    alert("Something went wrong");
-  }
-};
-  >
-    📺 Connect TV (Soon)
-  </Button>
+  h="52px"
+  borderRadius="18px"
+  color="rgba(255,255,255,0.55)"
+  bg="rgba(255,255,255,0.02)"
+  border="1px dashed rgba(255,255,255,0.10)"
+  fontSize="15px"
+  fontWeight="700"
+  _hover={{ bg: "rgba(255,255,255,0.04)" }}
+  onClick={handleConnectTV}
+>
+  📺 Connect TV
+</Button>
 </VStack>
       </Box>
     </>
