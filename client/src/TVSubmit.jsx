@@ -37,8 +37,11 @@ export default function TVSubmit() {
     win.document.write("<h2 style='color:white;background:#0d0f18;height:100vh;display:flex;align-items:center;justify-content:center;'>Connecting...</h2>");
 
     // fetch token
-    const res = await fetch("/api/find-account");
-    const data = await res.json();
+    const res = await fetch("/api/get-tv-link", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ passcode }) // if needed
+});
 
     if (!data.ok || !data.account?.tvLink) {
       win.document.body.innerHTML = "<h2>Failed to connect</h2>";
