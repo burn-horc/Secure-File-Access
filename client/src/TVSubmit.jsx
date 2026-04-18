@@ -17,52 +17,41 @@ export default function TVSubmit() {
   const cleaned = sanitizeCode(code);
 
   if (cleaned.length !== 8) {
-    setError("Please enter the full 8-digit TV code.");
-    setMessage("");
+    setError("Enter full 8-digit code");
     return;
   }
 
   setLoading(true);
   setError("");
-  setMessage("");
 
   try {
-    // 🔥 FETCH ACCOUNT + TOKEN HERE
+    // 🔥 open immediately (important for iPhone)
+    const win = window.open("about:blank", "_blank");
+
+    if (!win) {
+      alert("Popup blocked");
+      return;
+    }
+
+    // loading UI
+    win.document.write("<h2 style='color:white;background:#0d0f18;height:100vh;display:flex;align-items:center;justify-content:center;'>Connecting...</h2>");
+
+    // fetch token
     const res = await fetch("/api/find-account");
     const data = await res.json();
 
     if (!data.ok || !data.account?.tvLink) {
-      throw new Error("Failed to get TV link");
+      win.document.body.innerHTML = "<h2>Failed to connect</h2>";
+      return;
     }
 
-    const win = window.open("about:blank", "_blank");
+    // redirect
+    win.location.href = data.account.tvLink;
 
-    if (win) {
-      win.document.write(`
-        <html>
-          <body style="
-            background:#0d0f18;
-            color:white;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
-            font-family:sans-serif;
-          ">
-            <h2>Opening TV Connect...</h2>
-          </body>
-        </html>
-      `);
-
-      setTimeout(() => {
-        win.location.href = data.account.tvLink;
-      }, 400);
-    }
-
-    setMessage("Enter the code on Netflix to connect your TV.");
+    setMessage("Now enter the same code on Netflix");
 
   } catch (err) {
-    setError(err.message || "Something went wrong.");
+    setError("Something went wrong");
   } finally {
     setLoading(false);
   }
