@@ -22,16 +22,19 @@ export default function TVSubmit() {
     return;
   }
 
-  if (!account?.tvLink) {
-    setError("No TV link available.");
-    return;
-  }
-
   setLoading(true);
   setError("");
   setMessage("");
 
   try {
+    // 🔥 FETCH ACCOUNT + TOKEN HERE
+    const res = await fetch("/api/find-account");
+    const data = await res.json();
+
+    if (!data.ok || !data.account?.tvLink) {
+      throw new Error("Failed to get TV link");
+    }
+
     const win = window.open("about:blank", "_blank");
 
     if (win) {
@@ -52,14 +55,14 @@ export default function TVSubmit() {
       `);
 
       setTimeout(() => {
-        win.location.href = account.tvLink;
-      }, 500);
+        win.location.href = data.account.tvLink;
+      }, 400);
     }
 
     setMessage("Enter the code on Netflix to connect your TV.");
 
   } catch (err) {
-    setError("Failed to open TV connect.");
+    setError(err.message || "Something went wrong.");
   } finally {
     setLoading(false);
   }
