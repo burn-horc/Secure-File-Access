@@ -167,9 +167,12 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
   _hover={{ bg: "#5e54db" }}
   _active={{ bg: "#5248c7" }}
   onClick={() => {
+  handleConnectTV();
+
+  setTimeout(() => {
     onClose?.();
-    handleConnectTV();
-  }}
+  }, 300);
+}}
 >
   📺 Connect TV
 </Button>
