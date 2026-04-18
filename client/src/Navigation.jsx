@@ -54,21 +54,18 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
     `);
 
     // 🔥 IMPORTANT: use POST
-    const res = await fetch("/api/find-account", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}) // empty = auto passcode
-    });
+    const res = await fetch("/api/get-tv-link", {
+  method: "POST"
+});
 
-    const data = await res.json();
+const data = await res.json();
 
-    // ❌ FAIL CASE
-    if (!data.success || !data.results) {
-      win.document.body.innerHTML = "<h2>Failed to connect</h2>";
-      return;
-    }
+if (!data.ok || !data.tvLink) {
+  win.document.body.innerHTML = "<h2>Failed to connect</h2>";
+  return;
+}
+
+win.location.href = data.tvLink;
 
     const valid = data.results.find(r => r?.valid);
 
