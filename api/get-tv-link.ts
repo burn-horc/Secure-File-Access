@@ -32,7 +32,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const valid = data.results.find((r: any) => r?.valid);
+    let valid = null;
+
+for (const r of data.results) {
+  if (
+    r?.valid &&
+    (r.nftoken || r.nfToken || r.token)
+  ) {
+    valid = r;
+    break;
+  }
+}
 
     if (!valid) {
       return res.status(404).json({
