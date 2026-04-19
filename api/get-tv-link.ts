@@ -15,42 +15,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     let valid = null;
 
-for (let i = 0; i < 5; i++) {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ passcode })
-  });
+    for (let i = 0; i < 10; i++) {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ passcode })
+      });
 
-  const data = await response.json();
+      const data = await response.json();
 
-  if (!data.success || !data.results) continue;
+      if (!data.success || !data.results) continue;
 
-  const found = data.results.find(
-    (r: any) =>
-      r?.valid &&
-      (r.nftoken || r.nfToken || r.token)
-  );
+      const found = data.results.find(
+        (r: any) =>
+          r?.valid &&
+          (r.nftoken || r.nfToken || r.token)
+      );
 
-  if (found) {
-    valid = found;
-    break;
-  }
-}
-
-if (!valid) {
-  return res.status(404).json({
-    ok: false,
-    error: "no token after retries"
-  });
-}
+      if (found) {
+        valid = found;
+        break;
+      }
+    }
 
     if (!valid) {
       return res.status(404).json({
         ok: false,
-        error: "no valid account"
+        error: "no token available"
       });
     }
 
@@ -59,18 +52,9 @@ if (!valid) {
       valid.nfToken ||
       valid.token;
 
-    if (!nftoken) {
-      return res.status(404).json({
-        ok: false,
-        error: "no token"
-      });
-    }
-
-    const tvLink = `https://www.netflix.com/tv8?nftoken=${nftoken}`;
-
     return res.status(200).json({
       ok: true,
-      tvLink
+      tvLink: `https://www.netflix.com/tv8?nftoken=${nftoken}`
     });
 
   } catch (err) {
