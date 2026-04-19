@@ -209,7 +209,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         await clearFailures(ip);
 
-        return res.status(200).json(result);
+        return res.status(200).json({
+  success: true,
+  results: [valid] // 🔥 ONLY return the good one
+});
       }
     }
 
