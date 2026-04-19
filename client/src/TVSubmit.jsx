@@ -51,6 +51,7 @@ export default function TVSubmit() {
 });
 
 const data = await res.json();
+console.log("GET-TV-LINK RESPONSE:", data);
 
 if (!data.ok || !data.tvLink) {
   win.document.body.innerHTML = "<h2>Failed to connect</h2>";
