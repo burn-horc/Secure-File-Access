@@ -2,7 +2,15 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    // ✅ use absolute URL correctly
+    const { passcode } = req.body || {};
+
+    if (!passcode) {
+      return res.status(400).json({
+        ok: false,
+        error: "Missing passcode"
+      });
+    }
+
     const url = `https://${req.headers.host}/api/find-account`;
 
     const response = await fetch(url, {
@@ -10,24 +18,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({})
+      body: JSON.stringify({
+        passcode
+      })
     });
 
-    const text = await response.text();
-
-    // 🔥 DEBUG: log raw response
-    console.log("RAW RESPONSE:", text);
-
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      return res.status(500).json({
-        ok: false,
-        error: "find-account returned HTML instead of JSON",
-        raw: text.slice(0, 200)
-      });
-    }
+    const data = await response.json();
 
     if (!data.success || !data.results) {
       return res.status(400).json({
@@ -65,7 +61,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
   } catch (err) {
-    console.error("get-tv-link error:", err);
     return res.status(500).json({
       ok: false,
       error: String(err)
