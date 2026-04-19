@@ -72,21 +72,7 @@ win.location.href = data.tvLink;
 
     console.log(data); // 🔥 debug
 
-    const valid = data?.results?.find(r => r?.valid);
-
-    const nftoken =
-      valid?.nftoken ||
-      valid?.nfToken ||
-      valid?.token;
-
-    if (!nftoken) {
-      win.document.body.innerHTML = "<h2>Failed to connect</h2>";
-      return;
-    }
-
-    const tvLink = `https://www.netflix.com/tv8?nftoken=${nftoken}`;
-
-    win.location.href = tvLink;
+    
 
     setMessage("Now enter the code on Netflix");
 
