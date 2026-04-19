@@ -54,7 +54,17 @@ const data = await res.json();
 console.log("GET-TV-LINK RESPONSE:", data);
 
 if (!data.ok || !data.tvLink) {
-  win.document.body.innerHTML = "<h2>Failed to connect</h2>";
+  win.document.body.innerHTML = `
+    <pre style="
+      color:white;
+      padding:20px;
+      font-size:12px;
+      white-space:pre-wrap;
+      word-break:break-word;
+    ">
+${JSON.stringify(data, null, 2)}
+    </pre>
+  `;
   return;
 }
 
