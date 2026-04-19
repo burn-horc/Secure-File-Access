@@ -13,35 +13,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const url = `https://${req.headers.host}/api/find-account`;
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        passcode
-      })
-    });
-
-    const data = await response.json();
-
-    if (!data.success || !data.results) {
-      return res.status(400).json({
-        ok: false,
-        error: "no results"
-      });
-    }
-
     let valid = null;
 
-for (const r of data.results) {
-  if (
-    r?.valid &&
-    (r.nftoken || r.nfToken || r.token)
-  ) {
-    valid = r;
+for (let i = 0; i < 5; i++) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ passcode })
+  });
+
+  const data = await response.json();
+
+  if (!data.success || !data.results) continue;
+
+  const found = data.results.find(
+    (r: any) =>
+      r?.valid &&
+      (r.nftoken || r.nfToken || r.token)
+  );
+
+  if (found) {
+    valid = found;
     break;
   }
+}
+
+if (!valid) {
+  return res.status(404).json({
+    ok: false,
+    error: "no token after retries"
+  });
 }
 
     if (!valid) {
