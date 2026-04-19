@@ -1,26 +1,35 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-// ✅ IMPORT your logic directly
-import findAccountHandler from "./find-account";
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    // 👇 fake response object to capture result
-    let jsonData: any = null;
+    // ✅ use absolute URL correctly
+    const url = `https://${req.headers.host}/api/find-account`;
 
-    const fakeRes: any = {
-      status: () => fakeRes,
-      json: (data: any) => {
-        jsonData = data;
-      }
-    };
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({})
+    });
 
-    // ✅ CALL your API directly (no fetch)
-    await findAccountHandler(req, fakeRes);
+    const text = await response.text();
 
-    const data = jsonData;
+    // 🔥 DEBUG: log raw response
+    console.log("RAW RESPONSE:", text);
 
-    if (!data?.success || !data?.results) {
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      return res.status(500).json({
+        ok: false,
+        error: "find-account returned HTML instead of JSON",
+        raw: text.slice(0, 200)
+      });
+    }
+
+    if (!data.success || !data.results) {
       return res.status(400).json({
         ok: false,
         error: "no results"
