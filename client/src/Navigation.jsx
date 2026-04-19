@@ -55,7 +55,13 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
     // 🔥 IMPORTANT: use POST
     const res = await fetch("/api/get-tv-link", {
-  method: "POST"
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    passcode: "10000001"
+  })
 });
 
 const data = await res.json();
