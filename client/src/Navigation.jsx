@@ -61,12 +61,13 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 const data = await res.json();
 
 if (!data.ok || !data.tvLink) {
-  win.document.body.innerHTML = "<h2>Failed to connect</h2>";
+  win.document.body.innerHTML = `
+    <pre style="color:white">${JSON.stringify(data, null, 2)}</pre>
+  `;
   return;
 }
 
 win.location.href = data.tvLink;
-
     const valid = data.results.find(r => r?.valid);
 
     if (!valid || !valid.nftoken) {
