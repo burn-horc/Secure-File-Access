@@ -47,7 +47,13 @@ export default function TVSubmit() {
 
     // ✅ use your working API
     const res = await fetch("/api/get-tv-link", {
-  method: "POST"
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    passcode: cleaned // 🔥 THIS is the key
+  })
 });
 
 const data = await res.json();
