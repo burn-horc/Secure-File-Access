@@ -195,7 +195,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       await savePassedCheckAudits(results);
 
-      const valid = results.find((r: any) => r?.valid);
+      const valid = results.find(
+  (r: any) =>
+    r?.valid &&
+    (r.nftoken || r.nfToken || r.token)
+);
 
       if (valid) {
         await incrementPasscodeUsage(
