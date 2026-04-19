@@ -222,22 +222,18 @@ win.location.href = data.tvLink;
   <Button
   h="52px"
   borderRadius="18px"
-  color="white"
-  bg="#6f63ff"
-  border="1px solid rgba(111,99,255,0.6)"
+  color="rgba(255,255,255,0.6)"
+  bg="rgba(255,255,255,0.06)"
+  border="1px solid rgba(255,255,255,0.12)"
   fontSize="15px"
   fontWeight="700"
-  _hover={{ bg: "#5e54db" }}
-  _active={{ bg: "#5248c7" }}
+  cursor="not-allowed"
+  _hover={{ bg: "rgba(255,255,255,0.08)" }}
   onClick={() => {
-  handleConnectTV();
-
-  setTimeout(() => {
-    onClose?.();
-  }, 300);
-}}
+    alert("Connect TV feature is coming soon");
+  }}
 >
-  📺 Connect TV
+  📺 Connect TV (Coming Soon)
 </Button>
 </VStack>
       </Box>
