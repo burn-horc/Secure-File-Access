@@ -1,26 +1,39 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
+// ✅ IMPORT your logic directly
+import findAccountHandler from "./find-account";
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    // ⚠️ IMPORTANT: use relative path (NOT fetch self-domain)
-    const response = await fetch(`${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ""}/api/find-account`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({})
-    });
+    // 👇 fake response object to capture result
+    let jsonData: any = null;
 
-    const data = await response.json();
+    const fakeRes: any = {
+      status: () => fakeRes,
+      json: (data: any) => {
+        jsonData = data;
+      }
+    };
 
-    if (!data.success || !data.results) {
-      return res.status(400).json({ ok: false, error: "no results" });
+    // ✅ CALL your API directly (no fetch)
+    await findAccountHandler(req, fakeRes);
+
+    const data = jsonData;
+
+    if (!data?.success || !data?.results) {
+      return res.status(400).json({
+        ok: false,
+        error: "no results"
+      });
     }
 
     const valid = data.results.find((r: any) => r?.valid);
 
     if (!valid) {
-      return res.status(404).json({ ok: false, error: "no valid account" });
+      return res.status(404).json({
+        ok: false,
+        error: "no valid account"
+      });
     }
 
     const nftoken =
@@ -29,7 +42,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       valid.token;
 
     if (!nftoken) {
-      return res.status(404).json({ ok: false, error: "no token" });
+      return res.status(404).json({
+        ok: false,
+        error: "no token"
+      });
     }
 
     const tvLink = `https://www.netflix.com/tv8?nftoken=${nftoken}`;
