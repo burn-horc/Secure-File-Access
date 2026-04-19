@@ -10,7 +10,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({}) // no passcode for now
+      body: JSON.stringify({
+  passcode: "1234" // ← put REAL passcode from Supabase
+})
     });
 
     const data = await response.json();
