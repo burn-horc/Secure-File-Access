@@ -195,11 +195,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       await savePassedCheckAudits(results);
 
-      const valid = results.find(
-  (r: any) =>
-    r?.valid &&
-    (r.nftoken || r.nfToken || r.token)
-);
+      const valid = results.find((r: any) => r?.valid);
 
       if (valid) {
         await incrementPasscodeUsage(
@@ -209,10 +205,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         await clearFailures(ip);
 
-        return res.status(200).json({
-  success: true,
-  results: [valid] // 🔥 ONLY return the good one
-});
+        return res.status(200).json(result);
       }
     }
 
