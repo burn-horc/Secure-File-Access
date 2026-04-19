@@ -8,7 +8,7 @@ import { initAntiInspectGuard } from "./antiInspect";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 
-// initAntiInspectGuard();
+ initAntiInspectGuard();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
