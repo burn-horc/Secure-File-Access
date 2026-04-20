@@ -766,7 +766,7 @@ const [trialResults, setTrialResults] = useState([]);
 const [showTrialResults, setShowTrialResults] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [acceptedNotice, setAcceptedNotice] = useState(true);
-  
+  const [actionMode, setActionMode] = useState("premium");
   const canAccessAdmin = sessionUnlocked; 
 
   const goBackToChecker = () => {
@@ -1159,7 +1159,22 @@ const noResultTimer = setTimeout(() => {
     setCheckProgress({ completed: results.length, total: results.length });
 
     const validResults = results.filter((r) => r.valid);
+    
     const invalidResults = results.filter((r) => !r.valid);
+
+    if (validResults.length > 0) {
+
+  if (actionMode === "tv") {
+
+    window.open("https://www.netflix.com/tv2", "_blank");
+
+    setIsLoading(false);
+
+    return; // ⛔ STOP EVERYTHING
+
+  }
+
+}
 
     setLiveValidCount(validResults.length);
     setLiveInvalidCount(invalidResults.length);
@@ -1250,18 +1265,7 @@ appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`
 
   const runFindAccount = (mode = "premium") => {
   if (isLoading) return;
-    if (mode === "tv") {
-
-    const win = window.open("https://www.netflix.com/tv2", "_blank");
-
-    if (!win) {
-
-      window.location.href = "https://www.netflix.com/tv2";
-
-    }
-
-    return;
-      }
+   setActionMode(mode);
     
   findAccountRetryRef.current = 0;
 
