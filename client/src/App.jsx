@@ -1150,7 +1150,7 @@ console.log("✅ RESPONSE RECEIVED:", response.status);
     }
 
     const data = await response.json();
-    
+    console.log("🔥 API DATA:", data);
     const results = Array.isArray(data?.results) ? data.results : [];
 
     if (!results.length) {
