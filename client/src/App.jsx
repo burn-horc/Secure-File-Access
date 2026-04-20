@@ -1081,6 +1081,8 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
   };
 
   const runFindAccountScan = async (passcodeArg = verifiedPasscode, mode = "premium") => {
+    console.log("🔥 MODE INSIDE SCAN:", mode);
+console.log("🔥 ACTION MODE STATE:", actionMode);
   if (isLoading) return;
 
   const abortController = new AbortController();
