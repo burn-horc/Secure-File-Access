@@ -1113,15 +1113,19 @@ console.log("🔥 ACTION MODE STATE:", actionMode);
 // timeout if nothing happens
 
 
-    const response = await fetch("/api/find-account", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      signal: abortController.signal,
-      body: JSON.stringify({
-        passcode: passcodeArg,
-      }),
-    });
+    console.log("🚀 SENDING REQUEST...");
+
+const response = await fetch("/api/find-account", {
+  method: "POST",
+  credentials: "include",
+  headers: { "Content-Type": "application/json" },
+  signal: abortController.signal,
+  body: JSON.stringify({
+    passcode: passcodeArg,
+  }),
+});
+
+console.log("✅ RESPONSE RECEIVED:", response.status);
 
     if (response.status === 401) {
       setSessionUnlocked(false);
