@@ -1111,10 +1111,7 @@ console.log("🔥 ACTION MODE STATE:", actionMode);
     appendCheckLog("info", "Finding Valid NETFLIX Account...");
 
 // timeout if nothing happens
-const noResultTimer = setTimeout(() => {
-  appendCheckLog("invalid", "No valid account found. Please generate account again.");
-  setIsLoading(false);
-}, 15000);
+
 
     const response = await fetch("/api/find-account", {
       method: "POST",
@@ -1149,7 +1146,7 @@ const noResultTimer = setTimeout(() => {
     }
 
     const data = await response.json();
-    clearTimeout(noResultTimer);
+    
     const results = Array.isArray(data?.results) ? data.results : [];
 
     if (!results.length) {
@@ -1166,11 +1163,12 @@ if (validResults.length > 0) {
   const valid = validResults[0];
 
   if (mode === "tv") {
-    if (!valid?.nftoken) {
-      appendCheckLog("error", "No nftoken found");
-      setIsLoading(false);
-      return;
-    }
+  if (!valid?.nftoken) {
+    appendCheckLog("error", "No nftoken found from backend");
+    console.log("DEBUG RESULT:", valid); // 👈 ADD THIS
+    setIsLoading(false);
+    return;
+  }
 
     const tvUrl = `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`;
 
