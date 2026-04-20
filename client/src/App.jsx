@@ -1080,7 +1080,7 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     uploadInputRef.current?.click();
   };
 
-  const runFindAccountScan = async (passcodeArg = verifiedPasscode) => {
+  const runFindAccountScan = async (passcodeArg = verifiedPasscode, mode = "premium") => {
   if (isLoading) return;
 
   const abortController = new AbortController();
