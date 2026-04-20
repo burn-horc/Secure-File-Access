@@ -1250,15 +1250,7 @@ appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`
 
   const runFindAccount = (mode = "premium") => {
   if (isLoading) return;
-    if (mode === "tv") {
-  const win = window.open("https://www.netflix.com/tv2", "_blank");
-
-  if (!win) {
-    window.location.href = "https://www.netflix.com/tv2";
-  }
-
-  return; // ⛔ STOP normal account flow
-}
+    
   findAccountRetryRef.current = 0;
 
   if (sessionUnlocked) {
