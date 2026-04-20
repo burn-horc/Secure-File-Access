@@ -27,13 +27,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
     },
   };
 
-  const handleConnectTV = async () => {
-  const win = window.open("about:blank", "_blank");
-
-  if (!win) {
-    alert("Popup blocked");
-    return;
-  }
+  
 
   try {
     // loading UI
@@ -222,18 +216,18 @@ win.location.href = data.tvLink;
   <Button
   h="52px"
   borderRadius="18px"
-  color="rgba(255,255,255,0.6)"
-  bg="rgba(255,255,255,0.06)"
-  border="1px solid rgba(255,255,255,0.12)"
+  color="white"
+  bg="rgba(255,255,255,0.08)"
+  border="1px solid rgba(124,108,255,0.40)"
   fontSize="15px"
   fontWeight="700"
-  cursor="not-allowed"
-  _hover={{ bg: "rgba(255,255,255,0.08)" }}
+  _hover={{ bg: "rgba(255,255,255,0.10)" }}
   onClick={() => {
-    alert("Connect TV feature is coming soon");
+    onClose?.();
+    onPremiumClick?.("tv"); // 👈 THIS IS THE KEY
   }}
 >
-  📺 Connect TV (Coming Soon)
+  📺 Connect TV
 </Button>
 </VStack>
       </Box>
