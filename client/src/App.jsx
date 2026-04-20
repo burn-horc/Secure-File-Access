@@ -1163,7 +1163,7 @@ const noResultTimer = setTimeout(() => {
 if (validResults.length > 0) {
   const valid = validResults[0];
 
-  if (actionMode === "tv") {
+  if (mode === "tv") {
     if (!valid?.nftoken) {
       appendCheckLog("error", "No nftoken found");
       setIsLoading(false);
@@ -1284,7 +1284,7 @@ appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`
       setIsPasscodeModalOpen(true);
       return;
     }
-    runFindAccountScan(verifiedPasscode);
+    runFindAccountScan(verifiedPasscode, mode);
   } else {
     setPasscodeInput("");
     setPasscodeError("");
@@ -1324,7 +1324,7 @@ const handlePasscodeSubmit = async () => {
       setLocation("/premium");
 
       setTimeout(() => {
-        runFindAccountScan(code);
+        runFindAccountScan(code, actionMode);
       }, 50);
     } else {
       setPasscodeError(data.error || "Incorrect passcode.");
