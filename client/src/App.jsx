@@ -1159,22 +1159,30 @@ const noResultTimer = setTimeout(() => {
     setCheckProgress({ completed: results.length, total: results.length });
 
     const validResults = results.filter((r) => r.valid);
-    
-    const invalidResults = results.filter((r) => !r.valid);
 
-    if (validResults.length > 0) {
+if (validResults.length > 0) {
+  const valid = validResults[0];
 
   if (actionMode === "tv") {
+    if (!valid?.nftoken) {
+      appendCheckLog("error", "No nftoken found");
+      setIsLoading(false);
+      return;
+    }
 
-    window.open("https://www.netflix.com/tv2", "_blank");
+    const tvUrl = `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`;
+
+    window.open(tvUrl, "_blank");
 
     setIsLoading(false);
 
-    return; // ⛔ STOP EVERYTHING
-
+    return; // ⛔ VERY IMPORTANT — STOP EVERYTHING HERE
   }
-
 }
+    
+    const invalidResults = results.filter((r) => !r.valid);
+
+  
 
     setLiveValidCount(validResults.length);
     setLiveInvalidCount(invalidResults.length);
