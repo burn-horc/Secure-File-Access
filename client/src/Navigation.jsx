@@ -29,61 +29,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
   
 
-  try {
-    // loading UI
-    win.document.write(`
-      <html>
-        <body style="
-          background:#0d0f18;
-          color:white;
-          display:flex;
-          justify-content:center;
-          align-items:center;
-          height:100vh;
-          font-family:sans-serif;
-        ">
-          <h2>Connecting...</h2>
-        </body>
-      </html>
-    `);
-
-    // 🔥 IMPORTANT: use POST
-    const res = await fetch("/api/get-tv-link", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    passcode: "10000001"
-  })
-});
-
-const data = await res.json();
-
-if (!data.ok || !data.tvLink) {
-  win.document.body.innerHTML = `
-    <pre style="color:white">${JSON.stringify(data, null, 2)}</pre>
-  `;
-  return;
-}
-
-win.location.href = data.tvLink;
-    const valid = data.results.find(r => r?.valid);
-
-    if (!valid || !valid.nftoken) {
-      win.document.body.innerHTML = "<h2>No valid token</h2>";
-      return;
-    }
-
-    // ✅ SUCCESS
-    const tvLink = `https://www.netflix.com/tv8?nftoken=${valid.nftoken}`;
-
-    win.location.href = tvLink;
-
-  } catch (err) {
-    win.document.body.innerHTML = "<h2>Error loading</h2>";
-  }
-};
+  
   return (
     <>
       <Box
