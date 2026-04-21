@@ -2,76 +2,29 @@ import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { Link } from "wouter";
 
 export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
+
   const itemStyle = {
+    h: "64px",
     w: "full",
-    h: "60px",
-    borderRadius: "18px",
+    borderRadius: "20px",
     justifyContent: "flex-start",
-    px: 5,
-    fontSize: "15px",
+    px: 6,
+    fontSize: "16px",
     fontWeight: "700",
     color: "white",
-    bg: "rgba(255,255,255,0.05)",
-    borderWidth: "1px",
-    borderColor: "rgba(255,255,255,0.10)",
+    bg: "rgba(255,255,255,0.03)",
+    border: "1px solid rgba(124,108,255,0.15)",
     backdropFilter: "blur(12px)",
+    boxShadow: "0 0 12px rgba(124,108,255,0.12)",
     _hover: {
-      bg: "rgba(255,255,255,0.08)",
-      borderColor: "rgba(124,108,255,0.5)",
+      bg: "rgba(124,108,255,0.08)",
+      borderColor: "#7c6cff",
+      boxShadow: "0 0 18px rgba(124,108,255,0.6)",
+      transform: "translateY(-2px)",
     },
     _active: {
-      transform: "scale(0.98)"
-    }
-  };
-
-  const handleConnectTV = async () => {
-    const win = window.open("about:blank", "_blank");
-
-    if (!win) {
-      alert("Popup blocked");
-      return;
-    }
-
-    try {
-      win.document.write(`
-        <html>
-          <body style="
-            background:#0d0f18;
-            color:white;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
-            font-family:sans-serif;
-          ">
-            <h2>Connecting...</h2>
-          </body>
-        </html>
-      `);
-
-      const res = await fetch("/api/get-tv-link", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          passcode: "10000001"
-        })
-      });
-
-      const data = await res.json();
-
-      if (!data.ok || !data.tvLink) {
-        win.document.body.innerHTML = `
-          <pre style="color:white">${JSON.stringify(data, null, 2)}</pre>
-        `;
-        return;
-      }
-
-      win.location.href = data.tvLink;
-
-    } catch (err) {
-      win.document.body.innerHTML = "<h2>Error loading</h2>";
+      transform: "scale(0.97)",
+      boxShadow: "0 0 10px rgba(124,108,255,0.8)"
     }
   };
 
@@ -81,55 +34,83 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
       <Box
         position="fixed"
         inset="0"
-        bg="rgba(0,0,0,0.5)"
-        backdropFilter="blur(4px)"
+        bg="rgba(0,0,0,0.6)"
+        backdropFilter="blur(6px)"
         zIndex="1390"
         onClick={onClose}
       />
 
-      {/* BOTTOM PANEL */}
+      {/* PANEL */}
       <Box
         position="fixed"
-        bottom="0"
-        left="0"
-        right="0"
-        bg="linear-gradient(180deg, rgba(15,22,48,0.95) 0%, rgba(10,15,35,0.98) 100%)"
-        borderTop="1px solid rgba(255,255,255,0.1)"
-        borderTopRadius="28px"
-        boxShadow="0 -20px 60px rgba(0,0,0,0.6)"
+        top="14px"
+        right="14px"
+        bottom="14px"
+        w={{ base: "78vw", sm: "360px" }}
+        maxW="360px"
+        bg="linear-gradient(180deg, rgba(10,14,30,0.95) 0%, rgba(5,8,20,0.98) 100%)"
+        border="1px solid rgba(124,108,255,0.25)"
+        borderRadius="28px"
+        boxShadow="
+          0 0 30px rgba(124,108,255,0.25),
+          inset 0 0 20px rgba(124,108,255,0.08)
+        "
         zIndex="1400"
-        px={5}
-        pt={4}
-        pb={6}
-        animation="slideUp 0.25s ease-out"
+        overflow="hidden"
       >
 
-        {/* DRAG HANDLE */}
+        {/* HEADER */}
         <Box
-          w="40px"
-          h="4px"
-          bg="rgba(255,255,255,0.3)"
-          borderRadius="full"
-          mx="auto"
-          mb={4}
-        />
-
-        {/* TITLE */}
-        <Text
-          textAlign="center"
-          fontSize="13px"
-          letterSpacing="0.15em"
-          color="rgba(255,255,255,0.4)"
-          mb={4}
+          px={6}
+          pt={6}
+          pb={5}
+          borderBottom="1px solid rgba(124,108,255,0.2)"
         >
-          QUICK ACCESS
-        </Text>
+          <HStack justify="space-between">
 
-        {/* BUTTONS */}
-        <VStack spacing={3}>
+            <VStack align="start" spacing={1}>
+              <Text
+                color="#7c6cff"
+                fontWeight="900"
+                fontSize="14px"
+                letterSpacing="0.18em"
+                textShadow="0 0 10px #7c6cff"
+              >
+                NAVIGATION
+              </Text>
+              <Text color="rgba(255,255,255,0.4)" fontSize="12px">
+                Control panel
+              </Text>
+            </VStack>
+
+            <Button
+              onClick={onClose}
+              minW="44px"
+              h="44px"
+              borderRadius="14px"
+              color="white"
+              bg="rgba(255,255,255,0.05)"
+              border="1px solid rgba(124,108,255,0.3)"
+              fontSize="22px"
+              _hover={{
+                bg: "rgba(124,108,255,0.2)",
+                boxShadow: "0 0 12px #7c6cff"
+              }}
+            >
+              ×
+            </Button>
+
+          </HStack>
+        </Box>
+
+        {/* MAIN */}
+        <VStack spacing={4} align="stretch" px={6} pt={6}>
 
           <Link href="/">
-            <Button {...itemStyle} onClick={onClose}>
+            <Button
+              {...itemStyle}
+              onClick={onClose}
+            >
               <HStack spacing={4}>
                 <Text fontSize="20px">⌂</Text>
                 <Text>Cookie Checker</Text>
@@ -163,35 +144,29 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             </HStack>
           </Button>
 
-          {/* CONNECT TV */}
-          <Button
-            {...itemStyle}
-            onClick={handleConnectTV}
-          >
-            <HStack spacing={4}>
-              <Text fontSize="20px">📺</Text>
-              <Text>Connect TV</Text>
-            </HStack>
-          </Button>
-
         </VStack>
-      </Box>
 
-      {/* ANIMATION */}
-      <style>
-        {`
-          @keyframes slideUp {
-            from {
-              transform: translateY(100%);
-              opacity: 0;
-            }
-            to {
-              transform: translateY(0%);
-              opacity: 1;
-            }
-          }
-        `}
-      </style>
+        {/* FOOTER LINE */}
+        <Box px={6} pt={8}>
+          <Box
+            h="1px"
+            bg="linear-gradient(90deg, transparent, #7c6cff, transparent)"
+          />
+        </Box>
+
+        {/* FOOTER TEXT */}
+        <Box px={6} pt={5} pb={6}>
+          <Text
+            color="rgba(255,255,255,0.3)"
+            fontSize="11px"
+            textAlign="center"
+            letterSpacing="0.15em"
+          >
+            SYSTEM READY
+          </Text>
+        </Box>
+
+      </Box>
     </>
   );
 }
