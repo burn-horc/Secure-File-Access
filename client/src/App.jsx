@@ -1081,12 +1081,14 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
   };
 
   const runFindAccountScan = async (passcodeArg = verifiedPasscode, mode = "premium") => {
-    console.log("🔥 MODE INSIDE SCAN:", mode);
-console.log("🔥 ACTION MODE STATE:", actionMode);
+  console.log("🔥 MODE INSIDE SCAN:", mode);
+  console.log("🔥 ACTION MODE STATE:", actionMode);
+
   if (isLoading) return;
 
   const abortController = new AbortController();
   activeCheckAbortControllerRef.current = abortController;
+
   nextCheckLogIdRef.current = 1;
   setCheckLogs([]);
   setIsLoading(true);
@@ -1099,7 +1101,8 @@ console.log("🔥 ACTION MODE STATE:", actionMode);
   setLiveResultIds(new Set());
 
   try {
-    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
     if (abortController.signal.aborted) {
       throw new DOMException("Check aborted", "AbortError");
     }
@@ -1110,22 +1113,17 @@ console.log("🔥 ACTION MODE STATE:", actionMode);
 
     appendCheckLog("info", "Finding Valid NETFLIX Account...");
 
-// timeout if nothing happens
-
-
     console.log("🚀 SENDING REQUEST...");
 
-const response = await fetch("/api/find-account", {
-  method: "POST",
-  credentials: "include",
-  headers: { "Content-Type": "application/json" },
-  signal: abortController.signal,
-  body: JSON.stringify({
-    passcode: passcodeArg,
-  }),
-});
+    const response = await fetch("/api/find-account", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      signal: abortController.signal,
+      body: JSON.stringify({ passcode: passcodeArg }),
+    });
 
-console.log("✅ RESPONSE RECEIVED:", response.status);
+    console.log("✅ RESPONSE RECEIVED:", response.status);
 
     if (response.status === 401) {
       setSessionUnlocked(false);
@@ -1138,7 +1136,7 @@ console.log("✅ RESPONSE RECEIVED:", response.status);
       const data = await response.json().catch(() => ({}));
       const msg =
         data.error ||
-        "You have reached the 3 daily limit for Generate Account. Try again tomorrow.";
+        "You have reached the daily limit. Try again tomorrow.";
       appendCheckLog("error", msg);
       toast({ status: "error", title: msg, isClosable: true });
       return;
@@ -1150,50 +1148,83 @@ console.log("✅ RESPONSE RECEIVED:", response.status);
     }
 
     const data = await response.json();
-const results = Array.isArray(data?.results) ? data.results : [];
+    console.log("🔥 API DATA:", data);
 
-// 🚀 TV MODE — HANDLE FIRST AND EXIT
-if (mode === "tv") {
-  const valid = results.find(r => r.valid && r.nftoken);
+    const results = Array.isArray(data?.results) ? data.results : [];
 
-  if (!valid) {
+    // 🚀 =========================
+    // 🚀 TV MODE (MAIN FEATURE)
+    // 🚀 =========================
+    if (mode === "tv") {
+      const valid = results.find((r) => r.valid && r.nftoken);
+
+      if (!valid) {
+        appendCheckLog("error", "No TV-ready account found");
+        return;
+      }
+
+      window.open(
+        `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`,
+        "_blank"
+      );
+
+      return; // ⛔ STOP HERE (NO UI BELOW)
+    }
+
+    // =========================
+    // NORMAL FLOW (NON-TV)
+    // =========================
+
+    if (!results.length) {
+      appendCheckLog("invalid", "No account result returned.");
+      return;
+    }
+
+    latestPartialResultsRef.current = results;
+    setCheckProgress({ completed: results.length, total: results.length });
+
+    const validResults = results.filter((r) => r.valid);
+    const invalidResults = results.filter((r) => !r.valid);
+
+    setLiveValidCount(validResults.length);
+    setLiveInvalidCount(invalidResults.length);
+    setBulkValidResults(validResults);
+
+    results.forEach((result) => {
+      const planLabel = result.plan?.trim() || "Unknown Plan";
+      const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
+
+      if (result.valid) {
+        appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
+      } else {
+        appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel}`);
+      }
+    });
+
+    upsertStoredCookieChecksFromResults(results);
+
+    appendCheckLog(
+      "info",
+      `Completed: ${validResults.length} valid, ${invalidResults.length} invalid.`
+    );
+
+  } catch (err) {
+    if (isAbortError(err)) {
+      appendCheckLog("info", "Stopped.");
+      return;
+    }
+
+    const message =
+      err instanceof Error ? err.message : "Unexpected error";
+
+    appendCheckLog("invalid", `Error: ${message}`);
+    showToast(message);
+
+  } finally {
+    activeCheckAbortControllerRef.current = null;
     setIsLoading(false);
-    return;
   }
-
-  // ✅ OPEN NETFLIX TV PAGE (LOGGED IN)
-  window.open(
-    `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`,
-    "_blank"
-  );
-
-  // ✅ STOP EVERYTHING (NO UI UPDATE)
-  activeCheckAbortControllerRef.current = null;
-  setIsLoading(false);
-  return;
-}
-
-  window.open(`https://www.netflix.com/tv2?nftoken=${valid.nftoken}`, "_blank");
-
-  setIsLoading(false);
-  return; // ⛔ STOP EVERYTHING HERE
-}
-
-// ⬇️ NORMAL FLOW (NON-TV ONLY)
-
-if (!results.length) {
-  appendCheckLog("invalid", "No account result returned.");
-  setIsLoading(false);
-  return;
-}
-
-latestPartialResultsRef.current = results;
-setCheckProgress({ completed: results.length, total: results.length });
-
-const validResults = results.filter((r) => r.valid);
-const invalidResults = results.filter((r) => !r.valid);
-
-    
+};
     
     
 
