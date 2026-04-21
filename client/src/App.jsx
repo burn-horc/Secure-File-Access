@@ -1104,39 +1104,17 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
   };
 
   const runFindAccountScan = async (passcodeArg = verifiedPasscode, mode = "premium") => {
-  console.log("🔥 MODE INSIDE SCAN:", mode);
-  console.log("🔥 ACTION MODE STATE:", actionMode);
-
   if (isLoading) return;
 
   const abortController = new AbortController();
   activeCheckAbortControllerRef.current = abortController;
 
-  nextCheckLogIdRef.current = 1;
-  setCheckLogs([]);
   setIsLoading(true);
-  toast.closeAll();
-  setBulkValidResults([]);
-  latestPartialResultsRef.current = [];
-  setCheckProgress({ completed: 0, total: null });
-  setLiveValidCount(0);
-  setLiveInvalidCount(0);
-  setLiveResultIds(new Set());
 
   try {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    if (abortController.signal.aborted) {
-      throw new DOMException("Check aborted", "AbortError");
-    }
-
     if (!passcodeArg) {
       throw new Error("Passcode is required.");
     }
-
-    appendCheckLog("info", "Finding Valid NETFLIX Account...");
-
-    console.log("🚀 SENDING REQUEST...");
 
     const response = await fetch("/api/find-account", {
       method: "POST",
@@ -1146,120 +1124,42 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
       body: JSON.stringify({ passcode: passcodeArg }),
     });
 
-    console.log("✅ RESPONSE RECEIVED:", response.status);
-
-    if (response.status === 401) {
-      setSessionUnlocked(false);
-      setVerifiedPasscode("");
-      setIsPasscodeModalOpen(true);
-      return;
-    }
-
-    if (response.status === 429) {
-      const data = await response.json().catch(() => ({}));
-      const msg =
-        data.error ||
-        "You have reached the daily limit. Try again tomorrow.";
-      appendCheckLog("error", msg);
-      toast({ status: "error", title: msg, isClosable: true });
-      return;
-    }
-
     if (!response.ok) {
-      const msg = await readApiErrorMessage(response);
-      throw new Error(msg);
+      throw new Error("Request failed");
     }
 
     const data = await response.json();
-    console.log("🔥 API DATA:", data);
-
     const results = Array.isArray(data?.results) ? data.results : [];
 
-    // 🚀 =========================
-    // 🚀 TV MODE (MAIN FEATURE)
-    // 🚀 =========================
+    console.log("🔥 RESULTS:", results);
+
+    // 🚀 TV MODE
     if (mode === "tv") {
-  const valid = results.find((r) => r.valid && r.nftoken);
+      const valid = results.find(r => r.valid && r.nftoken);
 
-  console.log("🔥 VALID:", valid);
+      console.log("🔥 VALID:", valid);
 
-  if (!valid || !valid.nftoken) {
-    appendCheckLog("error", "No NFTOKEN found");
-    
-    // 🚨 close blank tab if opened
-    if (window.__tvWindow) {
-      window.__tvWindow.close();
-      window.__tvWindow = null;
-    }
+      if (!valid || !valid.nftoken) {
+        console.log("❌ NO NFTOKEN FOUND");
+        return;
+      }
 
-    return;
-  }
+      const tvUrl = `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`;
+      console.log("🚀 OPENING:", tvUrl);
 
-  const tvUrl = `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`;
+      window.open(tvUrl, "_blank");
 
-  console.log("🚀 REDIRECTING TO:", tvUrl);
-
-  if (window.__tvWindow) {
-    window.__tvWindow.location.href = tvUrl;
-  } else {
-    window.open(tvUrl, "_blank");
-  }
-
-  return;
-}
-
-    // =========================
-    // NORMAL FLOW (NON-TV)
-    // =========================
-
-    if (!results.length) {
-      appendCheckLog("invalid", "No account result returned.");
       return;
     }
 
-    latestPartialResultsRef.current = results;
-    setCheckProgress({ completed: results.length, total: results.length });
-
-    const validResults = results.filter((r) => r.valid);
-    const invalidResults = results.filter((r) => !r.valid);
-
-    setLiveValidCount(validResults.length);
-    setLiveInvalidCount(invalidResults.length);
-    setBulkValidResults(validResults);
-
-    results.forEach((result) => {
-      const planLabel = result.plan?.trim() || "Unknown Plan";
-      const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
-
-      if (result.valid) {
-        appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
-      } else {
-        appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel}`);
-      }
-    });
-
-    upsertStoredCookieChecksFromResults(results);
-
-    appendCheckLog(
-      "info",
-      `Completed: ${validResults.length} valid, ${invalidResults.length} invalid.`
-    );
+    // NORMAL MODE
+    console.log("✅ NORMAL MODE");
 
   } catch (err) {
-    if (isAbortError(err)) {
-      appendCheckLog("info", "Stopped.");
-      return;
-    }
-
-    const message =
-      err instanceof Error ? err.message : "Unexpected error";
-
-    appendCheckLog("invalid", `Error: ${message}`);
-    showToast(message);
-
+    console.log("❌ ERROR:", err);
   } finally {
-    activeCheckAbortControllerRef.current = null;
     setIsLoading(false);
+    activeCheckAbortControllerRef.current = null;
   }
 };
   
