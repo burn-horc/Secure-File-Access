@@ -169,9 +169,15 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
   fontWeight="700"
   _hover={{ bg: "rgba(255,255,255,0.10)" }}
   onClick={() => {
-    onClose?.();
-    onPremiumClick?.("tv"); // 👈 THIS IS THE KEY
-  }}
+  onClose?.();
+
+  console.log("📺 CONNECT TV CLICKED");
+
+  // 🚀 FORCE TV MODE DIRECTLY
+  window.__FORCE_TV_MODE = true;
+
+  onPremiumClick?.();
+}}
 >
   📺 Connect TV
 </Button>
