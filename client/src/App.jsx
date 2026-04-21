@@ -1181,22 +1181,31 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     if (mode === "tv") {
   const valid = results.find((r) => r.valid && r.nftoken);
 
-  if (!valid) {
-    appendCheckLog("error", "No TV-ready account found");
+  console.log("🔥 VALID:", valid);
+
+  if (!valid || !valid.nftoken) {
+    appendCheckLog("error", "No NFTOKEN found");
+    
+    // 🚨 close blank tab if opened
+    if (window.__tvWindow) {
+      window.__tvWindow.close();
+      window.__tvWindow = null;
+    }
+
     return;
   }
 
   const tvUrl = `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`;
 
-  // ✅ use already-opened window (IMPORTANT for iPhone)
-  if (tvWindowRef.current) {
-    tvWindowRef.current.location.href = tvUrl;
+  console.log("🚀 REDIRECTING TO:", tvUrl);
+
+  if (window.__tvWindow) {
+    window.__tvWindow.location.href = tvUrl;
   } else {
-    // fallback (desktop)
     window.open(tvUrl, "_blank");
   }
 
-  return; // ⛔ STOP HERE
+  return;
 }
 
     // =========================
