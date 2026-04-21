@@ -1230,55 +1230,8 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
 
   
 
-    setLiveValidCount(validResults.length);
-    setLiveInvalidCount(invalidResults.length);
-    setBulkValidResults(validResults);
-
-    validResults.forEach((result) => {
-      const ck = result.cookieHeader || String(Date.now());
-      setLiveResultIds((prev) => new Set([...prev, ck]));
-      setTimeout(() => {
-        setLiveResultIds((prev) => {
-          const next = new Set(prev);
-          next.delete(ck);
-          return next;
-        });
-      }, 30000);
-    });
-
-    results.forEach((result) => {
-      const planLabel = result.plan?.trim() || "Unknown Plan";
-      const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
-
-      if (result.valid) {
-        appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
-      } else {
-        
-        const reasonText = String(result.reason || "").toLowerCase();
-
-let reason = "Unknown error";
-
-if (reasonText.includes("timeout")) reason = "Request timeout";
-else if (reasonText.includes("429")) reason = "Rate limited";
-else if (reasonText.includes("network")) reason = "Network error";
-else if (reasonText.includes("http 5")) reason = "Server error";
-else if (result.reason) reason = result.reason;
-
-appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`);
-    }
-    });
-
-    upsertStoredCookieChecksFromResults(results);
-
-    appendCheckLog(
-      "info",
-      `Completed: ${validResults.length} valid, ${invalidResults.length} invalid.`
-    );
-
-    if (validResults.length > 0 && soundEnabled) {
-      playSuccessChime();
     
-  } catch (caughtError) {
+  
     if (isAbortError(caughtError)) {
       upsertStoredCookieChecksFromResults(latestPartialResultsRef.current);
       const foundValid = latestPartialResultsRef.current.filter((r) => r.valid).length;
