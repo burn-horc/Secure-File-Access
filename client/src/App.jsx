@@ -1154,9 +1154,12 @@ console.log("✅ RESPONSE RECEIVED:", response.status);
     const results = Array.isArray(data?.results) ? data.results : [];
 
     if (!results.length) {
-      appendCheckLog("invalid", "No account result returned.");
-      return;
-    }
+  appendCheckLog("invalid", "No account result returned.");
+
+  setIsLoading(false); // 👈 VERY IMPORTANT
+
+  return;
+}
 
     latestPartialResultsRef.current = results;
     setCheckProgress({ completed: results.length, total: results.length });
@@ -1169,10 +1172,13 @@ if (validResults.length > 0) {
   if (mode === "tv") {
   if (!valid?.nftoken) {
     appendCheckLog("error", "No nftoken found from backend");
-    console.log("DEBUG RESULT:", valid); // 👈 ADD THIS
+
+    console.log("❌ FULL RESULT:", valid); // 👈 ADD THIS
+
     setIsLoading(false);
     return;
   }
+}
 
     const tvUrl = `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`;
 
