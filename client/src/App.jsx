@@ -1244,10 +1244,10 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
   };
 
   const runFindAccount = (mode) => {
-    console.log("🔥 BUTTON MODE:", mode);
   if (isLoading) return;
-   setActionMode(mode);
-    
+
+  setActionMode(mode);
+
   findAccountRetryRef.current = 0;
 
   if (sessionUnlocked) {
@@ -1257,7 +1257,10 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
       setIsPasscodeModalOpen(true);
       return;
     }
+
+    // ✅ PASS MODE HERE
     runFindAccountScan(verifiedPasscode, mode);
+
   } else {
     setPasscodeInput("");
     setPasscodeError("");
