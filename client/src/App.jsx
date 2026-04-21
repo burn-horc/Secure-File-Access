@@ -1243,7 +1243,8 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     setInput(nextValue);
   };
 
-  const runFindAccount = (mode = "premium") => {
+  const runFindAccount = (mode) => {
+    console.log("🔥 BUTTON MODE:", mode);
   if (isLoading) return;
    setActionMode(mode);
     
