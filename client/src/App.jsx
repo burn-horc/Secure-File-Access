@@ -1277,7 +1277,7 @@ appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`
 
     if (validResults.length > 0 && soundEnabled) {
       playSuccessChime();
-    }
+    
   } catch (caughtError) {
     if (isAbortError(caughtError)) {
       upsertStoredCookieChecksFromResults(latestPartialResultsRef.current);
