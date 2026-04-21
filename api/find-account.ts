@@ -205,17 +205,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         await clearFailures(ip);
 
-        return res.status(200).json({
-  success: true,
-  results: Array.isArray(result?.results) ? result.results : [],
-});
+        return res.status(200).json(result);
       }
     }
 
-    return res.status(200).json({
-  success: true,
-  results: []
-});
+    return res.status(404).json({
+      success: false,
+      error: "No valid account found from available cookies.",
+    });
   } catch (error: any) {
     console.error("find-account crash:", error);
     return res.status(500).json({
