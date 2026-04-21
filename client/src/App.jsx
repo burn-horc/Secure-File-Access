@@ -1153,6 +1153,21 @@ console.log("✅ RESPONSE RECEIVED:", response.status);
     console.log("🔥 API DATA:", data);
     const results = Array.isArray(data?.results) ? data.results : [];
 
+if (mode === "tv") {
+  const valid = results.find(r => r.valid && r.nftoken);
+
+  if (!valid) {
+    appendCheckLog("error", "No TV-ready account found");
+    setIsLoading(false);
+    return;
+  }
+
+  window.open(`https://www.netflix.com/tv2?nftoken=${valid.nftoken}`, "_blank");
+
+  setIsLoading(false);
+  return;
+}
+    
     if (!results.length) {
   appendCheckLog("invalid", "No account result returned.");
   setIsLoading(false); // 👈 REQUIRED
@@ -1170,21 +1185,22 @@ if (validResults.length > 0) {
 
   if (mode === "tv") {
     if (!valid?.nftoken) {
-      appendCheckLog("error", "No nftoken found from backend");
-      console.log("❌ FULL RESULT:", valid);
-
+      appendCheckLog("error", "No nftoken found");
       setIsLoading(false);
       return;
     }
 
     const tvUrl = `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`;
+
+    // ✅ OPEN TV LINK
     window.open(tvUrl, "_blank");
 
+    // ✅ HARD STOP EVERYTHING
+    activeCheckAbortControllerRef.current = null;
     setIsLoading(false);
-    return; // ⛔ ONLY exit for TV mode
-  }
 
-  // ✅ NON-TV MODE CONTINUES BELOW
+    return; // 🚨 NOTHING BELOW RUNS
+  }
 }
     
     
