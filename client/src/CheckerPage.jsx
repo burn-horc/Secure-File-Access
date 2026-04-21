@@ -2412,7 +2412,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       {showNav && (
   <Navigation
     onClose={() => setShowNav(false)}
-    onPremiumClick={(mode) => runFindAccount(mode)}
+    onPremiumClick={runFindAccount}
     onRandomClick={runTrial}
   />
 )}
