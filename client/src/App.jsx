@@ -808,14 +808,14 @@ const [showTrialResults, setShowTrialResults] = useState(false);
       });
     } catch {}
   };
-
+  
   const uploadInputRef = useRef(null);
   const checkLogRef = useRef(null);
   const activeCheckAbortControllerRef = useRef(null);
   const latestPartialResultsRef = useRef([]);
   const nextCheckLogIdRef = useRef(1);
   const findAccountRetryRef = useRef(0);
-
+  const tvWindowRef = useRef(null);
   const uploadedInputBanner = uploadedInputSource
     ? `Using file: ${uploadedInputSource.fileName} (${formatFileSize(uploadedInputSource.fileSize)})`
     : null;
@@ -1156,20 +1156,25 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     // 🚀 TV MODE (MAIN FEATURE)
     // 🚀 =========================
     if (mode === "tv") {
-      const valid = results.find((r) => r.valid && r.nftoken);
+  const valid = results.find((r) => r.valid && r.nftoken);
 
-      if (!valid) {
-        appendCheckLog("error", "No TV-ready account found");
-        return;
-      }
+  if (!valid) {
+    appendCheckLog("error", "No TV-ready account found");
+    return;
+  }
 
-      window.open(
-        `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`,
-        "_blank"
-      );
+  const tvUrl = `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`;
 
-      return; // ⛔ STOP HERE (NO UI BELOW)
-    }
+  // ✅ use already-opened window (IMPORTANT for iPhone)
+  if (tvWindowRef.current) {
+    tvWindowRef.current.location.href = tvUrl;
+  } else {
+    // fallback (desktop)
+    window.open(tvUrl, "_blank");
+  }
+
+  return; // ⛔ STOP HERE
+}
 
     // =========================
     // NORMAL FLOW (NON-TV)
