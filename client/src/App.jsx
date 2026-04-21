@@ -910,6 +910,29 @@ const [showTrialResults, setShowTrialResults] = useState(false);
       }
     }
 
+    useEffect(() => {
+  const handler = (e) => {
+    const text = e.target?.innerText || "";
+
+    if (text.toLowerCase().includes("tv connect")) {
+      console.log("📺 TV BUTTON DETECTED");
+
+      window.__FORCE_TV_MODE = true;
+
+      // reset after short time
+      setTimeout(() => {
+        window.__FORCE_TV_MODE = false;
+      }, 2000);
+    }
+  };
+
+  document.addEventListener("click", handler);
+
+  return () => {
+    document.removeEventListener("click", handler);
+  };
+}, []);
+
     const abortController = new AbortController();
     activeCheckAbortControllerRef.current = abortController;
     nextCheckLogIdRef.current = 1;
