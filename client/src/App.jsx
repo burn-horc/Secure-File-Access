@@ -1248,10 +1248,12 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     setInput(nextValue);
   };
 
-  const runFindAccount = (mode) => {
+  const runFindAccount = (mode = "premium") => {
   if (isLoading) return;
 
-  setActionMode(mode);
+  console.log("🚀 BUTTON MODE:", mode); // 👈 DEBUG
+
+  setActionMode(mode); // keep this
 
   findAccountRetryRef.current = 0;
 
@@ -1263,9 +1265,8 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
       return;
     }
 
-    // ✅ PASS MODE HERE
+    // ✅ FORCE MODE HERE
     runFindAccountScan(verifiedPasscode, mode);
-
   } else {
     setPasscodeInput("");
     setPasscodeError("");
