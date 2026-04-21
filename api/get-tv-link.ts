@@ -1,22 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-function extractNFToken(value: string) {
-  if (!value) return null;
-
-  try {
-    const url = new URL(value);
-    return url.searchParams.get("nftoken");
-  } catch {
-    // fallback: maybe it's already a raw token
-    if (value.length > 50 && !value.includes("http")) {
-      return value;
-    }
-    return null;
-  }
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
+    if (req.method !== "POST") {
+      return res.status(405).json({ ok: false, error: "Method not allowed" });
+    }
+
     const { passcode } = req.body || {};
 
     if (!passcode) {
@@ -28,72 +17,51 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const url = `https://${req.headers.host}/api/find-account`;
 
-    let valid = null;
+    let nftoken: string | null = null;
 
-    // 🔥 try multiple times to get a working account
     for (let i = 0; i < 10; i++) {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ passcode })
-      });
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ passcode })
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (data?.results?.length) {
-  const found = data.results.find(
-    (r: any) => r?.valid && (r.nftoken || r.nfToken || r.token)
-  );
+        console.log("DEBUG FIND ACCOUNT:", data);
 
-  if (found) {
-    valid = found;
-    break;
-  }
-}
+        const results = data?.results || [];
 
-      const found = data.results.find(
-        (r: any) =>
-          r?.valid &&
-          (r.nftoken || r.nfToken || r.token || r.nftokenLink)
-      );
+        const found = results.find(
+          (r: any) =>
+            r?.valid &&
+            (r.nftoken || r.nfToken || r.token)
+        );
 
-      if (found) {
-        valid = found;
-        break;
+        if (found) {
+          nftoken =
+            found.nftoken ||
+            found.nfToken ||
+            found.token;
+          break;
+        }
+
+      } catch (e) {
+        console.log("Loop error:", e);
       }
     }
 
-    if (!valid) {
+    if (!nftoken) {
       return res.status(404).json({
         ok: false,
-        error: "no account available"
+        error: "No account available"
       });
     }
-
-    // 🔑 extract token properly
-    const raw =
-      valid.nftoken ||
-      valid.nfToken ||
-      valid.token ||
-      valid.nftokenLink;
-
-    const nftoken = extractNFToken(raw);
-
-    if (!nftoken) {
-      return res.status(500).json({
-        ok: false,
-        error: "failed to extract nftoken"
-      });
-    }
-
-    // ✅ FINAL FIX: use /tv (NOT /tv8)
-    const tvLink = `https://www.netflix.com/tv?nftoken=${nftoken}`;
 
     return res.status(200).json({
       ok: true,
-      tvLink
+      tvLink: `https://www.netflix.com/tv8?nftoken=${nftoken}`
     });
 
   } catch (err) {
