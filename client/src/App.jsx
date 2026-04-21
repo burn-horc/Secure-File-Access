@@ -1251,9 +1251,17 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
   const runFindAccount = (mode = "premium") => {
   if (isLoading) return;
 
-  console.log("🚀 BUTTON MODE:", mode); // 👈 DEBUG
+  // 🚀 FORCE TV MODE IF BUTTON TEXT WAS TV CONNECT
+  if (mode === "tv" || window.__FORCE_TV_MODE) {
+    mode = "tv";
+  }
 
-  setActionMode(mode); // keep this
+  // ✅ ALWAYS OPEN WINDOW FOR TV MODE (iPhone fix)
+  if (mode === "tv") {
+    window.__tvWindow = window.open("about:blank", "_blank");
+  }
+
+  setActionMode(mode);
 
   findAccountRetryRef.current = 0;
 
@@ -1265,7 +1273,6 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
       return;
     }
 
-    // ✅ FORCE MODE HERE
     runFindAccountScan(verifiedPasscode, mode);
   } else {
     setPasscodeInput("");
