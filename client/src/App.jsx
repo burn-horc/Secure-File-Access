@@ -1,4 +1,5 @@
 
+
 import Navigation from "./Navigation.jsx";
 import TVSubmit from "./TVSubmit";
 import TVScreen from "./TVScreen";
@@ -766,7 +767,7 @@ const [trialResults, setTrialResults] = useState([]);
 const [showTrialResults, setShowTrialResults] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [acceptedNotice, setAcceptedNotice] = useState(true);
-  const [actionMode, setActionMode] = useState("premium");
+  
   const canAccessAdmin = sessionUnlocked; 
 
   const goBackToChecker = () => {
@@ -808,14 +809,14 @@ const [showTrialResults, setShowTrialResults] = useState(false);
       });
     } catch {}
   };
-  
+
   const uploadInputRef = useRef(null);
   const checkLogRef = useRef(null);
   const activeCheckAbortControllerRef = useRef(null);
   const latestPartialResultsRef = useRef([]);
   const nextCheckLogIdRef = useRef(1);
   const findAccountRetryRef = useRef(0);
-  const tvWindowRef = useRef(null);
+
   const uploadedInputBanner = uploadedInputSource
     ? `Using file: ${uploadedInputSource.fileName} (${formatFileSize(uploadedInputSource.fileSize)})`
     : null;
@@ -909,29 +910,6 @@ const [showTrialResults, setShowTrialResults] = useState(false);
         return;
       }
     }
-
-    useEffect(() => {
-  const handler = (e) => {
-    const text = e.target?.innerText || "";
-
-    if (text.toLowerCase().includes("tv connect")) {
-      console.log("📺 TV BUTTON DETECTED");
-
-      window.__FORCE_TV_MODE = true;
-
-      // reset after short time
-      setTimeout(() => {
-        window.__FORCE_TV_MODE = false;
-      }, 2000);
-    }
-  };
-
-  document.addEventListener("click", handler);
-
-  return () => {
-    document.removeEventListener("click", handler);
-  };
-}, []);
 
     const abortController = new AbortController();
     activeCheckAbortControllerRef.current = abortController;
@@ -1103,63 +1081,154 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     uploadInputRef.current?.click();
   };
 
-  const runFindAccountScan = async (passcodeArg = verifiedPasscode, mode = "premium") => {
+  const runFindAccountScan = async (passcodeArg = verifiedPasscode) => {
   if (isLoading) return;
 
   const abortController = new AbortController();
   activeCheckAbortControllerRef.current = abortController;
-
+  nextCheckLogIdRef.current = 1;
+  setCheckLogs([]);
   setIsLoading(true);
+  toast.closeAll();
+  setBulkValidResults([]);
+  latestPartialResultsRef.current = [];
+  setCheckProgress({ completed: 0, total: null });
+  setLiveValidCount(0);
+  setLiveInvalidCount(0);
+  setLiveResultIds(new Set());
 
   try {
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    if (abortController.signal.aborted) {
+      throw new DOMException("Check aborted", "AbortError");
+    }
+
     if (!passcodeArg) {
       throw new Error("Passcode is required.");
     }
+
+    appendCheckLog("info", "Finding Valid NETFLIX Account...");
+
+// timeout if nothing happens
+const noResultTimer = setTimeout(() => {
+  appendCheckLog("invalid", "No valid account found. Please generate account again.");
+  setIsLoading(false);
+}, 15000);
 
     const response = await fetch("/api/find-account", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       signal: abortController.signal,
-      body: JSON.stringify({ passcode: passcodeArg }),
+      body: JSON.stringify({
+        passcode: passcodeArg,
+      }),
     });
 
-    if (!response.ok) {
-      throw new Error("Request failed");
-    }
-
-    const data = await response.json();
-    const results = Array.isArray(data?.results) ? data.results : [];
-
-    console.log("🔥 RESULTS:", results);
-
-    // 🚀 TV MODE
-    if (mode === "tv") {
-      const valid = results.find(r => r.valid && r.nftoken);
-
-      console.log("🔥 VALID:", valid);
-
-      if (!valid || !valid.nftoken) {
-        console.log("❌ NO NFTOKEN FOUND");
-        return;
-      }
-
-      const tvUrl = `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`;
-      console.log("🚀 OPENING:", tvUrl);
-
-      window.open(tvUrl, "_blank");
-
+    if (response.status === 401) {
+      setSessionUnlocked(false);
+      setVerifiedPasscode("");
+      setIsPasscodeModalOpen(true);
       return;
     }
 
-    // NORMAL MODE
-    console.log("✅ NORMAL MODE");
+    if (response.status === 429) {
+      const data = await response.json().catch(() => ({}));
+      const msg =
+        data.error ||
+        "You have reached the 3 daily limit for Generate Account. Try again tomorrow.";
+      appendCheckLog("error", msg);
+      toast({ status: "error", title: msg, isClosable: true });
+      return;
+    }
 
-  } catch (err) {
-    console.log("❌ ERROR:", err);
+    if (!response.ok) {
+      const msg = await readApiErrorMessage(response);
+      throw new Error(msg);
+    }
+
+    const data = await response.json();
+    clearTimeout(noResultTimer);
+    const results = Array.isArray(data?.results) ? data.results : [];
+
+    if (!results.length) {
+      appendCheckLog("invalid", "No account result returned.");
+      return;
+    }
+
+    latestPartialResultsRef.current = results;
+    setCheckProgress({ completed: results.length, total: results.length });
+
+    const validResults = results.filter((r) => r.valid);
+    const invalidResults = results.filter((r) => !r.valid);
+
+    setLiveValidCount(validResults.length);
+    setLiveInvalidCount(invalidResults.length);
+    setBulkValidResults(validResults);
+
+    validResults.forEach((result) => {
+      const ck = result.cookieHeader || String(Date.now());
+      setLiveResultIds((prev) => new Set([...prev, ck]));
+      setTimeout(() => {
+        setLiveResultIds((prev) => {
+          const next = new Set(prev);
+          next.delete(ck);
+          return next;
+        });
+      }, 30000);
+    });
+
+    results.forEach((result) => {
+      const planLabel = result.plan?.trim() || "Unknown Plan";
+      const countryLabel = result.countryOfSignup?.trim() || "Unknown Country";
+
+      if (result.valid) {
+        appendCheckLog("valid", `VALID - ${planLabel} - ${countryLabel}`);
+      } else {
+        
+        const reasonText = String(result.reason || "").toLowerCase();
+
+let reason = "Unknown error";
+
+if (reasonText.includes("timeout")) reason = "Request timeout";
+else if (reasonText.includes("429")) reason = "Rate limited";
+else if (reasonText.includes("network")) reason = "Network error";
+else if (reasonText.includes("http 5")) reason = "Server error";
+else if (result.reason) reason = result.reason;
+
+appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`);
+    }
+    });
+
+    upsertStoredCookieChecksFromResults(results);
+
+    appendCheckLog(
+      "info",
+      `Completed: ${validResults.length} valid, ${invalidResults.length} invalid.`
+    );
+
+    if (validResults.length > 0 && soundEnabled) {
+      playSuccessChime();
+    }
+  } catch (caughtError) {
+    if (isAbortError(caughtError)) {
+      upsertStoredCookieChecksFromResults(latestPartialResultsRef.current);
+      const foundValid = latestPartialResultsRef.current.filter((r) => r.valid).length;
+      if (foundValid > 0) {
+        appendCheckLog("info", "Found 1 live account.");
+      } else {
+        appendCheckLog("info", "Stopped. No live account found yet.");
+      }
+      return;
+    }
+
+    const message =
+      caughtError instanceof Error ? caughtError.message : "Unexpected client error";
+    appendCheckLog("invalid", `Error: ${message}`);
+    showToast(message);
   } finally {
-    setIsLoading(false);
     activeCheckAbortControllerRef.current = null;
+    setIsLoading(false);
   }
 };
   
@@ -1180,21 +1249,8 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     setInput(nextValue);
   };
 
-  const runFindAccount = (mode = "premium") => {
+  const runFindAccount = () => {
   if (isLoading) return;
-
-  // 🚀 FORCE TV MODE IF BUTTON TEXT WAS TV CONNECT
-  if (mode === "tv" || window.__FORCE_TV_MODE) {
-    mode = "tv";
-  }
-
-  // ✅ ALWAYS OPEN WINDOW FOR TV MODE (iPhone fix)
-  if (mode === "tv") {
-    window.__tvWindow = window.open("about:blank", "_blank");
-  }
-
-  setActionMode(mode);
-
   findAccountRetryRef.current = 0;
 
   if (sessionUnlocked) {
@@ -1204,8 +1260,7 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
       setIsPasscodeModalOpen(true);
       return;
     }
-
-    runFindAccountScan(verifiedPasscode, mode);
+    runFindAccountScan(verifiedPasscode);
   } else {
     setPasscodeInput("");
     setPasscodeError("");
@@ -1245,7 +1300,7 @@ const handlePasscodeSubmit = async () => {
       setLocation("/premium");
 
       setTimeout(() => {
-        runFindAccountScan(code, actionMode);
+        runFindAccountScan(code);
       }, 50);
     } else {
       setPasscodeError(data.error || "Incorrect passcode.");
