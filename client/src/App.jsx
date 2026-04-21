@@ -1225,33 +1225,6 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     setIsLoading(false);
   }
 };
-    
-    
-
-  
-
-    
-  
-    if (isAbortError(caughtError)) {
-      upsertStoredCookieChecksFromResults(latestPartialResultsRef.current);
-      const foundValid = latestPartialResultsRef.current.filter((r) => r.valid).length;
-      if (foundValid > 0) {
-        appendCheckLog("info", "Found 1 live account.");
-      } else {
-        appendCheckLog("info", "Stopped. No live account found yet.");
-      }
-      return;
-    }
-
-    const message =
-      caughtError instanceof Error ? caughtError.message : "Unexpected client error";
-    appendCheckLog("invalid", `Error: ${message}`);
-    showToast(message);
-  } finally {
-    activeCheckAbortControllerRef.current = null;
-    setIsLoading(false);
-  }
-};
   
   const handleCookieInputChange = (event) => {
     const nextValue = event.target.value;
