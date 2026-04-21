@@ -159,17 +159,17 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
         {/* ✅ CONNECT TV BUTTON ENABLED */}
         <VStack spacing={4} align="stretch" px={6} pt={4}>
           <Button
-            h="52px"
-            borderRadius="18px"
-            bg="linear-gradient(90deg, #7c3aed, #a855f7)"
-            color="white"
-            fontSize="15px"
-            fontWeight="700"
-            _hover={{ filter: "brightness(1.1)" }}
-            onClick={handleConnectTV}
-          >
-            📺 Connect TV
-          </Button>
+  h="52px"
+  borderRadius="18px"
+  color="white"
+  bg="linear-gradient(90deg,#7c3aed,#a855f7)"
+  border="none"
+  fontSize="15px"
+  fontWeight="700"
+  onClick={handleConnectTV}
+>
+  📺 Connect TV
+</Button>
         </VStack>
       </Box>
     </>
