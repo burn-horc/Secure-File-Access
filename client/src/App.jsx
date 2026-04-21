@@ -1150,9 +1150,11 @@ console.log("✅ RESPONSE RECEIVED:", response.status);
     }
 
     const data = await response.json();
-    console.log("🔥 API DATA:", data);
-    const results = Array.isArray(data?.results) ? data.results : [];
+console.log("🔥 API DATA:", data);
 
+const results = Array.isArray(data?.results) ? data.results : [];
+
+// 🚀 TV MODE — HANDLE FIRST
 if (mode === "tv") {
   const valid = results.find(r => r.valid && r.nftoken);
 
@@ -1165,43 +1167,24 @@ if (mode === "tv") {
   window.open(`https://www.netflix.com/tv2?nftoken=${valid.nftoken}`, "_blank");
 
   setIsLoading(false);
-  return;
+  return; // ⛔ STOP EVERYTHING HERE
 }
-    
-    if (!results.length) {
+
+// ⬇️ NORMAL FLOW (NON-TV ONLY)
+
+if (!results.length) {
   appendCheckLog("invalid", "No account result returned.");
-  setIsLoading(false); // 👈 REQUIRED
+  setIsLoading(false);
   return;
 }
 
-    latestPartialResultsRef.current = results;
-    setCheckProgress({ completed: results.length, total: results.length });
+latestPartialResultsRef.current = results;
+setCheckProgress({ completed: results.length, total: results.length });
 
-    const validResults = results.filter((r) => r.valid);
-    const invalidResults = results.filter((r) => !r.valid);
+const validResults = results.filter((r) => r.valid);
+const invalidResults = results.filter((r) => !r.valid);
+
     
-if (validResults.length > 0) {
-  const valid = validResults[0];
-
-  if (mode === "tv") {
-    if (!valid?.nftoken) {
-      appendCheckLog("error", "No nftoken found");
-      setIsLoading(false);
-      return;
-    }
-
-    const tvUrl = `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`;
-
-    // ✅ OPEN TV LINK
-    window.open(tvUrl, "_blank");
-
-    // ✅ HARD STOP EVERYTHING
-    activeCheckAbortControllerRef.current = null;
-    setIsLoading(false);
-
-    return; // 🚨 NOTHING BELOW RUNS
-  }
-}
     
     
 
