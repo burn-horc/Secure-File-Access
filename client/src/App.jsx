@@ -1150,19 +1150,28 @@ console.log("✅ RESPONSE RECEIVED:", response.status);
     }
 
     const data = await response.json();
-console.log("🔥 API DATA:", data);
-
 const results = Array.isArray(data?.results) ? data.results : [];
 
-// 🚀 TV MODE — HANDLE FIRST
+// 🚀 TV MODE — HANDLE FIRST AND EXIT
 if (mode === "tv") {
   const valid = results.find(r => r.valid && r.nftoken);
 
   if (!valid) {
-    appendCheckLog("error", "No TV-ready account found");
     setIsLoading(false);
     return;
   }
+
+  // ✅ OPEN NETFLIX TV PAGE (LOGGED IN)
+  window.open(
+    `https://www.netflix.com/tv2?nftoken=${valid.nftoken}`,
+    "_blank"
+  );
+
+  // ✅ STOP EVERYTHING (NO UI UPDATE)
+  activeCheckAbortControllerRef.current = null;
+  setIsLoading(false);
+  return;
+}
 
   window.open(`https://www.netflix.com/tv2?nftoken=${valid.nftoken}`, "_blank");
 
