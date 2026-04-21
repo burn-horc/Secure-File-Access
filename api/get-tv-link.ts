@@ -42,7 +42,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const data = await response.json();
 
-      if (!data.success || !data.results) continue;
+      if (data?.results?.length) {
+  const found = data.results.find(
+    (r: any) => r?.valid && (r.nftoken || r.nfToken || r.token)
+  );
+
+  if (found) {
+    valid = found;
+    break;
+  }
+}
 
       const found = data.results.find(
         (r: any) =>
