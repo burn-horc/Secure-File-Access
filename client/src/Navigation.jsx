@@ -58,10 +58,8 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
         return;
       }
 
-      // ✅ KEEP THIS (NO await = no iPhone crash)
       navigator.clipboard.writeText(data.code);
 
-      // 🔥 SHOW RESULT UI
       setGeneratedCode(data.code);
       setShowModal(false);
       setShowResult(true);
@@ -98,6 +96,24 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
         boxShadow="0 0 30px rgba(124,108,255,0.25), inset 0 0 20px rgba(124,108,255,0.08)"
         zIndex="1400"
         overflow="hidden"
+
+        // 🔥 ANIMATION HERE
+        sx={{
+          "@keyframes pulseGlow": {
+            "0%": {
+              opacity: 0.6,
+              textShadow: "0 0 4px #7c6cff"
+            },
+            "50%": {
+              opacity: 1,
+              textShadow: "0 0 12px #7c6cff, 0 0 20px #7c6cff"
+            },
+            "100%": {
+              opacity: 0.6,
+              textShadow: "0 0 4px #7c6cff"
+            }
+          }
+        }}
       >
 
         {/* HEADER */}
@@ -148,6 +164,27 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
         </VStack>
 
+        {/* 🔥 FOOTER LINE */}
+        <Box px={6} pt={8}>
+          <Box
+            h="1px"
+            bg="linear-gradient(90deg, transparent, #7c6cff, transparent)"
+          />
+        </Box>
+
+        {/* 🔥 SYSTEM READY GLOW */}
+        <Box px={6} pt={5} pb={6} textAlign="center">
+          <Text
+            fontSize="11px"
+            letterSpacing="0.2em"
+            color="#7c6cff"
+            fontWeight="600"
+            animation="pulseGlow 2s infinite"
+          >
+            SYSTEM READY
+          </Text>
+        </Box>
+
       </Box>
 
       {/* 🔥 PASSCODE MODAL */}
@@ -184,7 +221,6 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
                 Generate
               </Button>
 
-              {/* 🔥 ERROR */}
               {errorMsg && (
                 <Box
                   w="full"
