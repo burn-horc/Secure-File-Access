@@ -1,13 +1,7 @@
-import { Box, Button, HStack, Text, VStack, Input, useToast } from "@chakra-ui/react";
+import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { Link } from "wouter";
-import { useState } from "react";
 
 export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
-
-  const [showModal, setShowModal] = useState(false);
-  const [passcode, setPasscode] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const toast = useToast();
 
   const itemStyle = {
     h: "64px",
@@ -34,10 +28,9 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
     }
   };
 
-  const handleSubmitPasscode = async () => {
+  const handleGenerateRandom = async () => {
+    const passcode = prompt("Enter passcode");
     if (!passcode) return;
-
-    setErrorMsg("");
 
     try {
       const res = await fetch("/api/generate-random-code", {
@@ -51,38 +44,17 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
       const data = await res.json();
 
       if (!data.ok) {
-        setErrorMsg(data.error || "Invalid passcode");
+        alert(data.error);
         return;
       }
 
-      await navigator.clipboard.writeText(data.code);
+      // 🔥 auto copy
+      navigator.clipboard.writeText(data.code);
 
-      toast({
-        duration: 3000,
-        position: "top",
-        render: () => (
-          <Box
-            bg="linear-gradient(135deg, #0a0f24, #050814)"
-            border="1px solid #7c6cff"
-            boxShadow="0 0 20px rgba(124,108,255,0.6)"
-            color="white"
-            px={5}
-            py={4}
-            borderRadius="14px"
-          >
-            <Text fontWeight="bold" color="#7c6cff">
-              ⚡ Code Copied
-            </Text>
-            <Text fontSize="sm">{data.code}</Text>
-          </Box>
-        ),
-      });
-
-      setShowModal(false);
-      setPasscode("");
+      alert("Code copied: " + data.code);
 
     } catch (err) {
-      setErrorMsg("Server error. Try again.");
+      alert("Something went wrong");
     }
   };
 
@@ -118,8 +90,14 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
       >
 
         {/* HEADER */}
-        <Box px={6} pt={6} pb={5} borderBottom="1px solid rgba(124,108,255,0.2)">
+        <Box
+          px={6}
+          pt={6}
+          pb={5}
+          borderBottom="1px solid rgba(124,108,255,0.2)"
+        >
           <HStack justify="space-between">
+
             <VStack align="start" spacing={1}>
               <Text
                 color="#7c6cff"
@@ -151,6 +129,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             >
               ×
             </Button>
+
           </HStack>
         </Box>
 
@@ -192,11 +171,17 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             </HStack>
           </Button>
 
+          {/* 🔥 GENERATE BUTTON */}
           <Button
             {...itemStyle}
-            onClick={() => setShowModal(true)}
+            onClick={handleGenerateRandom}
             borderColor="rgba(124,255,180,0.4)"
             bg="linear-gradient(135deg, rgba(124,255,180,0.16) 0%, rgba(124,255,180,0.08) 100%)"
+            _hover={{
+              bg: "rgba(124,255,180,0.12)",
+              borderColor: "#7cffb4",
+              boxShadow: "0 0 18px rgba(124,255,180,0.7)"
+            }}
           >
             <HStack spacing={4}>
               <Text fontSize="20px">⚡</Text>
@@ -208,7 +193,10 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
         {/* FOOTER */}
         <Box px={6} pt={8}>
-          <Box h="1px" bg="linear-gradient(90deg, transparent, #7c6cff, transparent)" />
+          <Box
+            h="1px"
+            bg="linear-gradient(90deg, transparent, #7c6cff, transparent)"
+          />
         </Box>
 
         <Box px={6} pt={5} pb={6}>
@@ -223,77 +211,6 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
         </Box>
 
       </Box>
-
-      {/* MODAL */}
-      {showModal && (
-        <Box
-          position="fixed"
-          inset="0"
-          bg="rgba(0,0,0,0.7)"
-          backdropFilter="blur(8px)"
-          zIndex="2000"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Box
-            bg="linear-gradient(180deg, #0a0f24, #050814)"
-            border="1px solid rgba(124,108,255,0.4)"
-            borderRadius="20px"
-            p={6}
-            w="90%"
-            maxW="320px"
-            boxShadow="0 0 25px rgba(124,108,255,0.4)"
-          >
-            <VStack spacing={3}>
-
-              <Text color="#7c6cff" fontWeight="bold">
-                Enter Passcode
-              </Text>
-
-              <Input
-                value={passcode}
-                onChange={(e) => {
-                  setPasscode(e.target.value);
-                  setErrorMsg("");
-                }}
-                placeholder="Enter passcode"
-                bg="rgba(255,255,255,0.05)"
-                border={errorMsg ? "1px solid #ff4d4f" : "1px solid rgba(124,108,255,0.3)"}
-                color="white"
-                _focus={{
-                  borderColor: errorMsg ? "#ff4d4f" : "#7c6cff",
-                  boxShadow: errorMsg
-                    ? "0 0 10px rgba(255,77,79,0.6)"
-                    : "0 0 10px #7c6cff"
-                }}
-              />
-
-              {errorMsg && (
-                <Text fontSize="12px" color="#ff4d4f">
-                  {errorMsg}
-                </Text>
-              )}
-
-              <HStack w="full">
-                <Button flex="1" onClick={() => setShowModal(false)}>
-                  Cancel
-                </Button>
-
-                <Button
-                  flex="1"
-                  bg="#7c6cff"
-                  color="white"
-                  onClick={handleSubmitPasscode}
-                >
-                  OK
-                </Button>
-              </HStack>
-
-            </VStack>
-          </Box>
-        </Box>
-      )}
     </>
   );
 }
