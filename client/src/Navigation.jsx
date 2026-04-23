@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Text, VStack, Input } from "@chakra-ui/react";
+import { Box, Button, HStack, Text, VStack, Input, useToast } from "@chakra-ui/react";
 import { Link } from "wouter";
 import { useState } from "react";
 
@@ -6,6 +6,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
   const [showModal, setShowModal] = useState(false);
   const [passcode, setPasscode] = useState("");
+  const toast = useToast();
 
   const itemStyle = {
     h: "64px",
@@ -47,23 +48,55 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
       const data = await res.json();
 
       if (!data.ok) {
-        alert(data.error);
+        toast({
+          title: "Error",
+          description: data.error,
+          status: "error",
+          duration: 2500,
+          position: "top"
+        });
         return;
       }
 
-      // 🔥 Auto copy
-      navigator.clipboard.writeText(data.code);
+      // ✅ copy properly
+      await navigator.clipboard.writeText(data.code);
 
-      alert("Code copied: " + data.code);
+      // 🔥 NEON TOAST
+      toast({
+        duration: 3000,
+        position: "top",
+        render: () => (
+          <Box
+            bg="linear-gradient(135deg, #0a0f24, #050814)"
+            border="1px solid #7c6cff"
+            boxShadow="0 0 20px rgba(124,108,255,0.6)"
+            color="white"
+            px={5}
+            py={4}
+            borderRadius="14px"
+          >
+            <Text fontWeight="bold" color="#7c6cff">
+              ⚡ Code Ready
+            </Text>
+            <Text fontSize="sm">{data.code}</Text>
+          </Box>
+        ),
+      });
 
-      // OPTIONAL: auto-use for Random Account
-      // onRandomClick?.(data.code);
+      // 🔥 AUTO USE CODE (UNCOMMENT IF YOU WANT)
+      onRandomClick?.(data.code);
 
       setShowModal(false);
       setPasscode("");
 
     } catch (err) {
-      alert("Something went wrong");
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        status: "error",
+        duration: 2500,
+        position: "top"
+      });
     }
   };
 
@@ -173,17 +206,12 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             </HStack>
           </Button>
 
-          {/* 🔥 GENERATE BUTTON */}
+          {/* GENERATE BUTTON */}
           <Button
             {...itemStyle}
             onClick={() => setShowModal(true)}
             borderColor="rgba(124,255,180,0.4)"
             bg="linear-gradient(135deg, rgba(124,255,180,0.16) 0%, rgba(124,255,180,0.08) 100%)"
-            _hover={{
-              bg: "rgba(124,255,180,0.12)",
-              borderColor: "#7cffb4",
-              boxShadow: "0 0 18px rgba(124,255,180,0.7)"
-            }}
           >
             <HStack spacing={4}>
               <Text fontSize="20px">⚡</Text>
@@ -211,7 +239,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
       </Box>
 
-      {/* 🔥 MODAL */}
+      {/* MODAL */}
       {showModal && (
         <Box
           position="fixed"
@@ -245,10 +273,6 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
                 bg="rgba(255,255,255,0.05)"
                 border="1px solid rgba(124,108,255,0.3)"
                 color="white"
-                _focus={{
-                  borderColor: "#7c6cff",
-                  boxShadow: "0 0 10px #7c6cff"
-                }}
               />
 
               <HStack w="full">
