@@ -6,6 +6,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
   const [showModal, setShowModal] = useState(false);
   const [passcode, setPasscode] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const toast = useToast();
 
   const itemStyle = {
@@ -36,6 +37,8 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
   const handleSubmitPasscode = async () => {
     if (!passcode) return;
 
+    setErrorMsg("");
+
     try {
       const res = await fetch("/api/generate-random-code", {
         method: "POST",
@@ -48,20 +51,12 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
       const data = await res.json();
 
       if (!data.ok) {
-        toast({
-          title: "Error",
-          description: data.error,
-          status: "error",
-          duration: 2500,
-          position: "top",
-        });
+        setErrorMsg(data.error || "Invalid passcode");
         return;
       }
 
-      // ✅ copy properly
       await navigator.clipboard.writeText(data.code);
 
-      // 🔥 CLEAN NEON SUCCESS
       toast({
         duration: 3000,
         position: "top",
@@ -87,13 +82,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
       setPasscode("");
 
     } catch (err) {
-      toast({
-        title: "Error",
-        description: "Something went wrong",
-        status: "error",
-        duration: 2500,
-        position: "top",
-      });
+      setErrorMsg("Server error. Try again.");
     }
   };
 
@@ -203,7 +192,6 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             </HStack>
           </Button>
 
-          {/* GENERATE BUTTON */}
           <Button
             {...itemStyle}
             onClick={() => setShowModal(true)}
@@ -257,7 +245,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             maxW="320px"
             boxShadow="0 0 25px rgba(124,108,255,0.4)"
           >
-            <VStack spacing={4}>
+            <VStack spacing={3}>
 
               <Text color="#7c6cff" fontWeight="bold">
                 Enter Passcode
@@ -265,12 +253,27 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
               <Input
                 value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
+                onChange={(e) => {
+                  setPasscode(e.target.value);
+                  setErrorMsg("");
+                }}
                 placeholder="Enter passcode"
                 bg="rgba(255,255,255,0.05)"
-                border="1px solid rgba(124,108,255,0.3)"
+                border={errorMsg ? "1px solid #ff4d4f" : "1px solid rgba(124,108,255,0.3)"}
                 color="white"
+                _focus={{
+                  borderColor: errorMsg ? "#ff4d4f" : "#7c6cff",
+                  boxShadow: errorMsg
+                    ? "0 0 10px rgba(255,77,79,0.6)"
+                    : "0 0 10px #7c6cff"
+                }}
               />
+
+              {errorMsg && (
+                <Text fontSize="12px" color="#ff4d4f">
+                  {errorMsg}
+                </Text>
+              )}
 
               <HStack w="full">
                 <Button flex="1" onClick={() => setShowModal(false)}>
