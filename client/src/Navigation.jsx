@@ -28,6 +28,34 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
     }
   };
 
+  const handleGenerateRandom = async () => {
+  const passcode = prompt("Enter passcode");
+
+  if (!passcode) return;
+
+  try {
+    const res = await fetch("/api/generate-random-code", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ passcode })
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      alert(data.error);
+      return;
+    }
+
+    alert("Generated Code: " + data.code);
+
+  } catch (err) {
+    alert("Something went wrong");
+  }
+};
+
   return (
     <>
       {/* BACKDROP */}
@@ -165,6 +193,18 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             SYSTEM READY
           </Text>
         </Box>
+
+        <Button
+  {...itemStyle}
+  onClick={handleGenerateRandom}
+  borderColor="rgba(124,255,180,0.4)"
+  bg="linear-gradient(135deg, rgba(124,255,180,0.16) 0%, rgba(124,255,180,0.08) 100%)"
+>
+  <HStack spacing={5}>
+    <Text fontSize="22px">⚡</Text>
+    <Text>Generate Random Code</Text>
+  </HStack>
+</Button>
 
       </Box>
     </>
