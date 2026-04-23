@@ -212,10 +212,12 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
               <Text color="#7c6cff">Enter Passcode</Text>
 
               <Input
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
-                color="white"
-              />
+  type="password"
+  autoComplete="current-password"
+  value={passcode}
+  onChange={(e) => setPasscode(e.target.value)}
+  color="white"
+/>
 
               <Button w="full" onClick={handleSubmitPasscode}>
                 Generate
