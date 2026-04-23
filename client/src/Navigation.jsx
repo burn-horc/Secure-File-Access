@@ -53,7 +53,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
           description: data.error,
           status: "error",
           duration: 2500,
-          position: "top"
+          position: "top",
         });
         return;
       }
@@ -61,7 +61,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
       // ✅ copy properly
       await navigator.clipboard.writeText(data.code);
 
-      // 🔥 NEON TOAST
+      // 🔥 CLEAN NEON SUCCESS
       toast({
         duration: 3000,
         position: "top",
@@ -76,15 +76,12 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             borderRadius="14px"
           >
             <Text fontWeight="bold" color="#7c6cff">
-              ⚡ Code Ready
+              ⚡ Code Copied
             </Text>
             <Text fontSize="sm">{data.code}</Text>
           </Box>
         ),
       });
-
-      // 🔥 AUTO USE CODE (UNCOMMENT IF YOU WANT)
-      onRandomClick?.(data.code);
 
       setShowModal(false);
       setPasscode("");
@@ -95,7 +92,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
         description: "Something went wrong",
         status: "error",
         duration: 2500,
-        position: "top"
+        position: "top",
       });
     }
   };
