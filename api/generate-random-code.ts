@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const SECRET_PASSCODE = "123456"; // 🔥 change this
+const SECRET_PASSCODE = "HDSzRCv052496*"; // 🔥 change this
 
 function generateCode(length = 6) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
