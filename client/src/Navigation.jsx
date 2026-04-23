@@ -1,7 +1,11 @@
-import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Text, VStack, Input } from "@chakra-ui/react";
 import { Link } from "wouter";
+import { useState } from "react";
 
 export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
+
+  const [showModal, setShowModal] = useState(false);
+  const [passcode, setPasscode] = useState("");
 
   const itemStyle = {
     h: "64px",
@@ -28,8 +32,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
     }
   };
 
-  const handleGenerateRandom = async () => {
-    const passcode = prompt("Enter passcode");
+  const handleSubmitPasscode = async () => {
     if (!passcode) return;
 
     try {
@@ -48,10 +51,16 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
         return;
       }
 
-      // 🔥 auto copy
+      // 🔥 Auto copy
       navigator.clipboard.writeText(data.code);
 
       alert("Code copied: " + data.code);
+
+      // OPTIONAL: auto-use for Random Account
+      // onRandomClick?.(data.code);
+
+      setShowModal(false);
+      setPasscode("");
 
     } catch (err) {
       alert("Something went wrong");
@@ -90,14 +99,8 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
       >
 
         {/* HEADER */}
-        <Box
-          px={6}
-          pt={6}
-          pb={5}
-          borderBottom="1px solid rgba(124,108,255,0.2)"
-        >
+        <Box px={6} pt={6} pb={5} borderBottom="1px solid rgba(124,108,255,0.2)">
           <HStack justify="space-between">
-
             <VStack align="start" spacing={1}>
               <Text
                 color="#7c6cff"
@@ -129,7 +132,6 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             >
               ×
             </Button>
-
           </HStack>
         </Box>
 
@@ -174,7 +176,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
           {/* 🔥 GENERATE BUTTON */}
           <Button
             {...itemStyle}
-            onClick={handleGenerateRandom}
+            onClick={() => setShowModal(true)}
             borderColor="rgba(124,255,180,0.4)"
             bg="linear-gradient(135deg, rgba(124,255,180,0.16) 0%, rgba(124,255,180,0.08) 100%)"
             _hover={{
@@ -193,10 +195,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
         {/* FOOTER */}
         <Box px={6} pt={8}>
-          <Box
-            h="1px"
-            bg="linear-gradient(90deg, transparent, #7c6cff, transparent)"
-          />
+          <Box h="1px" bg="linear-gradient(90deg, transparent, #7c6cff, transparent)" />
         </Box>
 
         <Box px={6} pt={5} pb={6}>
@@ -211,6 +210,66 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
         </Box>
 
       </Box>
+
+      {/* 🔥 MODAL */}
+      {showModal && (
+        <Box
+          position="fixed"
+          inset="0"
+          bg="rgba(0,0,0,0.7)"
+          backdropFilter="blur(8px)"
+          zIndex="2000"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Box
+            bg="linear-gradient(180deg, #0a0f24, #050814)"
+            border="1px solid rgba(124,108,255,0.4)"
+            borderRadius="20px"
+            p={6}
+            w="90%"
+            maxW="320px"
+            boxShadow="0 0 25px rgba(124,108,255,0.4)"
+          >
+            <VStack spacing={4}>
+
+              <Text color="#7c6cff" fontWeight="bold">
+                Enter Passcode
+              </Text>
+
+              <Input
+                value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
+                placeholder="Enter passcode"
+                bg="rgba(255,255,255,0.05)"
+                border="1px solid rgba(124,108,255,0.3)"
+                color="white"
+                _focus={{
+                  borderColor: "#7c6cff",
+                  boxShadow: "0 0 10px #7c6cff"
+                }}
+              />
+
+              <HStack w="full">
+                <Button flex="1" onClick={() => setShowModal(false)}>
+                  Cancel
+                </Button>
+
+                <Button
+                  flex="1"
+                  bg="#7c6cff"
+                  color="white"
+                  onClick={handleSubmitPasscode}
+                >
+                  OK
+                </Button>
+              </HStack>
+
+            </VStack>
+          </Box>
+        </Box>
+      )}
     </>
   );
 }
