@@ -29,32 +29,34 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
   };
 
   const handleGenerateRandom = async () => {
-  const passcode = prompt("Enter passcode");
+    const passcode = prompt("Enter passcode");
+    if (!passcode) return;
 
-  if (!passcode) return;
+    try {
+      const res = await fetch("/api/generate-random-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ passcode })
+      });
 
-  try {
-    const res = await fetch("/api/generate-random-code", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ passcode })
-    });
+      const data = await res.json();
 
-    const data = await res.json();
+      if (!data.ok) {
+        alert(data.error);
+        return;
+      }
 
-    if (!data.ok) {
-      alert(data.error);
-      return;
+      // 🔥 auto copy
+      navigator.clipboard.writeText(data.code);
+
+      alert("Code copied: " + data.code);
+
+    } catch (err) {
+      alert("Something went wrong");
     }
-
-    alert("Generated Code: " + data.code);
-
-  } catch (err) {
-    alert("Something went wrong");
-  }
-};
+  };
 
   return (
     <>
@@ -135,10 +137,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
         <VStack spacing={4} align="stretch" px={6} pt={6}>
 
           <Link href="/">
-            <Button
-              {...itemStyle}
-              onClick={onClose}
-            >
+            <Button {...itemStyle} onClick={onClose}>
               <HStack spacing={4}>
                 <Text fontSize="20px">⌂</Text>
                 <Text>Cookie Checker</Text>
@@ -172,9 +171,27 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             </HStack>
           </Button>
 
+          {/* 🔥 GENERATE BUTTON */}
+          <Button
+            {...itemStyle}
+            onClick={handleGenerateRandom}
+            borderColor="rgba(124,255,180,0.4)"
+            bg="linear-gradient(135deg, rgba(124,255,180,0.16) 0%, rgba(124,255,180,0.08) 100%)"
+            _hover={{
+              bg: "rgba(124,255,180,0.12)",
+              borderColor: "#7cffb4",
+              boxShadow: "0 0 18px rgba(124,255,180,0.7)"
+            }}
+          >
+            <HStack spacing={4}>
+              <Text fontSize="20px">⚡</Text>
+              <Text>Generate Code</Text>
+            </HStack>
+          </Button>
+
         </VStack>
 
-        {/* FOOTER LINE */}
+        {/* FOOTER */}
         <Box px={6} pt={8}>
           <Box
             h="1px"
@@ -182,7 +199,6 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
           />
         </Box>
 
-        {/* FOOTER TEXT */}
         <Box px={6} pt={5} pb={6}>
           <Text
             color="rgba(255,255,255,0.3)"
@@ -193,18 +209,6 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             SYSTEM READY
           </Text>
         </Box>
-
-        <Button
-  {...itemStyle}
-  onClick={handleGenerateRandom}
-  borderColor="rgba(124,255,180,0.4)"
-  bg="linear-gradient(135deg, rgba(124,255,180,0.16) 0%, rgba(124,255,180,0.08) 100%)"
->
-  <HStack spacing={5}>
-    <Text fontSize="22px">⚡</Text>
-    <Text>Generate Random Code</Text>
-  </HStack>
-</Button>
 
       </Box>
     </>
