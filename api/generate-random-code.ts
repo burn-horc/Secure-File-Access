@@ -6,64 +6,36 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-function generateCode() {
+const SECRET_PASSCODE = "123456"; // 🔥 change this
+
+function generateCode(length = 6) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let code = "";
-  for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
+  return Array.from({ length }, () =>
+    chars[Math.floor(Math.random() * chars.length)]
+  ).join("");
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  try {
-    const passcode = String(req.body?.passcode || "").trim();
-
-    if (!passcode) {
-      return res.status(400).json({
-        ok: false,
-        error: "Passcode required"
-      });
-    }
-
-    // 🔥 CHECK PASSCODE FROM YOUR EXISTING TABLE
-    const { data, error } = await supabase
-      .from("passcodes")
-      .select("*")
-      .eq("code", passcode)
-      .eq("is_active", true)
-      .maybeSingle();
-
-    if (error || !data) {
-      return res.status(401).json({
-        ok: false,
-        error: "Invalid passcode"
-      });
-    }
-
-    // ✅ GENERATE CODE
-    const code = generateCode();
-
-    const { error: insertError } = await supabase
-      .from("trial_codes")
-      .insert({ code });
-
-    if (insertError) {
-      return res.status(500).json({
-        ok: false,
-        error: insertError.message
-      });
-    }
-
-    return res.status(200).json({
-      ok: true,
-      code
-    });
-
-  } catch (err: any) {
-    return res.status(500).json({
-      ok: false,
-      error: err.message
-    });
+  if (req.method !== "POST") {
+    return res.status(405).json({ ok: false });
   }
+
+  const { passcode } = req.body;
+
+  if (passcode !== SECRET_PASSCODE) {
+    return res.json({ ok: false, error: "Invalid passcode" });
+  }
+
+  const code = generateCode();
+
+  const { error } = await supabase
+    .from("trial_codes") // 🔥 your table
+    .insert({ code });
+
+  if (error) {
+    console.error(error);
+    return res.json({ ok: false, error: "DB error" });
+  }
+
+  return res.json({ ok: true, code });
 }
