@@ -8,7 +8,8 @@ const supabase = createClient(
 
 const SECRET_PASSCODE = "HDSzRCv052496*"; // 🔥 your passcode
 
-function generateCode(length = 6) {
+// 🔥 UPDATED: now 8 characters (letters + numbers)
+function generateCode(length = 8) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   return Array.from({ length }, () =>
     chars[Math.floor(Math.random() * chars.length)]
@@ -34,7 +35,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json({ ok: false, error: "Invalid passcode" });
     }
 
-    const code = generateCode();
+    // 🔥 now generates 8-character code
+    const code = generateCode(8);
 
     const { error } = await supabase
       .from("trial_codes")
@@ -48,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // ✅ SUCCESS (this is what your frontend needs)
+    // ✅ SUCCESS
     return res.status(200).json({
       ok: true,
       code,
