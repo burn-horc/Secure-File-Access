@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [react()],
 
   build: {
-    outDir: "dist/public", // ✅ FIXED
+    outDir: "dist", // ✅ FIX HERE (NOT dist/public)
     emptyOutDir: true,
   },
 
