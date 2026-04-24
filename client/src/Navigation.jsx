@@ -10,7 +10,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
   const [showResult, setShowResult] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const [copied, setCopied] = useState(false); // 🔥 NEW
+  const [copied, setCopied] = useState(false);
 
   const itemStyle = {
     h: "64px",
@@ -46,39 +46,36 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
         return;
       }
 
-      // auto copy (still keep)
-      navigator.clipboard.writeText(data.code);
-
+      // ❌ NO AUTO COPY
       setGeneratedCode(data.code);
       setShowModal(false);
       setShowResult(true);
       setPasscode("");
-      setCopied(true);
+      setCopied(false);
 
     } catch {
       setErrorMsg("Something went wrong");
     }
   };
 
-  // 🔥 COPY BUTTON HANDLER
+  // 🔥 COPY BUTTON (with vibration + note)
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedCode);
+
+    // 📳 vibration (works on most mobile browsers)
+    if (navigator.vibrate) {
+      navigator.vibrate(100);
+    }
+
     setCopied(true);
 
-    setTimeout(() => setCopied(false), 1500); // reset text
+    setTimeout(() => setCopied(false), 1500);
   };
 
   return (
     <>
       {/* BACKDROP */}
-      <Box
-        position="fixed"
-        inset="0"
-        bg="rgba(0,0,0,0.6)"
-        backdropFilter="blur(6px)"
-        zIndex="1390"
-        onClick={onClose}
-      />
+      <Box position="fixed" inset="0" bg="rgba(0,0,0,0.6)" backdropFilter="blur(6px)" zIndex="1390" onClick={onClose} />
 
       {/* PANEL */}
       <Box
@@ -152,13 +149,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
             <Box mt={6} h="1px" bg="linear-gradient(90deg, transparent, #7c6cff, transparent)" />
 
-            <Text
-              mt={4}
-              textAlign="center"
-              fontSize="11px"
-              letterSpacing="0.2em"
-              color="#7c6cff"
-            >
+            <Text mt={4} textAlign="center" fontSize="11px" letterSpacing="0.2em" color="#7c6cff">
               SYSTEM READY
             </Text>
           </Box>
@@ -211,15 +202,17 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
                 {generatedCode}
               </Box>
 
-              {/* 🔥 COPY BUTTON */}
-              <Button
-                w="full"
-                onClick={handleCopy}
-                bg="#7c6cff"
-                color="white"
-              >
+              {/* COPY BUTTON */}
+              <Button w="full" onClick={handleCopy} bg="#7c6cff" color="white">
                 {copied ? "✔ Copied" : "Copy Code"}
               </Button>
+
+              {/* 🔥 NOTE */}
+              {copied && (
+                <Text fontSize="12px" color="rgba(255,255,255,0.6)">
+                  Copied to clipboard
+                </Text>
+              )}
 
               <Button w="full" onClick={() => setShowResult(false)}>
                 Close
