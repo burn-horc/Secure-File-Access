@@ -1753,10 +1753,6 @@ return (
           />
         </Route>
 
-        
-
-<Route path="/admin" component={AdminPage} />
-
         <Route path="/premium">
           <CheckerPage
             mode="premium"
