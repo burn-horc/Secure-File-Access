@@ -10,6 +10,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
   const [showResult, setShowResult] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [copied, setCopied] = useState(false); // 🔥 NEW
 
   const itemStyle = {
     h: "64px",
@@ -45,16 +46,26 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
         return;
       }
 
+      // auto copy (still keep)
       navigator.clipboard.writeText(data.code);
 
       setGeneratedCode(data.code);
       setShowModal(false);
       setShowResult(true);
       setPasscode("");
+      setCopied(true);
 
     } catch {
       setErrorMsg("Something went wrong");
     }
+  };
+
+  // 🔥 COPY BUTTON HANDLER
+  const handleCopy = () => {
+    navigator.clipboard.writeText(generatedCode);
+    setCopied(true);
+
+    setTimeout(() => setCopied(false), 1500); // reset text
   };
 
   return (
@@ -101,12 +112,11 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
           </HStack>
         </Box>
 
-        {/* 🔥 CONTENT (TAKES FULL HEIGHT) */}
+        {/* CONTENT */}
         <Box flex="1" display="flex" flexDirection="column" justifyContent="space-between">
 
-          {/* TOP BUTTONS */}
+          {/* TOP */}
           <VStack spacing={4} align="stretch" px={6} pt={6}>
-
             <Link href="/">
               <Button {...itemStyle} onClick={onClose}>
                 ⌂ Cookie Checker
@@ -126,13 +136,10 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             }}>
               ⟳ Random Account
             </Button>
-
           </VStack>
 
-          {/* 🔥 BOTTOM AREA (FIXED POSITION LOOK) */}
+          {/* BOTTOM */}
           <Box px={6} pb={6}>
-
-            {/* GENERATE BUTTON AT BOTTOM */}
             <Button
               {...itemStyle}
               w="full"
@@ -143,10 +150,8 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
               ⚡ Generate Code
             </Button>
 
-            {/* LINE */}
             <Box mt={6} h="1px" bg="linear-gradient(90deg, transparent, #7c6cff, transparent)" />
 
-            {/* SYSTEM READY */}
             <Text
               mt={4}
               textAlign="center"
@@ -156,24 +161,13 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
             >
               SYSTEM READY
             </Text>
-
           </Box>
-
         </Box>
-
       </Box>
 
       {/* PASSCODE MODAL */}
       {showModal && (
-        <Box
-          position="fixed"
-          inset="0"
-          bg="rgba(0,0,0,0.7)"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          zIndex="2000"
-        >
+        <Box position="fixed" inset="0" bg="rgba(0,0,0,0.7)" display="flex" alignItems="center" justifyContent="center" zIndex="2000">
           <Box bg="#050814" border="1px solid #7c6cff" p={6} borderRadius="20px">
             <VStack spacing={4}>
               <Text color="#7c6cff">Enter Passcode</Text>
@@ -189,9 +183,7 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
                 Generate
               </Button>
 
-              {errorMsg && (
-                <Text color="red">❌ {errorMsg}</Text>
-              )}
+              {errorMsg && <Text color="red">❌ {errorMsg}</Text>}
 
               <Button w="full" onClick={() => setShowModal(false)}>
                 Close
@@ -203,25 +195,39 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
 
       {/* RESULT MODAL */}
       {showResult && (
-        <Box
-          position="fixed"
-          inset="0"
-          bg="rgba(0,0,0,0.7)"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          zIndex="2100"
-        >
+        <Box position="fixed" inset="0" bg="rgba(0,0,0,0.7)" display="flex" alignItems="center" justifyContent="center" zIndex="2100">
           <Box bg="#050814" border="1px solid #7c6cff" p={6} borderRadius="20px">
             <VStack spacing={4}>
-              <Text color="#7c6cff">⚡ Code Copied</Text>
-              <Text>{generatedCode}</Text>
-              <Button onClick={() => setShowResult(false)}>Close</Button>
+              <Text color="#7c6cff">⚡ Code Ready</Text>
+
+              <Box
+                w="full"
+                p={3}
+                borderRadius="12px"
+                bg="rgba(255,255,255,0.05)"
+                textAlign="center"
+                fontWeight="bold"
+              >
+                {generatedCode}
+              </Box>
+
+              {/* 🔥 COPY BUTTON */}
+              <Button
+                w="full"
+                onClick={handleCopy}
+                bg="#7c6cff"
+                color="white"
+              >
+                {copied ? "✔ Copied" : "Copy Code"}
+              </Button>
+
+              <Button w="full" onClick={() => setShowResult(false)}>
+                Close
+              </Button>
             </VStack>
           </Box>
         </Box>
       )}
-
     </>
   );
 }
