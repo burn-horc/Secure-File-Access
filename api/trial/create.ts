@@ -95,6 +95,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const ip = getClientIp(req);
+
+// Check VPN before doing anything else
+
+if (await isVPN(ip)) {
+
+  return res.status(403).json({
+
+    success: false,
+
+    error: "VPN or proxy connections are not allowed.",
+
+  });
+
+}
+    
     const passcode = String(req.body?.passcode ?? "").trim();
     const isAdmin = await getPasscodeAdminStatus(passcode);
 
