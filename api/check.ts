@@ -141,27 +141,6 @@ const {
   runDirectCheck,
 } = originalServerHelpers.default ?? originalServerHelpers;
 
-async function isVPN(ip: string) {
-  try {
-    const apiKey = process.env.PROXYCHECK_API_KEY;
-
-    console.log("Checking IP:", ip);
-
-    const response = await fetch(
-      `https://proxycheck.io/v2/${ip}?key=${apiKey}&vpn=1`
-    );
-
-    const data = await response.json();
-
-    console.log("ProxyCheck response:", JSON.stringify(data, null, 2));
-
-    return data[ip]?.proxy === "yes";
-  } catch (err) {
-    console.error("VPN check failed:", err);
-    return false;
-  }
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     console.log("API /api/check invoked");
@@ -173,21 +152,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const ip = getClientIp(req);
 
-console.log("Client IP:", ip);
-
-if (await isVPN(ip)) {
-  return res.status(403).json({
-    success: false,
-    error: "VPN or proxy connections are not allowed.",
-  });
-}
-
-if (await isLockedOut(ip)) {
-  return res.status(429).json({
-    success: false,
-    error: "Too many failed attempts. Try again later.",
-  });
-}
+    if (await isLockedOut(ip)) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many failed attempts. Try again later.",
+      });
+    }
 
     // Global rate limit (basic protection)
 const { success: basicLimit } = await ipRateLimit.limit(ip);
