@@ -88,6 +88,26 @@ async function getPasscodeAdminStatus(passcode: string) {
   return data.is_admin === true;
 }
 
+async function isVPN(ip: string) {
+  try {
+    if (!ip || ip === "unknown") return false;
+
+    const apiKey = process.env.PROXYCHECK_API_KEY;
+
+    const response = await fetch(
+      `https://proxycheck.io/v2/${ip}?key=${apiKey}&vpn=1`
+    );
+
+    const data = await response.json();
+
+    return data[ip]?.proxy === "yes";
+  } catch (err) {
+    console.error("VPN check failed:", err);
+    return false;
+  }
+}
+
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
