@@ -169,17 +169,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const ip = getClientIp(req);
 
-    if (await isLockedOut(ip)) {
-      return res.status(429).json({
-        success: false,
-        error: "Too many failed attempts. Try again later.",
-      });
-    }
-
-    if (await isVPN(ip)) {
+if (await isVPN(ip)) {
   return res.status(403).json({
     success: false,
     error: "VPN or proxy connections are not allowed.",
+  });
+}
+
+if (await isLockedOut(ip)) {
+  return res.status(429).json({
+    success: false,
+    error: "Too many failed attempts. Try again later.",
   });
 }
 
