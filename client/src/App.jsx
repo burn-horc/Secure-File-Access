@@ -784,7 +784,7 @@ const [trialLoading, setTrialLoading] = useState(false);
 const [trialResults, setTrialResults] = useState([]);
 const [showTrialResults, setShowTrialResults] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
-  const [acceptedNotice, setAcceptedNotice] = useState(true);
+  const [acceptedNotice, setAcceptedNotice] = useState(false);
   
   const canAccessAdmin = sessionUnlocked; 
 
@@ -1545,13 +1545,14 @@ if (usableResults.length > 0 && soundEnabled) {
     setIsLoading(false);
   }
 };
-  
-if (!acceptedNotice) {
 
-  if (!session) {
+if (!session) {
   return <LoginPage />;
 }
   
+if (!acceptedNotice) {
+
+
   return (
     <Flex direction="column" minH="100vh" bg="#0d0f18" color="white" py={8} px={4}>
       <Box flex="1" display="flex" alignItems="center" justifyContent="center">
