@@ -1,5 +1,5 @@
 import { Box, Button, Heading, VStack } from "@chakra-ui/react";
-import { supabase } from "./supabase";
+import { supabase } from "./supabaseClient";
 
 export default function LoginPage() {
   const signIn = async () => {
