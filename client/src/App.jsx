@@ -12,6 +12,8 @@ import CheckerPage from "./CheckerPage";
 import AdminPage from "./AdminPage";
 import { showAppToast } from "./appToast.jsx";
 import AppCredits from "./AppCredits";
+import LoginPage from "./LoginPage";
+import { supabase } from "./supabaseClient";
 const MAX_JSON_PAYLOAD_BYTES = 850_000;
 const MAX_CHECKS_PER_REQUEST_CAP = 120;
 const TARGET_REQUEST_RUNTIME_MS = 240_000;
@@ -759,6 +761,22 @@ export default function App() {
   const [verifiedPasscode, setVerifiedPasscode] = useState("");
   const [location, setLocation] = useLocation();
 
+const [session, setSession] = useState(null);
+
+useEffect(() => {
+  supabase.auth.getSession().then(({ data }) => {
+    setSession(data.session);
+  });
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    setSession(session);
+  });
+
+  return () => subscription.unsubscribe();
+}, []);
+  
   const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
 const [trialCodeInput, setTrialCodeInput] = useState("");
 const [trialCodeError, setTrialCodeError] = useState("");
@@ -1529,6 +1547,11 @@ if (usableResults.length > 0 && soundEnabled) {
 };
   
 if (!acceptedNotice) {
+
+  if (!session) {
+  return <LoginPage />;
+}
+  
   return (
     <Flex direction="column" minH="100vh" bg="#0d0f18" color="white" py={8} px={4}>
       <Box flex="1" display="flex" alignItems="center" justifyContent="center">
