@@ -806,15 +806,6 @@ const [showTrialResults, setShowTrialResults] = useState(false);
 };
   
   const toggleSound = () => setSoundEnabled(prev => {
-
-const handleLogout = async () => {
-  await supabase.auth.signOut();
-
-  setSessionUnlocked(false);
-  setVerifiedPasscode("");
-  setLocation("/");
-};
-    
     const next = !prev;
     localStorage.setItem('netflix-checker:sound', next ? 'on' : 'off');
     return next;
@@ -1565,44 +1556,6 @@ if (!acceptedNotice) {
   return (
     <Flex direction="column" minH="100vh" bg="#0d0f18" color="white" py={8} px={4}>
       <Box flex="1" display="flex" alignItems="center" justifyContent="center">
-
-        {session && (
-  <Box px={4} pt={4}>
-    <Flex
-      justify="space-between"
-      align="center"
-      borderWidth="1px"
-      borderColor="rgba(139,92,246,0.22)"
-      borderRadius="16px"
-      bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
-      p={4}
-      mb={4}
-    >
-      <Box>
-        <Text fontSize="xs" color="gray.400">
-          Signed in as
-        </Text>
-
-        <Text fontWeight="bold" color="white">
-          {session.user.user_metadata?.full_name || session.user.email.split("@")[0]}
-        </Text>
-
-        <Text fontSize="sm" color="gray.300">
-          {session.user.email}
-        </Text>
-      </Box>
-
-      <Button
-        size="sm"
-        colorScheme="red"
-        onClick={handleLogout}
-      >
-        Logout
-      </Button>
-    </Flex>
-  </Box>
-)}
-        
         <Box
           w="full"
           maxW="md"
