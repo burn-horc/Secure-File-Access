@@ -1663,6 +1663,7 @@ if (!acceptedNotice) {
     </Flex>
   </Flex>
 );
+  }
   
   if (vpnBlocked) {
   return (
