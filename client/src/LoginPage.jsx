@@ -1,12 +1,11 @@
 import {
   Box,
   Button,
+  Divider,
   Heading,
   Text,
   VStack,
-  Icon,
 } from "@chakra-ui/react";
-import { FaShieldAlt } from "react-icons/fa";
 import { supabase } from "./supabaseClient";
 
 export default function LoginPage() {
@@ -22,86 +21,88 @@ export default function LoginPage() {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      bgGradient="linear(to-br, #0f0f0f, #1a1a1a, #000)"
+      bg="#090909"
+      bgGradient="radial(circle at top, #1b1b1b 0%, #090909 65%)"
       px={6}
     >
       <Box
         w="100%"
-        maxW="450px"
+        maxW="440px"
         p={10}
-        textAlign="center"
-        bg="rgba(255,255,255,0.05)"
-        border="1px solid rgba(255,255,255,0.08)"
-        backdropFilter="blur(18px)"
-        borderRadius="2xl"
-        boxShadow="0 25px 60px rgba(0,0,0,.55)"
+        bg="#121212"
+        border="1px solid rgba(255,255,255,0.06)"
+        borderRadius="24px"
+        boxShadow="0 35px 80px rgba(0,0,0,.75)"
       >
-        <VStack spacing={7}>
-          <Box
-            bg="red.500"
-            color="white"
-            w="70px"
-            h="70px"
-            rounded="full"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            fontSize="30px"
-            fontWeight="bold"
+        <VStack spacing={6} align="stretch">
+          <Text
+            color="red.500"
+            fontSize="sm"
+            fontWeight="700"
+            letterSpacing="0.25em"
+            textTransform="uppercase"
+            textAlign="center"
           >
-            N
-          </Box>
+            Secure Portal
+          </Text>
 
           <Heading
             color="white"
-            fontSize="4xl"
-            fontWeight="extrabold"
+            fontSize="42px"
+            fontWeight="800"
+            textAlign="center"
+            lineHeight="1.1"
           >
-            Welcome 👋
+            Welcome Back
           </Heading>
 
           <Text
-            color="gray.300"
-            fontSize="md"
-            maxW="320px"
+            color="gray.400"
+            textAlign="center"
+            fontSize="15px"
+            lineHeight="1.7"
           >
-            Sign in securely with your Google account to continue.
+            Sign in with your Google account to securely access your dashboard.
           </Text>
 
           <Button
-            colorScheme="red"
-            size="lg"
-            width="100%"
-            h="58px"
-            fontSize="lg"
-            fontWeight="bold"
-            borderRadius="xl"
             onClick={signIn}
+            h="58px"
+            w="100%"
+            bg="#E50914"
+            color="white"
+            fontWeight="700"
+            fontSize="16px"
+            borderRadius="14px"
             _hover={{
+              bg: "#F40612",
               transform: "translateY(-2px)",
+              boxShadow: "0 10px 30px rgba(229,9,20,.35)",
             }}
-            transition="0.2s"
+            _active={{
+              transform: "scale(.98)",
+            }}
+            transition="all .2s"
           >
             Continue with Google
           </Button>
 
-          <Box
-            display="flex"
-            alignItems="center"
-            gap={2}
-            color="green.300"
-          >
-            <Icon as={FaShieldAlt} />
-            <Text fontSize="sm">
-              Secure authentication powered by Google
-            </Text>
-          </Box>
+          <Divider borderColor="whiteAlpha.100" />
 
           <Text
+            textAlign="center"
             color="gray.500"
-            fontSize="xs"
+            fontSize="13px"
           >
-            Your account is protected using encrypted authentication.
+            Protected by Google Authentication
+          </Text>
+
+          <Text
+            textAlign="center"
+            color="gray.600"
+            fontSize="11px"
+          >
+            © 2026 • All rights reserved
           </Text>
         </VStack>
       </Box>
