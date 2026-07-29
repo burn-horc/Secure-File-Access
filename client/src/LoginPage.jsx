@@ -43,7 +43,7 @@ export default function LoginPage() {
             textTransform="uppercase"
             textAlign="center"
           >
-            Secure Portal
+            Secure Netflix Portal
           </Text>
 
           <Heading
