@@ -53,7 +53,7 @@ export default function LoginPage() {
             textAlign="center"
             lineHeight="1.1"
           >
-            Welcome to Netflix Generator
+            Welcome
           </Heading>
 
           <Text
