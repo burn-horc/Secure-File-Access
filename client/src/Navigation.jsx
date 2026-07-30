@@ -120,15 +120,12 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
               </Button>
             </Link>
 
-            <Button
-  {...itemStyle}
-  onClick={() => {
-    onClose?.();
-    onPremiumClick?.();
-  }}
->
-  ★ Premium Account
-</Button>
+            <Button {...itemStyle} onClick={() => {
+              onClose?.();
+              onPremiumClick?.();
+            }}>
+              ★ Premium Account
+            </Button>
 
             <Button {...itemStyle} onClick={() => {
               onClose?.();
