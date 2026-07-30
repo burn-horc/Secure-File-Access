@@ -1641,9 +1641,9 @@ if (!acceptedNotice) {
 
   <Text
     fontSize="sm"
-    color={profile?.premium ? "green.300" : "gray.400"}
+    color={hasActivePremium ? "green.300" : "gray.400"}
   >
-    {profile?.premium ? "Premium Account" : "Free Account"}
+    {hasActivePremium ? "Premium Account" : "Free Account"}
   </Text>
 </VStack>
       
@@ -1890,7 +1890,7 @@ return (
         </Route>
 
         <Route path="/premium">
-          {profile?.premium ? (
+          {hasActivePremium ? (
           <CheckerPage
             mode="premium"
             input={input}
