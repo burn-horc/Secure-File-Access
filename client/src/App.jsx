@@ -1893,6 +1893,7 @@ return (
           {hasActivePremium ? (
           <CheckerPage
             mode="premium"
+            hasActivePremium={hasActivePremium}
             input={input}
             uploadedInputBanner={uploadedInputBanner}
             isLoading={isLoading}
