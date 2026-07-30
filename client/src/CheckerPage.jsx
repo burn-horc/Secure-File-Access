@@ -2298,8 +2298,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 )}
 
             <Modal
-  isOpen={isPasscodeModalOpen && !sessionUnlocked}
-  onClose={() => setIsPasscodeModalOpen(false)}
+        isOpen={isPasscodeModalOpen}
+        onClose={() => setIsPasscodeModalOpen(false)}
         isCentered
         size="sm"
       >
@@ -2410,14 +2410,11 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </ModalContent>
 </Modal>
       {showNav && (
-<Navigation
-  onClose={() => setShowNav(false)}
-  onPremiumClick={() => {
-    setLocation("/premium");
-    runFindAccount();
-  }}
-  onRandomClick={runTrial}
-/>
+  <Navigation
+    onClose={() => setShowNav(false)}
+    onPremiumClick={runFindAccount}
+    onRandomClick={runTrial}
+  />
 )}
 </Box>
 
