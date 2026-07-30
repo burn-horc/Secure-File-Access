@@ -1882,6 +1882,7 @@ return (
         </Route>
 
         <Route path="/premium">
+          {profile?.premium ? (
           <CheckerPage
             mode="premium"
             input={input}
@@ -1932,9 +1933,77 @@ return (
             trialCodeError={trialCodeError}
             trialLoading={trialLoading}
             handleTrialSubmit={handleTrialSubmit}
-            goBackToChecker={goBackToChecker}
-          />
-        </Route>
+                    goBackToChecker={goBackToChecker}
+      />
+  ) : (
+    <Flex
+      minH="80vh"
+      alignItems="center"
+      justifyContent="center"
+      px={4}
+    >
+      <Box
+        w="full"
+        maxW="420px"
+        textAlign="center"
+        borderWidth="1px"
+        borderColor="rgba(139,92,246,0.25)"
+        borderRadius="24px"
+        bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+        boxShadow="0 8px 32px rgba(0,0,0,0.65)"
+        p={8}
+      >
+        <Text fontSize="3xl" mb={3}>
+          🔒
+        </Text>
+
+        <Text
+          fontSize="xl"
+          fontWeight="800"
+          color="white"
+          mb={2}
+        >
+          Premium Access Required
+        </Text>
+
+        <Text
+          fontSize="sm"
+          color="rgba(255,255,255,0.65)"
+          lineHeight="1.7"
+          mb={6}
+        >
+          Your account is currently on the Free plan. Upgrade your
+          account to access the premium checker and premium features.
+        </Text>
+
+        <Button
+          w="full"
+          borderRadius="12px"
+          bg="linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%)"
+          color="white"
+          _hover={{ filter: "brightness(1.08)" }}
+          onClick={() => {
+            window.location.href = "/support";
+          }}
+        >
+          Upgrade to Premium
+        </Button>
+
+        <Button
+          mt={3}
+          w="full"
+          variant="ghost"
+          color="gray.400"
+          onClick={() => {
+            window.location.href = "/free";
+          }}
+        >
+          Return to Free Version
+        </Button>
+      </Box>
+    </Flex>
+  )}
+</Route>
 
         <Route path="/trial">
           <CheckerPage
