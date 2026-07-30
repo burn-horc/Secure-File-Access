@@ -766,64 +766,72 @@ const [session, setSession] = useState(null);
 
 useEffect(() => {
   const ensureProfile = async (session) => {
-    console.log("ENSURE PROFILE RUNNING", session);
-
-    if (!session?.user) return;
+    if (!session?.user) {
+      setSession(null);
+      setProfile(null);
+      return;
+    }
 
     const user = session.user;
 
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from("profiles")
       .select("id")
       .eq("id", user.id)
       .maybeSingle();
 
-    console.log("Existing profile:", existing);
+    if (existingError) {
+      console.error("Profile check error:", existingError);
+      return;
+    }
 
     if (!existing) {
-  const { data: insertedProfile, error: insertError } = await supabase
-  .from("profiles")
-  .insert({
-    id: user.id,
-    email: user.email,
-    name: user.user_metadata?.full_name || "",
-    avatar_url: user.user_metadata?.avatar_url || "",
-    premium: false,
-    premium_until: null,
-    created_at: new Date().toISOString(),
-  })
-  .select()
-  .single();
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .insert({
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.full_name || "",
+          avatar_url: user.user_metadata?.avatar_url || "",
+          premium: false,
+          premium_until: null,
+          created_at: new Date().toISOString(),
+        });
 
-console.log("INSERTED PROFILE:", insertedProfile);
-console.log("INSERT ERROR:", JSON.stringify(insertError, null, 2));
-}
+      if (insertError) {
+        console.error("Profile insert error:", insertError);
+        return;
+      }
+    }
 
-setSession(session);
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-const { data: profileData } = await supabase
-  .from("profiles")
-  .select("*")
-  .eq("id", user.id)
-  .single();
+    if (profileError) {
+      console.error("Profile load error:", profileError);
+      return;
+    }
 
-setProfile(profileData);
-console.log("USER PROFILE:", profileData);
+    setProfile(profileData);
+    setSession(session);
+  };
 
-};  // 
+  supabase.auth.getSession().then(({ data }) => {
+    ensureProfile(data.session);
+  });
 
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    ensureProfile(session);
+  });
 
-supabase.auth.getSession().then(({ data }) => {
-  ensureProfile(data.session);
-});
-
-const {
-  data: { subscription },
-} = supabase.auth.onAuthStateChange((_event, session) => {
-  ensureProfile(session);
-});
-
-return () => subscription.unsubscribe();
+  return () => {
+    subscription.unsubscribe();
+  };
 }, []);
   
   const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
