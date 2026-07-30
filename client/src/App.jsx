@@ -764,14 +764,37 @@ export default function App() {
 const [session, setSession] = useState(null);
 
 useEffect(() => {
+  const ensureProfile = async (session) => {
+    if (!session?.user) return;
+
+    const user = session.user;
+
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!existing) {
+      await supabase.from("profiles").insert({
+        id: user.id,
+        email: user.email,
+        premium: false,
+        premium_until: null,
+      });
+    }
+
+    setSession(session);
+  };
+
   supabase.auth.getSession().then(({ data }) => {
-    setSession(data.session);
+    ensureProfile(data.session);
   });
 
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange((_event, session) => {
-    setSession(session);
+    ensureProfile(session);
   });
 
   return () => subscription.unsubscribe();
