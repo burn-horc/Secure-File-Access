@@ -1623,14 +1623,22 @@ if (!acceptedNotice) {
       bg="#111827"
     >
       <VStack align="start" spacing={0}>
-        <Text fontSize="sm" color="gray.400">
-          Signed in as
-        </Text>
-        <Text fontWeight="bold">
-          {session?.user?.user_metadata?.full_name || session?.user?.email}
-        </Text>
-      </VStack>
+  <Text fontSize="sm" color="gray.400">
+    Signed in as
+  </Text>
 
+  <Text fontWeight="bold">
+    {profile?.name || session?.user?.email}
+  </Text>
+
+  <Text
+    fontSize="sm"
+    color={profile?.premium ? "green.300" : "gray.400"}
+  >
+    {profile?.premium ? "Premium Account" : "Free Account"}
+  </Text>
+</VStack>
+      
       <Button
         size="sm"
         colorScheme="red"
