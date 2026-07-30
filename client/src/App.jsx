@@ -1897,7 +1897,7 @@ return (
             uploadInputRef={uploadInputRef}
             filePickerAccept={FILE_PICKER_ACCEPT}
             minWorkerCount={MIN_WORKER_COUNT}
-            maxWorkerCount={sessionUnlocked ? MAX_WORKER_COUNT : 1}
+            maxWorkerCount={MAX_WORKER_COUNT}
             runCheck={runCheck}
             stopCheck={stopCheck}
             handleCookieInputChange={handleCookieInputChange}
@@ -1916,7 +1916,7 @@ return (
             passcodeError={passcodeError}
             passcodeLoading={passcodeLoading}
             handlePasscodeSubmit={handlePasscodeSubmit}
-            sessionUnlocked={sessionUnlocked}
+            sessionUnlocked={true}
             soundEnabled={soundEnabled}
             toggleSound={toggleSound}
             liveValidCount={liveValidCount}
