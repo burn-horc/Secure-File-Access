@@ -764,6 +764,14 @@ export default function App() {
 const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
 
+  const hasActivePremium = Boolean(
+  profile?.premium &&
+    (
+      !profile?.premium_until ||
+      new Date(profile.premium_until).getTime() > Date.now()
+    )
+);
+
 useEffect(() => {
   const ensureProfile = async (session) => {
     if (!session?.user) {
