@@ -2299,7 +2299,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 )}
 
             <Modal
-         isOpen={mode !== "premium" && isPasscodeModalOpen}
+        isOpen={false}
         onClose={() => setIsPasscodeModalOpen(false)}
         isCentered
         size="sm"
