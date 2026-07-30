@@ -781,7 +781,7 @@ useEffect(() => {
     console.log("Existing profile:", existing);
 
     if (!existing) {
-  const { data, error } = await supabase
+  const { data: insertedProfile, error: insertError } = await supabase
   .from("profiles")
   .insert({
     id: user.id,
@@ -791,10 +791,12 @@ useEffect(() => {
     premium: false,
     premium_until: null,
     created_at: new Date().toISOString(),
-  });
+  })
+  .select()
+  .single();
 
-console.log("INSERT DATA:", data);
-console.log("INSERT ERROR:", error);
+console.log("INSERTED PROFILE:", insertedProfile);
+console.log("INSERT ERROR:", JSON.stringify(insertError, null, 2));
 }
 
 setSession(session);
