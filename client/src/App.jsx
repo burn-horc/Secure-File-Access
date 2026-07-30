@@ -777,11 +777,14 @@ useEffect(() => {
 
     if (!existing) {
       await supabase.from("profiles").insert({
-        id: user.id,
-        email: user.email,
-        premium: false,
-        premium_until: null,
-      });
+  id: user.id,
+  email: user.email,
+  name: user.user_metadata?.full_name || "",
+  avatar_url: user.user_metadata?.avatar_url || "",
+  premium: false,
+  premium_until: null,
+  created_at: new Date().toISOString(),
+});
     }
 
     setSession(session);
