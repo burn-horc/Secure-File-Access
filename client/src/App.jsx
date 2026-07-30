@@ -778,6 +778,8 @@ useEffect(() => {
       .eq("id", user.id)
       .maybeSingle();
 
+    console.log("Existing profile:", existing);
+
     if (!existing) {
   await supabase.from("profiles").insert({
     id: user.id,
