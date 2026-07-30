@@ -30,6 +30,8 @@ function getClientIp(req: VercelRequest) {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
+    console.log("verify-passcode method:", req.method);
+
     if (req.method !== "POST") {
       return res.status(405).json({
         success: false,
@@ -42,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (await isLockedOut(ip)) {
       return res.status(429).json({
         success: false,
-        error: "Too many failed attempts. Try again later.",
+        error: "Too many failed attempts. Try again in 60 minutes! Nice try diddy 😂.",
       });
     }
 
@@ -55,6 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const passcode = String(req.body?.passcode ?? "").trim();
+    console.log("verify-passcode received:", passcode ? "[present]" : "[missing]");
 
     if (!passcode) {
       await recordFailure(ip);
@@ -70,6 +73,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .eq("code", passcode)
       .eq("is_active", true)
       .maybeSingle();
+
+    console.log("supabase data:", data);
+    console.log("supabase error:", error);
 
     if (error) {
       return res.status(500).json({
@@ -94,15 +100,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    if (
-      typeof data.max_uses === "number" &&
-      typeof data.uses === "number" &&
-      data.uses >= data.max_uses
-    ) {
+    if (data.max_uses && (data.uses || 0) >= data.max_uses) {
       await recordFailure(ip);
       return res.status(403).json({
         success: false,
         error: "Premium code expired",
+      });
+    }
+
+    const { error: updateError } = await supabase
+      .from("passcodes")
+      .update({ uses: (data.uses || 0) + 1 })
+      .eq("id", data.id);
+
+    if (updateError) {
+      console.error("premium verify update error:", updateError);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to update premium code usage",
       });
     }
 
@@ -112,6 +127,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       success: true,
     });
   } catch (error: any) {
+    console.error("verify-passcode crash:", error);
     return res.status(500).json({
       success: false,
       error: error?.message || "Unexpected server error",
