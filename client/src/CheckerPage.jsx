@@ -243,6 +243,7 @@ async function copyTextToClipboard(value) {
 
 export default function CheckerPage({
   mode = "premium",
+  hasActivePremium,
   input,
   uploadedInputBanner,
   isLoading,
