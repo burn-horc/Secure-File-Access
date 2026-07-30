@@ -766,6 +766,8 @@ const [session, setSession] = useState(null);
 
 useEffect(() => {
   const ensureProfile = async (session) => {
+    console.log("ENSURE PROFILE RUNNING", session);
+
     if (!session?.user) return;
 
     const user = session.user;
