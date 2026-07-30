@@ -762,6 +762,7 @@ export default function App() {
   const [location, setLocation] = useLocation();
 
 const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
 
 useEffect(() => {
   const ensureProfile = async (session) => {
@@ -776,31 +777,42 @@ useEffect(() => {
       .maybeSingle();
 
     if (!existing) {
-      await supabase.from("profiles").insert({
-  id: user.id,
-  email: user.email,
-  name: user.user_metadata?.full_name || "",
-  avatar_url: user.user_metadata?.avatar_url || "",
-  premium: false,
-  premium_until: null,
-  created_at: new Date().toISOString(),
+  await supabase.from("profiles").insert({
+    id: user.id,
+    email: user.email,
+    name: user.user_metadata?.full_name || "",
+    avatar_url: user.user_metadata?.avatar_url || "",
+    premium: false,
+    premium_until: null,
+    created_at: new Date().toISOString(),
+  });
+}
+
+setSession(session);
+
+const { data: profileData } = await supabase
+  .from("profiles")
+  .select("*")
+  .eq("id", user.id)
+  .single();
+
+setProfile(profileData);
+console.log("USER PROFILE:", profileData);
+
+};  // 
+
+
+supabase.auth.getSession().then(({ data }) => {
+  ensureProfile(data.session);
 });
-    }
 
-    setSession(session);
-  };
+const {
+  data: { subscription },
+} = supabase.auth.onAuthStateChange((_event, session) => {
+  ensureProfile(session);
+});
 
-  supabase.auth.getSession().then(({ data }) => {
-    ensureProfile(data.session);
-  });
-
-  const {
-    data: { subscription },
-  } = supabase.auth.onAuthStateChange((_event, session) => {
-    ensureProfile(session);
-  });
-
-  return () => subscription.unsubscribe();
+return () => subscription.unsubscribe();
 }, []);
   
   const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
