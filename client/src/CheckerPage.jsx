@@ -2298,11 +2298,11 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 )}
 
             <Modal
-        isOpen={isPasscodeModalOpen}
-        onClose={() => setIsPasscodeModalOpen(false)}
-        isCentered
-        size="sm"
-      >
+  isOpen={false && isPasscodeModalOpen}
+  onClose={() => setIsPasscodeModalOpen(false)}
+  isCentered
+  size="sm"
+>
         <ModalOverlay bg="rgba(0,0,0,0.75)" backdropFilter="blur(4px)" />
         <ModalContent {...modalShell} mx={4}>
           <ModalCloseButton color="rgba(255,255,255,0.5)" top={4} right={4} />
