@@ -2325,7 +2325,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
             <VStack spacing={4}>
               <Input
                 type="password"
-                placeholder="Enter"
+                placeholder="Enter the code here"
                 value={passcodeInput}
                 onChange={(e) => setPasscodeInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handlePasscodeSubmit()}
