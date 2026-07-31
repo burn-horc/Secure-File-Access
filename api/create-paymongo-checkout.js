@@ -74,7 +74,7 @@ export default async function handler(req, res) {
               ],
 
               // Remove methods that are not enabled in your PayMongo account
-              payment_method_types: ["gcash", "card", "qrph"],
+              payment_method_types: ["qrph"],
 
               success_url: `${process.env.APP_URL}/premium?payment=success`,
               cancel_url: `${process.env.APP_URL}/premium?payment=cancelled`,
