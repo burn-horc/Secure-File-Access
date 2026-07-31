@@ -2416,8 +2416,17 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   <Navigation
     onClose={() => setShowNav(false)}
     onPremiumClick={() => {
-      setLocation("/premium"); 
-      runFindAccount().catch(console.error);
+      // 1. Start the background task first
+      try {
+        runFindAccount();
+      } catch (error) {
+        console.error(error);
+      }
+      
+      // 2. Change the page a split-second later so the task isn't canceled
+      setTimeout(() => {
+        setLocation("/premium");
+      }, 50);
     }}
     onRandomClick={runTrial}
   />
