@@ -2412,22 +2412,10 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 </Modal>
 
       
-     {mode === "premium" && hasActivePremium && (
-  <Box px={4} pb={4}>
-    <Button
-      {...primaryBtn}
-      w="full"
-      onClick={handleGenerateAccount}
-    >
-      Generate Account
-    </Button>
-  </Box>
-)}
-
-{showNav && (
+      {showNav && (
   <Navigation
     onClose={() => setShowNav(false)}
-    onPremiumClick={() => setLocation("/premium")}
+    onPremiumClick={runFindAccount}
     onRandomClick={runTrial}
   />
 )}
