@@ -2410,14 +2410,14 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     </ModalBody>
   </ModalContent>
 </Modal>
-     </Modal>
 
-{mode === "premium" && hasActivePremium && (
+      
+     {mode === "premium" && hasActivePremium && (
   <Box px={4} pb={4}>
     <Button
       {...primaryBtn}
       w="full"
-      onClick={runFindAccount}
+      onClick={handleGenerateAccount}
     >
       Generate Account
     </Button>
