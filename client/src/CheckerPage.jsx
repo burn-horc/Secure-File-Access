@@ -2416,14 +2416,16 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       
       {showNav && (
   <Navigation
-  onClose={() => setShowNav(false)}
-  onPremiumClick={() => {
-    setIsPasscodeModalOpen(false);
-    setShowNav(false);
-    setLocation("/premium");
-  }}
-  onRandomClick={runTrial}
-/>
+    onClose={() => setShowNav(false)}
+    onPremiumClick={() => {
+      setIsPasscodeModalOpen(false);
+      setShowNav(false);
+      setLocation("/premium");
+    }}
+    onRandomClick={runTrial}
+  />
+)}
+
 </Box>
 
 );
