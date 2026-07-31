@@ -2411,15 +2411,16 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </ModalContent>
 </Modal>
 
-<Navigation
-  onClose={() => setShowNav(false)}
-  onPremiumClick={runFindAccount}
-/>
+{mode === "premium" && (
+  <Button
+    {...primaryBtn}
+    w="full"
+    mt={4}
+    onClick={runFindAccount}
+  >
     Premium Feature
   </Button>
 )}
-
-
       
       {showNav && (
   <Navigation
