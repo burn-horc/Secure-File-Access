@@ -243,7 +243,6 @@ async function copyTextToClipboard(value) {
 
 export default function CheckerPage({
   mode = "premium",
-  hasActivePremium,
   input,
   uploadedInputBanner,
   isLoading,
@@ -2299,7 +2298,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 )}
 
             <Modal
-       isOpen={!hasActivePremium && isPasscodeModalOpen}
+        isOpen={isPasscodeModalOpen}
         onClose={() => setIsPasscodeModalOpen(false)}
         isCentered
         size="sm"
@@ -2410,13 +2409,13 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     </ModalBody>
   </ModalContent>
 </Modal>
-
-   
-<Navigation
-  onClose={() => setShowNav(false)}
-  onPremiumClick={runFindAccount}
-  onRandomClick={runTrial}
-/>
+      {showNav && (
+  <Navigation
+    onClose={() => setShowNav(false)}
+    onPremiumClick={runFindAccount}
+    onRandomClick={runTrial}
+  />
+)}
 </Box>
 
 );
