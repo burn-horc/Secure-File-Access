@@ -2414,7 +2414,9 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   <Navigation
     onClose={() => setShowNav(false)}
     onPremiumClick={() => {
-      setIsPasscodeModalOpen(false);
+      setPasscodeInput("");
+      setPasscodeError("");
+      setIsPasscodeModalOpen(true);
       setShowNav(false);
       setLocation("/premium");
     }}
