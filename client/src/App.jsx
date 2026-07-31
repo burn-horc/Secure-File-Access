@@ -763,6 +763,7 @@ export default function App() {
 
 const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [isStartingPayment, setIsStartingPayment] = useState(false);
 
   const hasActivePremium = Boolean(
   profile?.premium &&
@@ -955,6 +956,55 @@ const [showTrialResults, setShowTrialResults] = useState(false);
       duration: 3600,
     });
   };
+
+  const handleUpgradeToPremium = async () => {
+  if (isStartingPayment) return;
+
+  setIsStartingPayment(true);
+
+  try {
+    const {
+      data: { session: currentSession },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !currentSession?.access_token) {
+      throw new Error("Please sign in again before upgrading.");
+    }
+
+    const response = await fetch("/api/create-paymongo-checkout", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${currentSession.access_token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        result.error || "Unable to open the PayMongo checkout."
+      );
+    }
+
+    if (!result.checkout_url) {
+      throw new Error("PayMongo did not return a checkout URL.");
+    }
+
+    window.location.assign(result.checkout_url);
+  } catch (error) {
+    console.error("PayMongo checkout error:", error);
+
+    showToast(
+      error instanceof Error
+        ? error.message
+        : "Unable to open the PayMongo checkout."
+    );
+  } finally {
+    setIsStartingPayment(false);
+  }
+};
 
   useEffect(() => {
     return () => {
@@ -1985,19 +2035,23 @@ return (
           account to access the premium checker and premium features.
         </Text>
 
+        
         <Button
-          w="full"
-          borderRadius="12px"
-          bg="linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%)"
-          color="white"
-          _hover={{ filter: "brightness(1.08)" }}
-          onClick={() => {
-            window.location.href = "/support";
-          }}
-        >
-          Upgrade to Premium
-        </Button>
+  w="full"
+  borderRadius="12px"
+  bg="linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%)"
+  color="white"
+  _hover={{ filter: "brightness(1.08)" }}
+  onClick={handleUpgradeToPremium}
+  isLoading={isStartingPayment}
+  loadingText="Opening PayMongo..."
+  isDisabled={isStartingPayment}
+>
+  Upgrade to Premium
+</Button>
 
+
+        
         <Button
           mt={3}
           w="full"
