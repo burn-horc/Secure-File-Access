@@ -294,23 +294,11 @@ export default function CheckerPage({
   handleTrialSubmit,
   goBackToChecker,
 }) {
- const [location, setLocation] = useLocation();
-  const isFreePage = mode === "free";
+ const [, setLocation] = useLocation();
+
+const isFreePage = mode === "free";
 const isPremiumPage = mode === "premium";
-  const isTrialPage = mode === "trial";
-useEffect(() => {
-  if (location === "/premium" && isPremiumPage) {
-    setPasscodeInput("");
-    setPasscodeError("");
-    setIsPasscodeModalOpen(true);
-  }
-}, [
-  location,
-  isPremiumPage,
-  setPasscodeInput,
-  setPasscodeError,
-  setIsPasscodeModalOpen,
-]);
+const isTrialPage = mode === "trial";
   
   const showBackButton = isPremiumPage || isTrialPage;
   const HISTORY_KEY = 'netflix-checker:history:v1';
@@ -2311,12 +2299,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </Box>
 )}
 
-           <Modal
-  isOpen={
-    location === "/premium" &&
-    isPremiumPage &&
-    isPasscodeModalOpen
-  }
+          <Modal
+  isOpen={isPremiumPage && isPasscodeModalOpen}
   onClose={() => setIsPasscodeModalOpen(false)}
   isCentered
   size="sm"
@@ -2432,13 +2416,15 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   <Navigation
     onClose={() => setShowNav(false)}
     onPremiumClick={() => {
+      setPasscodeInput("");
+      setIsPasscodeModalOpen(true);
       setShowNav(false);
-      window.location.assign("/premium");
+      setLocation("/premium");
     }}
     onRandomClick={runTrial}
   />
 )}
-
+      
 </Box>
 
 );
