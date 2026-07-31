@@ -2299,7 +2299,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 )}
 
             <Modal
-       isOpen={!hasActivePremium && isPasscodeModalOpen}
+       isOpen={false}
         onClose={() => setIsPasscodeModalOpen(false)}
         isCentered
         size="sm"
@@ -2413,7 +2413,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       {showNav && (
   <Navigation
     onClose={() => setShowNav(false)}
-    onPremiumClick={runFindAccount}
+    onPremiumClick={() => setLocation("/premium")}
     onRandomClick={runTrial}
   />
 )}
