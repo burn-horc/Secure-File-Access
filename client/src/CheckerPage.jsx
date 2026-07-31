@@ -2429,15 +2429,13 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 </Modal>
       
       {showNav && (
-  <Navigation
+   <Navigation
     onClose={() => setShowNav(false)}
-    onPremiumClick={() => {
-      setShowNav(false);
-      window.location.assign("/premium");
-    }}
+    onPremiumClick={runFindAccount}
     onRandomClick={runTrial}
   />
 )}
+
 </Box>
 
 );
