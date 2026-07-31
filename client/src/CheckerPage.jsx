@@ -2299,7 +2299,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 )}
 
             <Modal
-       isOpen={false}
+       isOpen={!hasActivePremium && isPasscodeModalOpen}
         onClose={() => setIsPasscodeModalOpen(false)}
         isCentered
         size="sm"
@@ -2410,7 +2410,6 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     </ModalBody>
   </ModalContent>
 </Modal>
-
       {showNav && (
   <Navigation
     onClose={() => setShowNav(false)}
