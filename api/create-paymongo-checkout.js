@@ -83,10 +83,10 @@ export default async function handler(req, res) {
               send_email_receipt: true,
 
               metadata: {
-                user_id: user.id,
-                user_email: user.email || "",
-                plan: "premium",
-              },
+  user_id: user.id,
+  user_email: user.email || "",
+  plan: "premium-30-days",
+},
             },
           },
         }),
