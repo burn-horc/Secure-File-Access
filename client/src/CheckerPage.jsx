@@ -2411,18 +2411,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </ModalContent>
 </Modal>
 
-      
-    <Box px={4} pb={4}>
-  <Button
-    {...primaryBtn}
-    w="full"
-    onClick={() => console.log("runFindAccount clicked")}
-  >
-    Generate Account
-  </Button>
-</Box>
-)}
-
+   
 {showNav && (
   <Navigation
     onClose={() => setShowNav(false)}
