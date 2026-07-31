@@ -2412,16 +2412,15 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 </Modal>
 
       
-     {mode === "premium" && hasActivePremium && (
-  <Box px={4} pb={4}>
-    <Button
-      {...primaryBtn}
-      w="full"
-      onClick={runFindAccount}
-    >
-      Generate Account
-    </Button>
-  </Box>
+    <Box px={4} pb={4}>
+  <Button
+    {...primaryBtn}
+    w="full"
+    onClick={() => console.log("runFindAccount clicked")}
+  >
+    Generate Account
+  </Button>
+</Box>
 )}
 
 {showNav && (
