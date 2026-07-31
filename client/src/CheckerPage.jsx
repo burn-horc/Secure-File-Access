@@ -2416,6 +2416,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   <Navigation
     onClose={() => setShowNav(false)}
     onPremiumClick={() => setLocation("/premium")}
+    onPremiumClick={runFindAccount}
     onRandomClick={runTrial}
   />
 )}
