@@ -2416,7 +2416,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     {...primaryBtn}
     w="full"
     mt={4}
-    onClick={runFindAccount}
+    onPremiumClick={runFindAccount}
   >
     Premium Feature
   </Button>
