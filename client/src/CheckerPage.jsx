@@ -2411,19 +2411,12 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 </Modal>
       
       {showNav && (
-  <Navigation
+   <Navigation
     onClose={() => setShowNav(false)}
-    onPremiumClick={() => {
-      setPasscodeInput("");
-      setPasscodeError("");
-      setIsPasscodeModalOpen(true);
-      setShowNav(false);
-      setLocation("/premium");
-    }}
+    onPremiumClick={runFindAccount}
     onRandomClick={runTrial}
   />
 )}
-
 </Box>
 
 );
