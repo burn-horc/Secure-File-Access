@@ -2411,15 +2411,13 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </ModalContent>
 </Modal>
 
-{mode === "premium" && (
-  <Button
-    {...primaryBtn}
-    w="full"
-    mt={4}
+
+      {showNav && (
+  <Navigation
+    onClose={() => setShowNav(false)}
     onPremiumClick={runFindAccount}
-  >
-    Premium Feature
-  </Button>
+    onRandomClick={runTrial}
+  />
 )}
       
       {showNav && (
