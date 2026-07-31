@@ -2410,19 +2410,13 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   </ModalContent>
 </Modal>
       
-      <Navigation
+      {showNav && (
+   <Navigation
     onClose={() => setShowNav(false)}
     onPremiumClick={runFindAccount}
     onRandomClick={runTrial}
   />
 )}
-
-
-
-
-
-
-
 </Box>
 
 );
