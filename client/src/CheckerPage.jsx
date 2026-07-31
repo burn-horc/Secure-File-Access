@@ -2324,7 +2324,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
             <VStack spacing={4}>
               <Input
                 type="password"
-                placeholder="Find Account"
+                placeholder="Enter"
                 value={passcodeInput}
                 onChange={(e) => setPasscodeInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handlePasscodeSubmit()}
@@ -2350,7 +2350,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                 isDisabled={!passcodeInput.trim()}
                 data-testid="button-unlock-find-account"
               >
-                Unlock
+                Find Account
               </Button>
             </VStack>
           </ModalBody>
