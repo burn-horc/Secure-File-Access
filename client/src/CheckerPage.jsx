@@ -30,6 +30,7 @@ import { SiNetflix, SiFacebook, SiTelegram } from "react-icons/si";
 import Navigation from "./Navigation";
 import FloatingMenu from "./FloatingMenu";
 import { showAppToast } from "./appToast.jsx";
+import PaymentConfirmationModal from "./PaymentConfirmationModal";
 
 
 function displayValue(value, fallback = "N/A") {
