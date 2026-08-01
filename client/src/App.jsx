@@ -1427,7 +1427,10 @@ const handlePasscodeSubmit = async () => {
     const res = await fetch("/api/find-account/verify-passcode", {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${session?.access_token || ""}`,
+},
       body: JSON.stringify({ passcode: code }),
     });
 
