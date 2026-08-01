@@ -762,6 +762,20 @@ export default function App() {
   const [verifiedPasscode, setVerifiedPasscode] = useState("");
   const [location, setLocation] = useLocation();
 
+
+  const paymentReturnState =
+  typeof window !== "undefined"
+    ? new URLSearchParams(
+        window.location.search
+      ).get("payment")
+    : null;
+
+const isReturningFromPayment = [
+  "processing",
+  "success",
+  "cancelled",
+].includes(paymentReturnState);
+
 const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [isStartingPayment, setIsStartingPayment] = useState(false);
@@ -1971,7 +1985,10 @@ return (
             handleUploadFile={handleUploadFile}
             runFindAccount={runFindAccount}
             bulkValidResults={bulkValidResults}
-            isPasscodeModalOpen={isPasscodeModalOpen}
+            isPasscodeModalOpen={
+  !isReturningFromPayment &&
+  isPasscodeModalOpen
+}
             setIsPasscodeModalOpen={setIsPasscodeModalOpen}
             passcodeInput={passcodeInput}
             setPasscodeInput={setPasscodeInput}
