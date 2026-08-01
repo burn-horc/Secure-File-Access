@@ -1,22 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ipRateLimit } from "../lib/rateLimit.js";
-import { isLockedOut, recordFailure, clearFailures } from "../lib/antiBruteforce.js";
+import {
+  isLockedOut,
+  recordFailure,
+  clearFailures,
+} from "../lib/antiBruteforce.js";
 import { createClient } from "@supabase/supabase-js";
 import { createRequire } from "module";
-
-function getClientIp(req: VercelRequest) {
-  const xff = req.headers["x-forwarded-for"];
-  if (typeof xff === "string" && xff.length > 0) {
-    return xff.split(",")[0].trim();
-  }
-
-  const realIp = req.headers["x-real-ip"];
-  if (typeof realIp === "string" && realIp.length > 0) {
-    return realIp;
-  }
-
-  return "unknown";
-}
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -35,19 +25,78 @@ const originalServerHelpers = require("./original_server_helpers.cjs");
 const { getCookieHeaders, runDirectCheck } =
   originalServerHelpers.default ?? originalServerHelpers;
 
-async function isPasscodeValid(passcode: string) {
+function getClientIp(req: VercelRequest) {
+  const xff = req.headers["x-forwarded-for"];
+
+  if (typeof xff === "string" && xff.length > 0) {
+    return xff.split(",")[0].trim();
+  }
+
+  const realIp = req.headers["x-real-ip"];
+
+  if (typeof realIp === "string" && realIp.length > 0) {
+    return realIp.trim();
+  }
+
+  return "unknown";
+}
+
+function getAccessToken(req: VercelRequest) {
+  const authorization = req.headers.authorization;
+
+  const headerValue = Array.isArray(authorization)
+    ? authorization[0]
+    : authorization || "";
+
+  const match = headerValue.match(/^Bearer\s+(.+)$/i);
+
+  return match?.[1]?.trim() || "";
+}
+
+type PasscodeCheck =
+  | {
+      ok: true;
+      passcodeRow: {
+        id: string;
+        uses: number | null;
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
+async function isPasscodeValid(
+  passcode: string,
+  userId: string
+): Promise<PasscodeCheck> {
   const { data, error } = await supabase
     .from("passcodes")
-    .select("id, code, is_active, expires_at, uses, max_uses")
+    .select(
+      "id, code, user_id, is_active, expires_at, uses, max_uses"
+    )
     .eq("code", passcode)
+    .eq("user_id", userId)
     .eq("is_active", true)
     .maybeSingle();
 
-  if (error) throw new Error(error.message);
-  if (!data) return { ok: false, error: "Incorrect passcode." };
+  if (error) {
+    console.error("Passcode lookup error:", error);
+    throw new Error("Unable to verify the premium code.");
+  }
+
+  if (!data) {
+    return {
+      ok: false,
+      error: "Incorrect passcode.",
+    };
+  }
 
   if (data.expires_at && new Date(data.expires_at) <= new Date()) {
-    return { ok: false, error: "This passcode has expired." };
+    return {
+      ok: false,
+      error: "This passcode has expired.",
+    };
   }
 
   if (
@@ -55,16 +104,30 @@ async function isPasscodeValid(passcode: string) {
     typeof data.uses === "number" &&
     data.uses >= data.max_uses
   ) {
-    return { ok: false, error: "Usage limit reached." };
+    return {
+      ok: false,
+      error: "Usage limit reached.",
+    };
   }
 
-  return { ok: true, passcodeRow: data };
+  return {
+    ok: true,
+    passcodeRow: {
+      id: data.id,
+      uses: data.uses ?? 0,
+    },
+  };
 }
 
-async function incrementPasscodeUsage(passcodeId: string, currentUses: number | null) {
+async function incrementPasscodeUsage(
+  passcodeId: string,
+  currentUses: number | null
+) {
   const { error } = await supabase
     .from("passcodes")
-    .update({ uses: (currentUses ?? 0) + 1 })
+    .update({
+      uses: (currentUses ?? 0) + 1,
+    })
     .eq("id", passcodeId);
 
   if (error) {
@@ -73,7 +136,8 @@ async function incrementPasscodeUsage(passcodeId: string, currentUses: number | 
 }
 
 async function savePassedCheckAudits(results: any[]) {
-  const passed = (results || []).filter((r) => r?.valid);
+  const passed = (results || []).filter((result) => result?.valid);
+
   if (!passed.length) return;
 
   const rows = passed.map((item) => ({
@@ -89,26 +153,11 @@ async function savePassedCheckAudits(results: any[]) {
   }
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
   try {
-    const ip = getClientIp(req);
-
-    const { success } = await ipRateLimit.limit(ip);
-    if (!success) {
-      return res.status(429).json({
-        success: false,
-        error: "Too many requests. Try again later.",
-      });
-    }
-
-    const locked = await isLockedOut(ip);
-    if (locked) {
-      return res.status(429).json({
-        success: false,
-        error: "Too many failed attempts. Try again later.",
-      });
-    }
-
     if (req.method !== "POST") {
       return res.status(405).json({
         success: false,
@@ -116,19 +165,68 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const passcode = String(req.body?.passcode ?? "").trim();
+    const ip = getClientIp(req);
+
+    const { success } = await ipRateLimit.limit(ip);
+
+    if (!success) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many requests. Try again later.",
+      });
+    }
+
+    if (await isLockedOut(ip)) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many failed attempts. Try again later.",
+      });
+    }
+
+    // Verify the currently signed-in Supabase user
+    const accessToken = getAccessToken(req);
+
+    if (!accessToken) {
+      return res.status(401).json({
+        success: false,
+        error: "You must be logged in.",
+      });
+    }
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(accessToken);
+
+    if (userError || !user) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid or expired login session.",
+      });
+    }
+
+    const passcode = String(req.body?.passcode ?? "")
+      .trim()
+      .toUpperCase();
 
     if (!passcode) {
       await recordFailure(ip);
+
       return res.status(400).json({
         success: false,
         error: "Passcode is required.",
       });
     }
 
-    const passcodeCheck = await isPasscodeValid(passcode);
+    // The passcode must belong to the signed-in purchaser
+    const passcodeCheck = await isPasscodeValid(
+      passcode,
+      user.id
+    );
+
     if (!passcodeCheck.ok) {
       await recordFailure(ip);
+
       return res.status(401).json({
         success: false,
         error: passcodeCheck.error,
@@ -141,9 +239,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .order("created_at", { ascending: false });
 
     if (cookieError) {
+      console.error("Cookie pool lookup error:", cookieError);
+
       return res.status(500).json({
         success: false,
-        error: cookieError.message,
+        error: "Unable to load the available account pool.",
       });
     }
 
@@ -170,6 +270,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const cookies = parsedInput.cookies;
+
     if (!Array.isArray(cookies) || !cookies.length) {
       return res.status(400).json({
         success: false,
@@ -179,6 +280,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     for (let i = cookies.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
+
       [cookies[i], cookies[j]] = [cookies[j], cookies[i]];
     }
 
@@ -191,16 +293,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         onValidCookie: async () => {},
       });
 
-      const results = Array.isArray(result?.results) ? result.results : [];
+      const results = Array.isArray(result?.results)
+        ? result.results
+        : [];
 
       await savePassedCheckAudits(results);
 
-      const valid = results.find((r: any) => r?.valid);
+      const valid = results.find((item: any) => item?.valid);
 
       if (valid) {
         await incrementPasscodeUsage(
           passcodeCheck.passcodeRow.id,
-          passcodeCheck.passcodeRow.uses ?? 0
+          passcodeCheck.passcodeRow.uses
         );
 
         await clearFailures(ip);
@@ -215,6 +319,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error: any) {
     console.error("find-account crash:", error);
+
     return res.status(500).json({
       success: false,
       error: error?.message || "Unexpected server error",
