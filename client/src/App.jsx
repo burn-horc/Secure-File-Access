@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast, Box, Flex, Button, Text, VStack } from "@chakra-ui/react";
 import { Switch, Route } from "wouter";
 import CheckerPage from "./CheckerPage";
+import PaymentConfirmationModal from "./PaymentConfirmationModal";
 import AdminPage from "./AdminPage";
 import { showAppToast } from "./appToast.jsx";
 import AppCredits from "./AppCredits";
@@ -1670,6 +1671,8 @@ if (!acceptedNotice) {
 
   return (
   <Flex direction="column" minH="100vh" bg="#0d0f18" color="white">
+    
+  <PaymentConfirmationModal />
 
     {/* Top Bar */}
     <Flex
