@@ -1,15 +1,21 @@
+import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseServer = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY,
-  {
+function getSupabaseAdmin() {
+  const url = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceRoleKey) {
+    throw new Error("Supabase server environment variables are missing.");
+  }
+
+  return createClient(url, serviceRoleKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
     },
-  }
-);
+  });
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -19,9 +25,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Verify the currently signed-in Supabase user
-    const authorization = req.headers.authorization || "";
-    const accessToken = authorization.replace("Bearer ", "");
+    const supabaseAdmin = getSupabaseAdmin();
+
+    const authorization = String(req.headers.authorization || "");
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    const accessToken = match?.[1]?.trim();
 
     if (!accessToken) {
       return res.status(401).json({
@@ -32,7 +40,7 @@ export default async function handler(req, res) {
     const {
       data: { user },
       error: userError,
-    } = await supabaseServer.auth.getUser(accessToken);
+    } = await supabaseAdmin.auth.getUser(accessToken);
 
     if (userError || !user) {
       return res.status(401).json({
@@ -40,7 +48,15 @@ export default async function handler(req, res) {
       });
     }
 
+    if (!user.email) {
+      return res.status(400).json({
+        error: "Your account does not have an email address.",
+      });
+    }
+
     const amount = Number(process.env.PREMIUM_PRICE_CENTAVOS);
+    const paymongoSecretKey = process.env.PAYMONGO_SECRET_KEY;
+    const appUrl = process.env.APP_URL;
 
     if (!Number.isInteger(amount) || amount <= 0) {
       return res.status(500).json({
@@ -48,7 +64,26 @@ export default async function handler(req, res) {
       });
     }
 
-    const referenceNumber = `premium-${user.id}-${Date.now()}`;
+    if (!paymongoSecretKey || !appUrl) {
+      return res.status(500).json({
+        error: "Payment configuration is incomplete.",
+      });
+    }
+
+    const referenceNumber = `premium-${crypto.randomUUID()}`;
+
+    const successUrl = new URL("/premium", appUrl);
+    successUrl.searchParams.set("payment", "processing");
+    successUrl.searchParams.set("reference", referenceNumber);
+
+    const cancelUrl = new URL("/premium", appUrl);
+    cancelUrl.searchParams.set("payment", "cancelled");
+
+    const customerName = String(
+      user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        user.email.split("@")[0]
+    ).slice(0, 255);
 
     const paymongoResponse = await fetch(
       "https://api.paymongo.com/v2/checkout_sessions",
@@ -56,37 +91,42 @@ export default async function handler(req, res) {
         method: "POST",
         headers: {
           Authorization: `Basic ${Buffer.from(
-            `${process.env.PAYMONGO_SECRET_KEY}:`
+            `${paymongoSecretKey}:`
           ).toString("base64")}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           data: {
             attributes: {
+              billing: {
+                name: customerName,
+                email: user.email,
+              },
+
               line_items: [
                 {
                   name: "Premium Access",
-                  description: "Access to premium website features",
+                  description: "30 days of premium website access",
                   amount,
                   currency: "PHP",
                   quantity: 1,
                 },
               ],
 
-              // Remove methods that are not enabled in your PayMongo account
               payment_method_types: ["qrph"],
 
-              success_url: `${process.env.APP_URL}/premium?payment=success`,
-              cancel_url: `${process.env.APP_URL}/premium?payment=cancelled`,
+              success_url: successUrl.toString(),
+              cancel_url: cancelUrl.toString(),
 
               reference_number: referenceNumber,
               send_email_receipt: true,
 
               metadata: {
-  user_id: user.id,
-  user_email: user.email || "",
-  plan: "premium-30-days",
-},
+                user_id: user.id,
+                user_email: user.email,
+                plan: "premium-30-days",
+                reference_number: referenceNumber,
+              },
             },
           },
         }),
@@ -96,7 +136,7 @@ export default async function handler(req, res) {
     const paymongoData = await paymongoResponse.json();
 
     if (!paymongoResponse.ok) {
-      console.error("PayMongo error:", paymongoData);
+      console.error("PayMongo checkout error:", paymongoData);
 
       return res.status(paymongoResponse.status).json({
         error:
@@ -106,12 +146,36 @@ export default async function handler(req, res) {
       });
     }
 
+    const checkoutSessionId = paymongoData?.data?.id;
     const checkoutUrl =
       paymongoData?.data?.attributes?.checkout_url;
 
-    if (!checkoutUrl) {
+    if (!checkoutSessionId || !checkoutUrl) {
       return res.status(500).json({
-        error: "PayMongo did not return a checkout URL.",
+        error: "PayMongo returned an incomplete checkout session.",
+      });
+    }
+
+    const { error: paymentInsertError } = await supabaseAdmin
+      .from("premium_payments")
+      .insert({
+        checkout_session_id: checkoutSessionId,
+        reference_number: referenceNumber,
+        user_id: user.id,
+        plan: "premium-30-days",
+        status: "pending",
+        amount_centavos: amount,
+        currency: "PHP",
+      });
+
+    if (paymentInsertError) {
+      console.error(
+        "Pending payment insert error:",
+        paymentInsertError
+      );
+
+      return res.status(500).json({
+        error: "Unable to save the pending payment.",
       });
     }
 
