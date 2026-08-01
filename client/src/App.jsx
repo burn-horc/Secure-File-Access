@@ -1266,7 +1266,10 @@ const noResultTimer = setTimeout(() => {
     const response = await fetch("/api/find-account", {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${session?.access_token || ""}`,
+},
       signal: abortController.signal,
       body: JSON.stringify({
         passcode: passcodeArg,
