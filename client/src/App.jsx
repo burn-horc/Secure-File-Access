@@ -779,15 +779,62 @@ const isReturningFromPayment = [
 const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [isStartingPayment, setIsStartingPayment] = useState(false);
+  const [isAdminAccount, setIsAdminAccount] = useState(false);
 
-  const hasActivePremium = Boolean(
-  profile?.premium &&
-    (
-      !profile?.premium_until ||
-      new Date(profile.premium_until).getTime() > Date.now()
-    )
-);
+  const hasActivePremium =
+  isAdminAccount ||
+  Boolean(
+    profile?.premium &&
+      (
+        !profile?.premium_until ||
+        new Date(profile.premium_until).getTime() > Date.now()
+      )
+  );
 
+useEffect(() => {
+  let cancelled = false;
+
+  const loadAdminStatus = async () => {
+    if (!session?.access_token) {
+      if (!cancelled) {
+        setIsAdminAccount(false);
+      }
+
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/account-status", {
+        method: "GET",
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!cancelled) {
+        setIsAdminAccount(
+          response.ok && data?.is_admin === true
+        );
+      }
+    } catch {
+      if (!cancelled) {
+        setIsAdminAccount(false);
+      }
+    }
+  };
+
+  loadAdminStatus();
+
+  return () => {
+    cancelled = true;
+  };
+}, [session?.access_token]);
+
+
+  
 useEffect(() => {
   const ensureProfile = async (session) => {
     if (!session?.user) {
@@ -1713,11 +1760,22 @@ if (!acceptedNotice) {
   </Text>
 
   <Text
-    fontSize="sm"
-    color={hasActivePremium ? "green.300" : "gray.400"}
-  >
-    {hasActivePremium ? "Premium Account" : "Free Account"}
-  </Text>
+  fontSize="sm"
+  color={
+    isAdminAccount
+      ? "purple.300"
+      : hasActivePremium
+        ? "green.300"
+        : "gray.400"
+  }
+>
+  {isAdminAccount
+    ? "Admin Account"
+    : hasActivePremium
+      ? "Premium Account"
+      : "Free Account"}
+</Text>
+        
 </VStack>
       
       <Button
