@@ -1090,11 +1090,7 @@ const [showTrialResults, setShowTrialResults] = useState(false);
   }, [checkLogs, isLoading]);
 
 
-  useEffect(() => {
-  if (location === "/admin" && !sessionUnlocked) {
-    setLocation("/");
-  }
-}, [location, sessionUnlocked, setLocation]);
+ 
 
   const runCheckCore = async (activeInput, skipFormatValidation = false) => {
     if (!activeInput.trim() || isLoading) return;
