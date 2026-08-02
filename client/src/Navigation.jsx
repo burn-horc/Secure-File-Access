@@ -3,6 +3,11 @@ import { Link } from "wouter";
 import { useState } from "react";
 
 export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
+   onClose,
+  onPremiumClick,
+  onRandomClick,
+  isAdminAccount,
+}) {
 
   const [showModal, setShowModal] = useState(false);
   const [passcode, setPasscode] = useState("");
@@ -135,6 +140,20 @@ export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
     ⚙ Account Settings
   </Button>
 </Link>
+
+            {isAdminAccount && (
+  <Link href="/admin">
+    <Button
+      {...itemStyle}
+      onClick={onClose}
+      borderColor="rgba(168,85,247,0.4)"
+      bg="linear-gradient(135deg, rgba(168,85,247,0.16), rgba(124,108,255,0.08))"
+      color="#c4b5fd"
+    >
+      ◆ Admin Panel
+    </Button>
+  </Link>
+)}
 
             <Button {...itemStyle} onClick={() => {
               onClose?.();
