@@ -2310,6 +2310,25 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         <ModalOverlay bg="rgba(0,0,0,0.75)" backdropFilter="blur(4px)" />
         <ModalContent {...modalShell} mx={4}>
           <ModalCloseButton color="rgba(255,255,255,0.5)" top={4} right={4} />
+
+{NOTE}
+<Box
+  mx={6}
+  mt={12}
+  px={4}
+  py={3}
+  borderRadius="12px"
+  bg="rgba(139,92,246,0.07)"
+  border="1px solid rgba(139,92,246,0.18)"
+  borderLeft="3px solid #8b5cf6"
+>
+  {If your Premium code does not appear after a successful payment, it will also
+  be sent to the email address linked to your account. Delivery may take a few
+  minutes, so please check your Spam or Junk folder as well.}
+</Box>
+
+
+          
           <ModalHeader
             pt={6}
             pb={0}
@@ -2324,38 +2343,6 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           </ModalHeader>
           <ModalBody pb={6} pt={4}>
             <VStack spacing={4}>
-
-<Box
-  w="full"
-  px={4}
-  py={3}
-  borderRadius="12px"
-  bg="rgba(139,92,246,0.07)"
-  border="1px solid rgba(139,92,246,0.18)"
-  borderLeft="3px solid #8b5cf6"
->
-  <Text
-    fontSize="xs"
-    fontWeight="700"
-    color="#c4b5fd"
-    letterSpacing="0.08em"
-    textTransform="uppercase"
-    mb={1}
-  >
-    NOTE
-  </Text>
-
-  <Text
-    fontSize="xs"
-    color="rgba(255,255,255,0.65)"
-    lineHeight="1.6"
-  >
-    If your Premium code does not appear after a successful payment, it will also
-  be sent to the email address linked to your account. Delivery may take a few
-  minutes, so please check your Spam or Junk folder as well.
-  </Text>
-</Box>
-
               
               <Input
                 type="password"
