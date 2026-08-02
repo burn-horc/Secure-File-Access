@@ -245,6 +245,7 @@ async function copyTextToClipboard(value) {
 
 export default function CheckerPage({
   mode = "premium",
+  isAdminAccount,
   input,
   uploadedInputBanner,
   isLoading,
@@ -2478,8 +2479,11 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 </Modal>
       
       {showNav && (
+  
   <Navigation
-    onClose={() => setShowNav(false)}
+    
+  isAdminAccount={isAdminAccount}
+  onClose={() => setShowNav(false)}
     onPremiumClick={() => {
       setPasscodeInput("");
       setIsPasscodeModalOpen(true);
