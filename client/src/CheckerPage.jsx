@@ -2327,29 +2327,32 @@ animation={isPremiumPage ? premiumAnimation : undefined}
 
 <Box
   w="full"
-  p={3}
-  borderRadius="10px"
-  bg="rgba(139,92,246,0.08)"
-  border="1px solid rgba(139,92,246,0.20)"
+  px={4}
+  py={3}
+  borderRadius="12px"
+  bg="rgba(139,92,246,0.07)"
+  border="1px solid rgba(139,92,246,0.18)"
+  borderLeft="3px solid #8b5cf6"
 >
   <Text
     fontSize="xs"
-    fontWeight="800"
-    color="#8b5cf6"
-    textAlign="center"
+    fontWeight="700"
+    color="#c4b5fd"
+    letterSpacing="0.08em"
+    textTransform="uppercase"
     mb={1}
   >
-    NOTE
+    Code delivery
   </Text>
 
   <Text
     fontSize="xs"
-    color="gray.400"
-    textAlign="center"
-    lineHeight="1.5"
+    color="rgba(255,255,255,0.65)"
+    lineHeight="1.6"
   >
-    After a successful payment, your Premium code is sent to your registered
-    email. Please also check your Spam or Junk folder.
+    If your Premium code does not appear after a successful payment, it will also
+  be sent to the email address linked to your account. Delivery may take a few
+  minutes, so please check your Spam or Junk folder as well.
   </Text>
 </Box>
 
