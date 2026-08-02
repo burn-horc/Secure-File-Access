@@ -915,7 +915,7 @@ const [showTrialResults, setShowTrialResults] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [acceptedNotice, setAcceptedNotice] = useState(false);
   
-  const canAccessAdmin = sessionUnlocked; 
+  
 
   const goBackToChecker = () => {
   setSessionUnlocked(false);
