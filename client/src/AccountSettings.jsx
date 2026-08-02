@@ -239,8 +239,8 @@ export default function AccountSettings({ session }) {
             </Text>
 
             <Heading mt={1} fontSize="2xl">
-              Premium Settings
-            </Heading>
+  Account Settings
+</Heading>
           </Box>
 
           <Button
@@ -303,24 +303,30 @@ export default function AccountSettings({ session }) {
                 </Box>
 
                 <Badge
-                  bg={
-                    account?.is_admin
-                      ? "rgba(168,85,247,.15)"
-                      : "rgba(34,197,94,.13)"
-                  }
-                  color={
-                    account?.is_admin
-                      ? "#c084fc"
-                      : "#4ade80"
-                  }
-                  borderRadius="full"
-                  px={3}
-                  py={1}
-                >
-                  {account?.is_admin
-                    ? "ADMIN"
-                    : "PREMIUM"}
-                </Badge>
+  bg={
+    account?.is_admin
+      ? "rgba(168,85,247,.15)"
+      : account?.has_active_premium
+        ? "rgba(34,197,94,.13)"
+        : "rgba(148,163,184,.14)"
+  }
+  color={
+    account?.is_admin
+      ? "#c084fc"
+      : account?.has_active_premium
+        ? "#4ade80"
+        : "#94a3b8"
+  }
+  borderRadius="full"
+  px={3}
+  py={1}
+>
+  {account?.is_admin
+    ? "ADMIN"
+    : account?.has_active_premium
+      ? "PREMIUM"
+      : "FREE"}
+</Badge>
               </HStack>
 
               <Text
@@ -332,11 +338,11 @@ export default function AccountSettings({ session }) {
               </Text>
 
               <Text mt={1} fontSize="sm">
-                {account?.is_admin
-                  ? "Unlimited (Admin)"
-                  : formatDate(
-                      account?.premium_until
-                    )}
+               {account?.is_admin
+  ? "Unlimited (Admin)"
+  : account?.has_active_premium
+    ? formatDate(account?.premium_until)
+    : "No active Premium access"}
               </Text>
             </Box>
 
