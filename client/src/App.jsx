@@ -1930,6 +1930,7 @@ return (
         
         <Route path="/admin">
           {canAccessAdmin ? <AdminPage session={session} /> : <CheckerPage
+            isAdminAccount={isAdminAccount}                                                    
             mode="premium"
             input={input}
             uploadedInputBanner={uploadedInputBanner}
@@ -1975,6 +1976,7 @@ return (
 
         <Route path="/free">
           <CheckerPage
+            isAdminAccount={isAdminAccount}
             mode="free"
             input={input}
             uploadedInputBanner={uploadedInputBanner}
@@ -2030,6 +2032,7 @@ return (
         <Route path="/premium">
           {hasActivePremium ? (
           <CheckerPage
+            isAdminAccount={isAdminAccount}
             mode="premium"
             hasActivePremium={hasActivePremium}
             input={input}
@@ -2161,12 +2164,14 @@ return (
 
         <Route path="/trial">
           <CheckerPage
+            isAdminAccount={isAdminAccount}
             mode="trial"
             input={input}
             uploadedInputBanner={uploadedInputBanner}
             isLoading={isLoading}
             checkLogs={checkLogs}
             checkLogRef={checkLogRef}
+            
             workerCount={workerCount}
             checkProgress={checkProgress}
             progressBarStyle={progressBarStyle}
