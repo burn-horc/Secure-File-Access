@@ -1925,7 +1925,7 @@ return (
     <Box flex="1">
       <Switch>
         <Route path="/admin">
-          {canAccessAdmin ? <AdminPage /> : <CheckerPage
+          {canAccessAdmin ? <AdminPage session={session} /> : <CheckerPage
             mode="premium"
             input={input}
             uploadedInputBanner={uploadedInputBanner}
