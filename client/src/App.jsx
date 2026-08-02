@@ -780,6 +780,7 @@ const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [isStartingPayment, setIsStartingPayment] = useState(false);
   const [isAdminAccount, setIsAdminAccount] = useState(false);
+  const canAccessAdmin = isAdminAccount;
 
   const hasActivePremium =
   isAdminAccount ||
