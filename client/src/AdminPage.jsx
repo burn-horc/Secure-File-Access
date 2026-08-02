@@ -1,628 +1,1084 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Badge,
   Box,
   Button,
+  Checkbox,
   Flex,
   Heading,
   HStack,
   Input,
+  SimpleGrid,
   Text,
   VStack,
   useToast,
 } from "@chakra-ui/react";
 
-const MAX_PASSCODES = 50;
+const CODE_PATTERN = /^[A-Za-z0-9_-]{8,32}$/;
+
+const inputStyle = {
+  bg: "rgba(255,255,255,0.05)",
+  borderColor: "rgba(255,255,255,0.12)",
+  borderRadius: "12px",
+  color: "white",
+  _placeholder: {
+    color: "rgba(255,255,255,0.3)",
+  },
+  _focus: {
+    borderColor: "#8b5cf6",
+    boxShadow: "0 0 0 1px #8b5cf6",
+  },
+};
+
+function localDateTime(value) {
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const adjusted = new Date(
+    date.getTime() - date.getTimezoneOffset() * 60_000
+  );
+
+  return adjusted.toISOString().slice(0, 16);
+}
+
+function defaultExpiry() {
+  return localDateTime(
+    new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+  );
+}
 
 function generateCode() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  const array = new Uint8Array(8);
-  window.crypto.getRandomValues(array);
-  for (let i = 0; i < 8; i++) {
-    code += chars[array[i] % chars.length];
+  const alphabet =
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  const bytes = new Uint8Array(10);
+
+  window.crypto.getRandomValues(bytes);
+
+  const value = Array.from(
+    bytes,
+    (byte) => alphabet[byte % alphabet.length]
+  ).join("");
+
+  return `PREM-${value.slice(0, 5)}-${value.slice(5)}`;
+}
+
+function formatDate(value) {
+  if (!value) return "Unlimited";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown";
   }
-  return code;
+
+  return date.toLocaleString();
 }
 
-function isExpired(expiresAt) {
-  if (!expiresAt) return false;
-  return new Date(expiresAt) <= new Date();
+function statusStyle(user) {
+  if (user.is_admin) {
+    return {
+      label: "ADMIN",
+      bg: "rgba(168,85,247,.15)",
+      color: "#c084fc",
+    };
+  }
+
+  if (user.status === "active") {
+    return {
+      label: "ACTIVE",
+      bg: "rgba(34,197,94,.13)",
+      color: "#4ade80",
+    };
+  }
+
+  if (user.status === "expired") {
+    return {
+      label: "EXPIRED",
+      bg: "rgba(245,158,11,.13)",
+      color: "#fbbf24",
+    };
+  }
+
+  return {
+    label: "FREE",
+    bg: "rgba(148,163,184,.12)",
+    color: "#94a3b8",
+  };
 }
 
-function formatExpiry(expiresAt) {
-  if (!expiresAt) return null;
-  const d = new Date(expiresAt);
-  return d.toLocaleString(undefined, {
-    month: "short", day: "numeric", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
-}
-
-export default function AdminPage() {
+export default function AdminPage({ session }) {
   const toast = useToast();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [checking, setChecking] = useState(true);
-  const [adminCode, setAdminCode] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [loginLoading, setLoginLoading] = useState(false);
+  const token = session?.access_token || "";
 
-  const [passcodes, setPasscodes] = useState([]);
-  const [listLoading, setListLoading] = useState(false);
-  const [newCode, setNewCode] = useState("");
-  const [newExpiry, setNewExpiry] = useState("");
-  const [addLoading, setAddLoading] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [busy, setBusy] = useState("");
 
-  const [abuseLog, setAbuseLog] = useState([]);
-  const [abuseLoading, setAbuseLoading] = useState(false);
-  const [clearingLog, setClearingLog] = useState(false);
+  const [grant, setGrant] = useState({
+    email: "",
+    code: "",
+    unlimited: false,
+    expiresAt: defaultExpiry(),
+  });
 
-  const [cookieCount, setCookieCount] = useState(null);
+  const [edit, setEdit] = useState(null);
 
-  useEffect(() => {
-    fetch("/api/admin/status", { credentials: "include" })
-      .then((r) => r.json())
-      .then((data) => {
-        setIsAdmin(data.isAdmin === true);
-        setChecking(false);
-      })
-      .catch(() => setChecking(false));
-  }, []);
-
-  const fetchPasscodes = useCallback(async () => {
-    setListLoading(true);
-    try {
-      const res = await fetch("/api/admin/passcodes", { credentials: "include" });
-      const data = await res.json();
-      setPasscodes(data.passcodes ?? []);
-    } catch {
-      toast({ title: "Failed to load passcodes.", status: "error", duration: 3000 });
-    } finally {
-      setListLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isAdmin) fetchPasscodes();
-  }, [isAdmin]);
-
-  const fetchAbuseLog = useCallback(async () => {
-    setAbuseLoading(true);
-    try {
-      const res = await fetch("/api/admin/abuse-log", { credentials: "include" });
-      const data = await res.json();
-      setAbuseLog(data.entries ?? []);
-    } catch {
-      toast({ title: "Failed to load abuse log.", status: "error", duration: 3000 });
-    } finally {
-      setAbuseLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isAdmin) fetchAbuseLog();
-  }, [isAdmin]);
-
-  const fetchCookieCount = useCallback(async () => {
-    try {
-      const res = await fetch("/api/admin/cookie-count", { credentials: "include" });
-      const data = await res.json();
-      setCookieCount(data.count ?? 0);
-    } catch {
-      setCookieCount(0);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isAdmin) fetchCookieCount();
-  }, [isAdmin]);
-
-  const handleClearLog = async () => {
-    setClearingLog(true);
-    try {
-      await fetch("/api/admin/abuse-log", { method: "DELETE", credentials: "include" });
-      setAbuseLog([]);
-      toast({ title: "Abuse log cleared.", status: "success", duration: 1800 });
-    } catch {
-      toast({ title: "Failed to clear log.", status: "error", duration: 3000 });
-    } finally {
-      setClearingLog(false);
-    }
-  };
-
-  const handleLogin = async () => {
-    setLoginLoading(true);
-    setLoginError("");
-    try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: adminCode }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setIsAdmin(true);
-      } else {
-        setLoginError(data.error || "Incorrect code.");
+  const request = useCallback(
+    async (method = "GET", body, query = "") => {
+      if (!token) {
+        throw new Error(
+          "Your login session has expired."
+        );
       }
-    } catch {
-      setLoginError("Network error. Try again.");
-    } finally {
-      setLoginLoading(false);
-    }
-  };
 
-  const handleAdd = async () => {
-    const code = newCode.trim();
-    if (!code) return;
-    setAddLoading(true);
-    try {
-      const res = await fetch("/api/admin/passcodes", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, expiresAt: newExpiry || null }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setNewCode("");
-        setNewExpiry("");
-        await fetchPasscodes();
-        toast({ title: "Passcode added.", status: "success", duration: 2000 });
-      } else {
-        toast({ title: data.error || "Failed to add.", status: "error", duration: 3000 });
+      const response = await fetch(
+        `/api/admin/premium-users${query}`,
+        {
+          method,
+          cache: "no-store",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            ...(body
+              ? {
+                  "Content-Type": "application/json",
+                }
+              : {}),
+          },
+          body: body
+            ? JSON.stringify(body)
+            : undefined,
+        }
+      );
+
+      const data = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Request failed."
+        );
       }
-    } catch {
-      toast({ title: "Network error.", status: "error", duration: 3000 });
-    } finally {
-      setAddLoading(false);
-    }
-  };
 
-  const handleDelete = async (id) => {
+      return data;
+    },
+    [token]
+  );
+
+  const loadUsers = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
     try {
-      const res = await fetch(`/api/admin/passcodes/${id}`, {
-        method: "DELETE",
-        credentials: "include",
+      const data = await request();
+
+      setUsers(
+        Array.isArray(data.users)
+          ? data.users
+          : []
+      );
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Unable to load accounts."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [request]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  const filteredUsers = useMemo(() => {
+    const value = search
+      .trim()
+      .toLowerCase();
+
+    if (!value) {
+      return users;
+    }
+
+    return users.filter((user) =>
+      [
+        user.name,
+        user.email,
+        user.passcode?.code,
+        user.source,
+      ]
+        .filter(Boolean)
+        .some((item) =>
+          String(item)
+            .toLowerCase()
+            .includes(value)
+        )
+    );
+  }, [search, users]);
+
+  const validateCode = (code) => {
+    if (CODE_PATTERN.test(code)) {
+      return true;
+    }
+
+    toast({
+      title: "Invalid passcode",
+      description:
+        "Use 8–32 letters, numbers, underscores, or hyphens.",
+      status: "error",
+      duration: 3500,
+      isClosable: true,
+    });
+
+    return false;
+  };
+
+  const grantPremium = async () => {
+    const email = grant.email
+      .trim()
+      .toLowerCase();
+
+    const code = grant.code.trim();
+
+    if (!email) {
+      toast({
+        title: "Customer email is required.",
+        status: "error",
       });
-      if (res.ok) {
-        setPasscodes((prev) => prev.filter((p) => p.id !== id));
-        toast({ title: "Passcode deleted.", status: "success", duration: 1800 });
-      }
-    } catch {
-      toast({ title: "Failed to delete.", status: "error", duration: 3000 });
+
+      return;
+    }
+
+    if (!validateCode(code)) {
+      return;
+    }
+
+    if (
+      !grant.unlimited &&
+      !grant.expiresAt
+    ) {
+      toast({
+        title: "Choose an expiration date.",
+        status: "error",
+      });
+
+      return;
+    }
+
+    setBusy("grant");
+
+    try {
+      await request("POST", {
+        email,
+        code,
+        unlimited: grant.unlimited,
+        expires_at: grant.unlimited
+          ? null
+          : new Date(
+              grant.expiresAt
+            ).toISOString(),
+      });
+
+      setGrant({
+        email: "",
+        code: "",
+        unlimited: false,
+        expiresAt: defaultExpiry(),
+      });
+
+      await loadUsers();
+
+      toast({
+        title: "Premium access granted.",
+        status: "success",
+      });
+    } catch (caught) {
+      toast({
+        title: "Unable to grant Premium",
+        description:
+          caught instanceof Error
+            ? caught.message
+            : "Try again.",
+        status: "error",
+        isClosable: true,
+      });
+    } finally {
+      setBusy("");
     }
   };
 
-  const handleCopy = (text) => {
-    navigator.clipboard.writeText(text).then(() => {
-      toast({ title: "Copied!", status: "success", duration: 1500 });
+  const beginEdit = (user) => {
+    setEdit({
+      user,
+      code: user.passcode?.code || "",
+      unlimited:
+        user.is_admin ||
+        !user.premium_until,
+      expiresAt: localDateTime(
+        user.premium_until
+      ),
     });
   };
 
-  const inputStyle = {
-    bg: "rgba(255,255,255,0.05)",
-    borderColor: "rgba(255,255,255,0.1)",
-    borderRadius: "12px",
-    color: "white",
-    _placeholder: { color: "rgba(255,255,255,0.3)" },
-    _focus: { borderColor: "#7c3aed", boxShadow: "0 0 0 1px #7c3aed" },
+  const saveEdit = async () => {
+    if (!edit) return;
+
+    const code = edit.code.trim();
+
+    if (!validateCode(code)) {
+      return;
+    }
+
+    if (
+      !edit.user.is_admin &&
+      !edit.unlimited &&
+      !edit.expiresAt
+    ) {
+      toast({
+        title: "Choose an expiration date.",
+        status: "error",
+      });
+
+      return;
+    }
+
+    const body = {
+      user_id: edit.user.user_id,
+      passcode_id:
+        edit.user.passcode?.id,
+      code,
+    };
+
+    if (!edit.user.is_admin) {
+      body.unlimited = edit.unlimited;
+
+      body.expires_at =
+        edit.unlimited
+          ? null
+          : new Date(
+              edit.expiresAt
+            ).toISOString();
+    }
+
+    setBusy(
+      `edit-${edit.user.user_id}`
+    );
+
+    try {
+      await request("PATCH", body);
+
+      setEdit(null);
+
+      await loadUsers();
+
+      toast({
+        title: "Premium account updated.",
+        status: "success",
+      });
+    } catch (caught) {
+      toast({
+        title: "Unable to update account",
+        description:
+          caught instanceof Error
+            ? caught.message
+            : "Try again.",
+        status: "error",
+        isClosable: true,
+      });
+    } finally {
+      setBusy("");
+    }
   };
 
-  if (checking) {
-    return (
-      <Flex h="100vh" bg="#08080f" align="center" justify="center">
-        <Text color="gray.500">Loading...</Text>
-      </Flex>
+  const revokePremium = async (user) => {
+    if (user.is_admin) return;
+
+    const confirmed = window.confirm(
+      `Revoke Premium access for ${user.email}?`
     );
-  }
+
+    if (!confirmed) return;
+
+    setBusy(
+      `revoke-${user.user_id}`
+    );
+
+    try {
+      await request(
+        "DELETE",
+        null,
+        `?user_id=${encodeURIComponent(
+          user.user_id
+        )}`
+      );
+
+      await loadUsers();
+
+      toast({
+        title: "Premium access revoked.",
+        status: "success",
+      });
+    } catch (caught) {
+      toast({
+        title: "Unable to revoke Premium",
+        description:
+          caught instanceof Error
+            ? caught.message
+            : "Try again.",
+        status: "error",
+        isClosable: true,
+      });
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const copyCode = async (code) => {
+    await navigator.clipboard.writeText(code);
+
+    toast({
+      title: "Passcode copied.",
+      status: "success",
+      duration: 1800,
+    });
+  };
 
   return (
-    <Flex h="100vh" bg="#08080f" align="flex-start" justify="center" overflowY="auto" py={8} px={4}>
-      <Box w="full" maxW="520px">
-        <Box
-          bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
-          borderWidth="1px"
-          borderColor="rgba(120,60,220,0.22)"
-          borderRadius="20px"
-          boxShadow="0 0 0 1px rgba(120,60,220,0.10), 0 16px 48px rgba(0,0,0,0.8)"
-          overflow="hidden"
+    <Box
+      minH="100vh"
+      bg="#080a12"
+      color="white"
+      px={4}
+      py={7}
+    >
+      <Box maxW="1050px" mx="auto">
+        <Flex
+          justify="space-between"
+          align="center"
+          gap={4}
+          mb={7}
+          flexWrap="wrap"
         >
-          <Box h="3px" bg="linear-gradient(90deg, #e50914 0%, #7c3aed 50%, #1a56db 100%)" />
+          <Box>
+            <Text
+              fontSize="xs"
+              color="#a78bfa"
+              fontWeight="800"
+              letterSpacing=".12em"
+            >
+              ADMINISTRATION
+            </Text>
 
-          {!isAdmin ? (
-            <Box p={8}>
-              <VStack spacing={5} align="stretch">
-                <Heading textAlign="center" fontSize="xl" fontWeight="800" letterSpacing="0.1em" textTransform="uppercase" color="#c084fc">
-                  Admin Panel
-                </Heading>
-                <Text textAlign="center" fontSize="sm" color="rgba(255,255,255,0.45)">
-                  Enter your admin access code
-                </Text>
-                <Input
-                  type="password"
-                  placeholder="Admin Code"
-                  value={adminCode}
-                  onChange={(e) => setAdminCode(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  {...inputStyle}
-                />
-                {loginError && (
-                  <Text color="#e50914" fontSize="sm" textAlign="center">{loginError}</Text>
-                )}
-                <Button
-                  onClick={handleLogin}
-                  isLoading={loginLoading}
-                  bg="linear-gradient(135deg, #6a35e8 0%, #a855f7 100%)"
-                  color="white"
-                  fontWeight="700"
-                  borderRadius="12px"
-                  borderWidth="0"
-                  _hover={{ filter: "brightness(1.15)" }}
-                >
-                  Enter
-                </Button>
-              </VStack>
-            </Box>
+            <Heading
+              mt={1}
+              fontSize={{
+                base: "2xl",
+                md: "3xl",
+              }}
+            >
+              Premium Accounts
+            </Heading>
+
+            <Text
+              mt={2}
+              fontSize="sm"
+              color="gray.500"
+            >
+              Manage users, passcodes, and
+              expiration dates.
+            </Text>
+          </Box>
+
+          <HStack>
+            <Button
+              size="sm"
+              variant="outline"
+              borderColor="whiteAlpha.300"
+              onClick={() => {
+                window.location.href =
+                  "/premium";
+              }}
+            >
+              Back
+            </Button>
+
+            <Button
+              size="sm"
+              bg="#7c3aed"
+              _hover={{
+                bg: "#8b5cf6",
+              }}
+              onClick={loadUsers}
+              isLoading={loading}
+            >
+              Refresh
+            </Button>
+          </HStack>
+        </Flex>
+
+        <SimpleGrid
+          columns={{
+            base: 1,
+            md: 2,
+          }}
+          spacing={4}
+          mb={5}
+        >
+          <Box
+            bg="#111525"
+            border="1px solid rgba(139,92,246,.2)"
+            borderRadius="16px"
+            p={5}
+          >
+            <Text
+              fontSize="xs"
+              color="gray.500"
+            >
+              ACCOUNTS LISTED
+            </Text>
+
+            <Text
+              fontSize="3xl"
+              fontWeight="800"
+            >
+              {users.length}
+            </Text>
+          </Box>
+
+          <Box
+            bg="#111525"
+            border="1px solid rgba(34,197,94,.18)"
+            borderRadius="16px"
+            p={5}
+          >
+            <Text
+              fontSize="xs"
+              color="gray.500"
+            >
+              ACTIVE PREMIUM
+            </Text>
+
+            <Text
+              fontSize="3xl"
+              fontWeight="800"
+              color="#4ade80"
+            >
+              {
+                users.filter(
+                  (user) =>
+                    user.is_admin ||
+                    user.status === "active"
+                ).length
+              }
+            </Text>
+          </Box>
+        </SimpleGrid>
+
+        <Box
+          bg="#111525"
+          border="1px solid rgba(139,92,246,.2)"
+          borderRadius="18px"
+          p={{
+            base: 4,
+            md: 6,
+          }}
+          mb={5}
+        >
+          <Heading fontSize="md">
+            Grant Premium manually
+          </Heading>
+
+          <Text
+            fontSize="xs"
+            color="gray.500"
+            mt={1}
+            mb={4}
+          >
+            The customer must already have a
+            registered website account.
+          </Text>
+
+          <SimpleGrid
+            columns={{
+              base: 1,
+              md: 2,
+            }}
+            spacing={3}
+          >
+            <Input
+              type="email"
+              placeholder="Customer email"
+              value={grant.email}
+              onChange={(event) =>
+                setGrant({
+                  ...grant,
+                  email:
+                    event.target.value,
+                })
+              }
+              {...inputStyle}
+            />
+
+            <HStack>
+              <Input
+                placeholder="Custom passcode"
+                value={grant.code}
+                onChange={(event) =>
+                  setGrant({
+                    ...grant,
+                    code:
+                      event.target.value,
+                  })
+                }
+                fontFamily="monospace"
+                {...inputStyle}
+              />
+
+              <Button
+                onClick={() =>
+                  setGrant({
+                    ...grant,
+                    code: generateCode(),
+                  })
+                }
+                bg="purple.700"
+              >
+                Generate
+              </Button>
+            </HStack>
+
+            <Input
+              type="datetime-local"
+              value={grant.expiresAt}
+              onChange={(event) =>
+                setGrant({
+                  ...grant,
+                  expiresAt:
+                    event.target.value,
+                })
+              }
+              isDisabled={
+                grant.unlimited
+              }
+              {...inputStyle}
+            />
+
+            <Flex align="center">
+              <Checkbox
+                colorScheme="purple"
+                isChecked={
+                  grant.unlimited
+                }
+                onChange={(event) =>
+                  setGrant({
+                    ...grant,
+                    unlimited:
+                      event.target.checked,
+                  })
+                }
+              >
+                Unlimited access
+              </Checkbox>
+            </Flex>
+          </SimpleGrid>
+
+          <Button
+            mt={4}
+            bg="linear-gradient(135deg,#6d28d9,#8b5cf6)"
+            onClick={grantPremium}
+            isLoading={busy === "grant"}
+          >
+            Grant Premium
+          </Button>
+        </Box>
+
+        <Box
+          bg="#111525"
+          border="1px solid rgba(255,255,255,.08)"
+          borderRadius="18px"
+          p={{
+            base: 4,
+            md: 6,
+          }}
+        >
+          <Flex
+            justify="space-between"
+            align="center"
+            gap={3}
+            mb={4}
+            flexWrap="wrap"
+          >
+            <Heading fontSize="md">
+              User access
+            </Heading>
+
+            <Input
+              maxW="330px"
+              placeholder="Search email, name, or passcode"
+              value={search}
+              onChange={(event) =>
+                setSearch(
+                  event.target.value
+                )
+              }
+              {...inputStyle}
+            />
+          </Flex>
+
+          {loading ? (
+            <Text
+              py={10}
+              textAlign="center"
+              color="gray.500"
+            >
+              Loading accounts...
+            </Text>
+          ) : error ? (
+            <Text
+              py={8}
+              textAlign="center"
+              color="red.300"
+            >
+              {error}
+            </Text>
+          ) : filteredUsers.length === 0 ? (
+            <Text
+              py={8}
+              textAlign="center"
+              color="gray.500"
+            >
+              No accounts found.
+            </Text>
           ) : (
-            <Box p={6}>
-              <VStack spacing={6} align="stretch">
+            <VStack
+              align="stretch"
+              spacing={3}
+            >
+              {filteredUsers.map(
+                (user) => {
+                  const badge =
+                    statusStyle(user);
 
-                <HStack justify="space-between" align="center">
-                  <Heading fontSize="lg" fontWeight="800" letterSpacing="0.1em" textTransform="uppercase" color="#c084fc">
-                    Admin Panel
-                  </Heading>
-                  <Badge
-                    bg={passcodes.length >= MAX_PASSCODES ? "rgba(229,9,20,0.15)" : "rgba(120,60,220,0.15)"}
-                    color={passcodes.length >= MAX_PASSCODES ? "#e50914" : "#c084fc"}
-                    borderRadius="full"
-                    px={3}
-                    py={1}
-                    fontSize="xs"
-                    fontWeight="700"
-                    letterSpacing="0.06em"
-                  >
-                    {passcodes.length} / {MAX_PASSCODES} codes
-                  </Badge>
-                </HStack>
+                  const editing =
+                    edit?.user.user_id ===
+                    user.user_id;
 
-                {/* ── Create new passcode ── */}
-                <Box
-                  bg="rgba(255,255,255,0.03)"
-                  borderRadius="14px"
-                  p={4}
-                  borderWidth="1px"
-                  borderColor="rgba(120,60,220,0.18)"
-                >
-                  <Text fontSize="xs" color="rgba(255,255,255,0.4)" textTransform="uppercase" letterSpacing="0.08em" mb={3}>
-                    New Passcode
-                  </Text>
-                  <VStack spacing={3} align="stretch">
-                    <HStack spacing={2}>
-                      <Input
-                        flex="1"
-                        placeholder="Code"
-                        value={newCode}
-                        onChange={(e) => setNewCode(e.target.value)}
-                        fontFamily="monospace"
-                        letterSpacing="0.12em"
-                        {...inputStyle}
-                        _placeholder={{ ...inputStyle._placeholder, fontFamily: "inherit", letterSpacing: "normal" }}
-                      />
-                      <Button
-                        onClick={() => setNewCode(generateCode())}
-                        bg="rgba(255,185,0,0.12)"
-                        color="#ffd700"
-                        borderRadius="12px"
-                        borderWidth="1px"
-                        borderColor="rgba(255,185,0,0.3)"
-                        fontWeight="700"
-                        fontSize="sm"
-                        flexShrink={0}
-                        _hover={{ bg: "rgba(255,185,0,0.22)" }}
-                      >
-                        Generate
-                      </Button>
-                    </HStack>
-                    <Input
-                      type="datetime-local"
-                      placeholder="Expiry (optional)"
-                      value={newExpiry}
-                      onChange={(e) => setNewExpiry(e.target.value)}
-                      {...inputStyle}
-                      sx={{ colorScheme: "dark" }}
-                    />
-                    <Button
-                      onClick={handleAdd}
-                      isLoading={addLoading}
-                      isDisabled={!newCode.trim() || passcodes.length >= MAX_PASSCODES}
-                      bg="linear-gradient(90deg, #e50914 0%, #1a56db 100%)"
-                      color="white"
-                      fontWeight="700"
-                      borderRadius="12px"
-                      borderWidth="0"
-                      _hover={{ filter: "brightness(1.15)" }}
-                      _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-                    >
-                      Add Passcode
-                    </Button>
-                  </VStack>
-                </Box>
-
-                {/* ── Passcode list ── */}
-                <Box>
-                  <Text fontSize="xs" color="rgba(255,255,255,0.4)" textTransform="uppercase" letterSpacing="0.08em" mb={3}>
-                    Active Passcodes
-                  </Text>
-
-                  {listLoading ? (
-                    <Text fontSize="sm" color="rgba(255,255,255,0.3)" textAlign="center" py={4}>Loading...</Text>
-                  ) : passcodes.length === 0 ? (
+                  return (
                     <Box
-                      bg="rgba(255,255,255,0.02)"
-                      borderRadius="12px"
+                      key={user.user_id}
+                      bg="rgba(255,255,255,.025)"
+                      border="1px solid rgba(255,255,255,.07)"
+                      borderRadius="14px"
                       p={4}
-                      borderWidth="1px"
-                      borderColor="rgba(255,255,255,0.06)"
-                      textAlign="center"
                     >
-                      <Text fontSize="sm" color="rgba(255,255,255,0.3)">
-                        No passcodes yet. Generate one above.
-                      </Text>
-                    </Box>
-                  ) : (
-                    <VStack spacing={2} align="stretch">
-                      {passcodes.map((p) => {
-                        const expired = isExpired(p.expiresAt);
-                        return (
-                          <Box
-                            key={p.id}
-                            bg="rgba(255,255,255,0.03)"
-                            borderRadius="12px"
-                            px={4}
-                            py={3}
-                            borderWidth="1px"
-                            borderColor={expired ? "rgba(229,9,20,0.2)" : "rgba(120,60,220,0.15)"}
+                      <Flex
+                        justify="space-between"
+                        gap={4}
+                        direction={{
+                          base: "column",
+                          md: "row",
+                        }}
+                      >
+                        <Box
+                          minW={0}
+                          flex="1"
+                        >
+                          <HStack
+                            flexWrap="wrap"
+                            mb={1}
                           >
-                            <HStack justify="space-between" align="center">
-                              <HStack spacing={3} flex="1" minW={0}>
+                            <Text fontWeight="800">
+                              {user.name ||
+                                "Unnamed user"}
+                            </Text>
+
+                            <Badge
+                              bg={badge.bg}
+                              color={
+                                badge.color
+                              }
+                              borderRadius="full"
+                              px={2}
+                            >
+                              {badge.label}
+                            </Badge>
+
+                            <Badge
+                              bg="rgba(59,130,246,.12)"
+                              color="#93c5fd"
+                              borderRadius="full"
+                              px={2}
+                            >
+                              {user.source ||
+                                "none"}
+                            </Badge>
+                          </HStack>
+
+                          <Text
+                            fontSize="sm"
+                            color="gray.400"
+                            wordBreak="break-all"
+                          >
+                            {user.email}
+                          </Text>
+
+                          <SimpleGrid
+                            columns={{
+                              base: 1,
+                              md: 2,
+                            }}
+                            spacing={3}
+                            mt={3}
+                          >
+                            <Box>
+                              <Text
+                                fontSize="2xs"
+                                color="gray.600"
+                              >
+                                PASSCODE
+                              </Text>
+
+                              <HStack mt={1}>
                                 <Text
                                   fontFamily="monospace"
-                                  fontSize="md"
-                                  fontWeight="700"
-                                  letterSpacing="0.15em"
-                                  color={expired ? "rgba(255,255,255,0.35)" : "#c084fc"}
-                                  flexShrink={0}
+                                  color="#c4b5fd"
+                                  wordBreak="break-all"
                                 >
-                                  {p.code}
+                                  {user
+                                    .passcode
+                                    ?.code ||
+                                    "No active passcode"}
                                 </Text>
-                                <VStack spacing={0} align="flex-start" minW={0}>
-                                  <Badge
-                                    fontSize="2xs"
-                                    px={2}
-                                    py={0.5}
-                                    borderRadius="full"
-                                    bg={expired ? "rgba(229,9,20,0.15)" : "rgba(35,215,198,0.12)"}
-                                    color={expired ? "#e50914" : "#23d7c6"}
-                                    fontWeight="700"
-                                    letterSpacing="0.06em"
-                                  >
-                                    {expired ? "EXPIRED" : "ACTIVE"}
-                                  </Badge>
-                                  {p.expiresAt ? (
-                                    <Text fontSize="2xs" color="rgba(255,255,255,0.3)" noOfLines={1}>
-                                      Expires {formatExpiry(p.expiresAt)}
-                                    </Text>
-                                  ) : (
-                                    <Text fontSize="2xs" color="rgba(255,255,255,0.25)">Never expires</Text>
-                                  )}
-                                </VStack>
-                              </HStack>
-                              <HStack spacing={1} flexShrink={0}>
-                                {!expired && (
+
+                                {user
+                                  .passcode
+                                  ?.code && (
                                   <Button
                                     size="xs"
-                                    onClick={() => handleCopy(p.code)}
-                                    bg="rgba(120,60,220,0.15)"
-                                    color="#c084fc"
-                                    borderRadius="8px"
-                                    borderWidth="1px"
-                                    borderColor="rgba(120,60,220,0.25)"
-                                    fontWeight="600"
-                                    _hover={{ bg: "rgba(120,60,220,0.3)" }}
+                                    variant="ghost"
+                                    color="#a78bfa"
+                                    onClick={() =>
+                                      copyCode(
+                                        user
+                                          .passcode
+                                          .code
+                                      )
+                                    }
                                   >
                                     Copy
                                   </Button>
                                 )}
-                                <Button
-                                  size="xs"
-                                  onClick={() => handleDelete(p.id)}
-                                  bg="rgba(229,9,20,0.1)"
-                                  color="#e50914"
-                                  borderRadius="8px"
-                                  borderWidth="1px"
-                                  borderColor="rgba(229,9,20,0.2)"
-                                  fontWeight="700"
-                                  _hover={{ bg: "rgba(229,9,20,0.25)" }}
-                                >
-                                  ×
-                                </Button>
                               </HStack>
-                            </HStack>
-                          </Box>
-                        );
-                      })}
-                    </VStack>
-                  )}
-                </Box>
+                            </Box>
 
-                {/* ── Cookie Pool ── */}
-                <Box
-                  bg="rgba(255,255,255,0.03)"
-                  borderRadius="14px"
-                  borderWidth="1px"
-                  borderColor="rgba(255,255,255,0.08)"
-                  p={4}
-                >
-                  <HStack justify="space-between" align="center">
-                    <Text fontSize="xs" color="rgba(255,255,255,0.4)" textTransform="uppercase" letterSpacing="0.08em">
-                      Cookie Pool (Database)
-                    </Text>
-                    <Button
-                      size="xs"
-                      onClick={fetchCookieCount}
-                      bg="rgba(0,180,100,0.12)"
-                      color="#4ade80"
-                      borderRadius="8px"
-                      borderWidth="1px"
-                      borderColor="rgba(0,180,100,0.2)"
-                      fontWeight="600"
-                      _hover={{ bg: "rgba(0,180,100,0.25)" }}
-                    >
-                      Refresh
-                    </Button>
-                  </HStack>
-                  <HStack mt={3} spacing={3}>
-                    <Box
-                      bg="rgba(0,180,100,0.08)"
-                      borderRadius="10px"
-                      borderWidth="1px"
-                      borderColor="rgba(0,180,100,0.18)"
-                      px={4}
-                      py={3}
-                      flex={1}
-                      textAlign="center"
-                    >
-                      <Text fontSize="2xl" fontWeight="800" color="#4ade80" data-testid="text-cookie-count">
-                        {cookieCount === null ? "..." : cookieCount}
-                      </Text>
-                      <Text fontSize="xs" color="rgba(255,255,255,0.4)" mt={1}>
-                        valid cookies stored
-                      </Text>
-                    </Box>
-                    <Text fontSize="xs" color="rgba(255,255,255,0.3)" flex={2}>
-                      Auto-saved from live checks and find-account scans. Stored in PostgreSQL — survives all deployments.
-                    </Text>
-                  </HStack>
-                </Box>
-
-                {/* ── Abuse Log ── */}
-                <Box>
-                  <HStack justify="space-between" align="center" mb={3}>
-                    <Text fontSize="xs" color="rgba(255,255,255,0.4)" textTransform="uppercase" letterSpacing="0.08em">
-                      Generate Account — Abuse Log
-                    </Text>
-                    <HStack spacing={2}>
-                      <Button
-                        size="xs"
-                        onClick={fetchAbuseLog}
-                        isLoading={abuseLoading}
-                        bg="rgba(120,60,220,0.15)"
-                        color="#c084fc"
-                        borderRadius="8px"
-                        borderWidth="1px"
-                        borderColor="rgba(120,60,220,0.25)"
-                        fontWeight="600"
-                        _hover={{ bg: "rgba(120,60,220,0.3)" }}
-                      >
-                        Refresh
-                      </Button>
-                      <Button
-                        size="xs"
-                        onClick={handleClearLog}
-                        isLoading={clearingLog}
-                        isDisabled={abuseLog.length === 0}
-                        bg="rgba(229,9,20,0.1)"
-                        color="#e50914"
-                        borderRadius="8px"
-                        borderWidth="1px"
-                        borderColor="rgba(229,9,20,0.2)"
-                        fontWeight="700"
-                        _hover={{ bg: "rgba(229,9,20,0.25)" }}
-                        _disabled={{ opacity: 0.35, cursor: "not-allowed" }}
-                      >
-                        Clear
-                      </Button>
-                    </HStack>
-                  </HStack>
-
-                  {abuseLoading ? (
-                    <Text fontSize="sm" color="rgba(255,255,255,0.3)" textAlign="center" py={4}>Loading...</Text>
-                  ) : abuseLog.length === 0 ? (
-                    <Box
-                      bg="rgba(255,255,255,0.02)"
-                      borderRadius="12px"
-                      p={4}
-                      borderWidth="1px"
-                      borderColor="rgba(255,255,255,0.06)"
-                      textAlign="center"
-                    >
-                      <Text fontSize="sm" color="rgba(255,255,255,0.3)">No attempts recorded yet.</Text>
-                    </Box>
-                  ) : (
-                    <VStack spacing={2} align="stretch" maxH="360px" overflowY="auto"
-                      css={{ scrollbarWidth: "thin", scrollbarColor: "rgba(120,60,220,0.3) transparent" }}
-                    >
-                      {abuseLog.map((entry, i) => (
-                        <Box
-                          key={i}
-                          bg="rgba(255,255,255,0.03)"
-                          borderRadius="12px"
-                          px={4}
-                          py={3}
-                          borderWidth="1px"
-                          borderColor={entry.allowed ? "rgba(35,215,198,0.15)" : "rgba(229,9,20,0.25)"}
-                        >
-                          <HStack justify="space-between" align="flex-start" spacing={3}>
-                            <VStack spacing={0.5} align="flex-start" flex="1" minW={0}>
-                              <HStack spacing={2} flexWrap="wrap">
-                                <Text fontFamily="monospace" fontSize="sm" fontWeight="700" color="white">
-                                  {entry.ip}
-                                </Text>
-                                <Badge
-                                  fontSize="2xs"
-                                  px={2}
-                                  py={0.5}
-                                  borderRadius="full"
-                                  bg={entry.allowed ? "rgba(35,215,198,0.12)" : "rgba(229,9,20,0.15)"}
-                                  color={entry.allowed ? "#23d7c6" : "#e50914"}
-                                  fontWeight="700"
-                                  letterSpacing="0.06em"
-                                >
-                                  {entry.allowed ? "ALLOWED" : "BLOCKED"}
-                                </Badge>
-                                <Badge
-                                  fontSize="2xs"
-                                  px={2}
-                                  py={0.5}
-                                  borderRadius="full"
-                                  bg="rgba(255,185,0,0.1)"
-                                  color="#ffd700"
-                                  fontWeight="700"
-                                >
-                                  {entry.dailyCount}/3 uses
-                                </Badge>
-                              </HStack>
-                              <Text fontSize="2xs" color="rgba(255,255,255,0.3)" noOfLines={1}>
-                                {new Date(entry.timestamp).toLocaleString()}
+                            <Box>
+                              <Text
+                                fontSize="2xs"
+                                color="gray.600"
+                              >
+                                EXPIRATION
                               </Text>
-                              <Text fontSize="2xs" color="rgba(255,255,255,0.2)" noOfLines={1} title={entry.userAgent}>
-                                {entry.userAgent.slice(0, 72)}{entry.userAgent.length > 72 ? "…" : ""}
+
+                              <Text
+                                mt={1}
+                                fontSize="sm"
+                              >
+                                {user.is_admin
+                                  ? "Unlimited (Admin)"
+                                  : formatDate(
+                                      user.premium_until
+                                    )}
                               </Text>
-                            </VStack>
-                          </HStack>
+                            </Box>
+                          </SimpleGrid>
+
+                          {user.payment
+                            ?.reference_number && (
+                            <Text
+                              mt={3}
+                              fontSize="2xs"
+                              color="gray.600"
+                              wordBreak="break-all"
+                            >
+                              Payment reference:{" "}
+                              {
+                                user
+                                  .payment
+                                  .reference_number
+                              }
+                            </Text>
+                          )}
                         </Box>
-                      ))}
-                    </VStack>
-                  )}
-                </Box>
 
-              </VStack>
-            </Box>
+                        <HStack
+                          alignSelf={{
+                            base: "stretch",
+                            md: "flex-start",
+                          }}
+                        >
+                          <Button
+                            size="sm"
+                            flex={{
+                              base: 1,
+                              md: "initial",
+                            }}
+                            bg="purple.800"
+                            isDisabled={
+                              !user.passcode
+                            }
+                            onClick={() =>
+                              editing
+                                ? setEdit(
+                                    null
+                                  )
+                                : beginEdit(
+                                    user
+                                  )
+                            }
+                          >
+                            {editing
+                              ? "Cancel"
+                              : "Edit"}
+                          </Button>
+
+                          {!user.is_admin &&
+                            user.premium && (
+                              <Button
+                                size="sm"
+                                flex={{
+                                  base: 1,
+                                  md: "initial",
+                                }}
+                                colorScheme="red"
+                                variant="outline"
+                                isLoading={
+                                  busy ===
+                                  `revoke-${user.user_id}`
+                                }
+                                onClick={() =>
+                                  revokePremium(
+                                    user
+                                  )
+                                }
+                              >
+                                Revoke
+                              </Button>
+                            )}
+                        </HStack>
+                      </Flex>
+
+                      {editing && (
+                        <Box
+                          mt={4}
+                          pt={4}
+                          borderTop="1px solid rgba(255,255,255,.08)"
+                        >
+                          <SimpleGrid
+                            columns={{
+                              base: 1,
+                              md: 2,
+                            }}
+                            spacing={3}
+                          >
+                            <Input
+                              value={
+                                edit.code
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                setEdit({
+                                  ...edit,
+                                  code:
+                                    event
+                                      .target
+                                      .value,
+                                })
+                              }
+                              placeholder="New passcode"
+                              {...inputStyle}
+                            />
+
+                            {!user.is_admin && (
+                              <Input
+                                type="datetime-local"
+                                value={
+                                  edit.expiresAt
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  setEdit({
+                                    ...edit,
+                                    expiresAt:
+                                      event
+                                        .target
+                                        .value,
+                                  })
+                                }
+                                isDisabled={
+                                  edit.unlimited
+                                }
+                                {...inputStyle}
+                              />
+                            )}
+                          </SimpleGrid>
+
+                          {!user.is_admin && (
+                            <Checkbox
+                              mt={3}
+                              colorScheme="purple"
+                              isChecked={
+                                edit.unlimited
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                setEdit({
+                                  ...edit,
+                                  unlimited:
+                                    event
+                                      .target
+                                      .checked,
+                                })
+                              }
+                            >
+                              Unlimited access
+                            </Checkbox>
+                          )}
+
+                          <Button
+                            mt={3}
+                            bg="#7c3aed"
+                            onClick={
+                              saveEdit
+                            }
+                            isLoading={
+                              busy ===
+                              `edit-${user.user_id}`
+                            }
+                          >
+                            Save changes
+                          </Button>
+                        </Box>
+                      )}
+                    </Box>
+                  );
+                }
+              )}
+            </VStack>
           )}
         </Box>
       </Box>
-    </Flex>
+    </Box>
   );
 }
