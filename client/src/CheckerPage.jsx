@@ -2324,6 +2324,36 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           </ModalHeader>
           <ModalBody pb={6} pt={4}>
             <VStack spacing={4}>
+
+<Box
+  w="full"
+  p={3}
+  borderRadius="10px"
+  bg="rgba(139,92,246,0.08)"
+  border="1px solid rgba(139,92,246,0.20)"
+>
+  <Text
+    fontSize="xs"
+    fontWeight="800"
+    color="#8b5cf6"
+    textAlign="center"
+    mb={1}
+  >
+    NOTE
+  </Text>
+
+  <Text
+    fontSize="xs"
+    color="gray.400"
+    textAlign="center"
+    lineHeight="1.5"
+  >
+    After a successful payment, your Premium code is sent to your registered
+    email. Please also check your Spam or Junk folder.
+  </Text>
+</Box>
+
+              
               <Input
                 type="password"
                 placeholder="Enter the code here"
