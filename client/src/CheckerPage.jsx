@@ -2307,96 +2307,112 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   isCentered
   size="sm"
 >
-        <ModalOverlay bg="rgba(0,0,0,0.75)" backdropFilter="blur(4px)" />
-        <ModalContent {...modalShell} mx={4}>
-         <ModalCloseButton
-  color="rgba(255,255,255,0.5)"
-  top={4}
-  right={4}
-/>
+  <ModalOverlay
+    bg="rgba(0,0,0,0.75)"
+    backdropFilter="blur(4px)"
+  />
 
-<Box
-  mx={6}
-  mt={12}
-  px={4}
-  py={3}
-  borderRadius="12px"
-  bg="rgba(139,92,246,0.07)"
-  border="1px solid rgba(139,92,246,0.18)"
-  borderLeft="3px solid #8b5cf6"
->
-  <Text
-    fontSize="xs"
-    fontWeight="700"
-    color="#c4b5fd"
-    letterSpacing="0.08em"
-    textTransform="uppercase"
-    mb={1}
-  >
-    Code delivery
-  </Text>
+  <ModalContent {...modalShell} mx={4}>
+    <ModalCloseButton
+      color="rgba(255,255,255,0.5)"
+      top={4}
+      right={4}
+    />
 
-  <Text
-    fontSize="xs"
-    color="rgba(255,255,255,0.65)"
-    lineHeight="1.6"
-  >
-    If your Premium code does not appear after a successful payment, it will
-    also be sent to the email address linked to your account. Delivery may take
-    a few minutes, so please check your Spam or Junk folder as well.
-  </Text>
-</Box>
+    <Box
+      mx={6}
+      mt={12}
+      px={4}
+      py={3}
+      borderRadius="12px"
+      bg="rgba(139,92,246,0.07)"
+      border="1px solid rgba(139,92,246,0.18)"
+      borderLeft="3px solid #8b5cf6"
+    >
+      <Text
+        fontSize="xs"
+        fontWeight="700"
+        color="#c4b5fd"
+        letterSpacing="0.08em"
+        textTransform="uppercase"
+        mb={1}
+      >
+        Code delivery
+      </Text>
 
-<ModalHeader
-  pt={4}
-  pb={0}
-  textAlign="center"
-  color="#8b5cf6"
-  fontSize="lg"
-  fontWeight="800"
-  letterSpacing="0.12em"
-  textTransform="uppercase"
->
-  PREMIUM CODE
-</ModalHeader>
+      <Text
+        fontSize="xs"
+        color="rgba(255,255,255,0.65)"
+        lineHeight="1.6"
+      >
+        If your Premium code does not appear after a successful payment, it
+        will also be sent to the email address linked to your account. Delivery
+        may take a few minutes, so please check your Spam or Junk folder as
+        well.
+      </Text>
+    </Box>
 
-<ModalBody pb={6} pt={4}>
-  <VStack spacing={4}>
-              
-              <Input
-                type="password"
-                placeholder="Enter the code here"
-                value={passcodeInput}
-                onChange={(e) => setPasscodeInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handlePasscodeSubmit()}
-                bg="rgba(255,255,255,0.05)"
-                borderColor="rgba(255,255,255,0.1)"
-                borderRadius="12px"
-                color="white"
-                _placeholder={{ color: "rgba(255,255,255,0.3)" }}
-                _focus={{ borderColor: "#8b5cf6", boxShadow: "0 0 0 1px #8b5cf6" }}
-                data-testid="input-find-passcode"
-                autoFocus
-              />
-              {passcodeError && (
-                <Text color="#e50914" fontSize="sm" textAlign="center" w="full">
-                  {passcodeError}
-                </Text>
-              )}
-              <Button
-                {...primaryBtn}
-                w="full"
-                onClick={handlePasscodeSubmit}
-                isLoading={passcodeLoading}
-                isDisabled={!passcodeInput.trim()}
-                data-testid="button-unlock-find-account"
-              >
-                Find Account
-              </Button>
-            </VStack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+    <ModalHeader
+      pt={4}
+      pb={0}
+      textAlign="center"
+      color="#8b5cf6"
+      fontSize="lg"
+      fontWeight="800"
+      letterSpacing="0.12em"
+      textTransform="uppercase"
+    >
+      PREMIUM CODE
+    </ModalHeader>
+
+    <ModalBody pb={6} pt={4}>
+      <VStack spacing={4}>
+        <Input
+          type="password"
+          placeholder="Enter the code here"
+          value={passcodeInput}
+          onChange={(e) => setPasscodeInput(e.target.value)}
+          onKeyDown={(e) =>
+            e.key === "Enter" && handlePasscodeSubmit()
+          }
+          bg="rgba(255,255,255,0.05)"
+          borderColor="rgba(255,255,255,0.1)"
+          borderRadius="12px"
+          color="white"
+          _placeholder={{ color: "rgba(255,255,255,0.3)" }}
+          _focus={{
+            borderColor: "#8b5cf6",
+            boxShadow: "0 0 0 1px #8b5cf6",
+          }}
+          data-testid="input-find-passcode"
+          autoFocus
+        />
+
+        {passcodeError && (
+          <Text
+            color="#e50914"
+            fontSize="sm"
+            textAlign="center"
+            w="full"
+          >
+            {passcodeError}
+          </Text>
+        )}
+
+        <Button
+          {...primaryBtn}
+          w="full"
+          onClick={handlePasscodeSubmit}
+          isLoading={passcodeLoading}
+          isDisabled={!passcodeInput.trim()}
+          data-testid="button-unlock-find-account"
+        >
+          Find Account
+        </Button>
+      </VStack>
+    </ModalBody>
+  </ModalContent>
+</Modal>
 <Modal
   isOpen={isTrialModalOpen}
   onClose={() => setIsTrialModalOpen(false)}
