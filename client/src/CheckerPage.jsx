@@ -2337,7 +2337,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         textTransform="uppercase"
         mb={1}
       >
-        Code delivery
+        NOTE
       </Text>
 
       <Text
