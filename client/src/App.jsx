@@ -11,10 +11,12 @@ import { Switch, Route } from "wouter";
 import CheckerPage from "./CheckerPage";
 import PaymentConfirmationModal from "./PaymentConfirmationModal";
 import AdminPage from "./AdminPage";
+import AccountSettings from "./AccountSettings";
 import { showAppToast } from "./appToast.jsx";
 import AppCredits from "./AppCredits";
 import LoginPage from "./LoginPage";
 import { supabase } from "./supabaseClient";
+
 const MAX_JSON_PAYLOAD_BYTES = 850_000;
 const MAX_CHECKS_PER_REQUEST_CAP = 120;
 const TARGET_REQUEST_RUNTIME_MS = 240_000;
@@ -1921,6 +1923,11 @@ return (
     
     <Box flex="1">
       <Switch>
+
+       <Route path="/account-settings">
+  <AccountSettings session={session} />
+</Route>
+        
         <Route path="/admin">
           {canAccessAdmin ? <AdminPage session={session} /> : <CheckerPage
             mode="premium"
