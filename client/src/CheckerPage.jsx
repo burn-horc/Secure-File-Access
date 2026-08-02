@@ -2312,21 +2312,19 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     backdropFilter="blur(4px)"
   />
 
-  <ModalContent {...modalShell} mx={4}>
-    <ModalCloseButton
-      color="rgba(255,255,255,0.5)"
-      top={4}
-      right={4}
-    />
-
+ <ModalContent
+  bg="transparent"
+  boxShadow="none"
+  border="none"
+  mx={4}
+  overflow="visible"
+>
+  <VStack spacing={3} align="stretch">
+    {/* Separate code-delivery notice */}
     <Box
-      mx={6}
-      mt={12}
+      {...modalShell}
       px={4}
       py={3}
-      borderRadius="12px"
-      bg="rgba(139,92,246,0.07)"
-      border="1px solid rgba(139,92,246,0.18)"
       borderLeft="3px solid #8b5cf6"
     >
       <Text
@@ -2337,7 +2335,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         textTransform="uppercase"
         mb={1}
       >
-        NOTE
+        Code delivery
       </Text>
 
       <Text
@@ -2352,66 +2350,76 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       </Text>
     </Box>
 
-    <ModalHeader
-      pt={4}
-      pb={0}
-      textAlign="center"
-      color="#8b5cf6"
-      fontSize="lg"
-      fontWeight="800"
-      letterSpacing="0.12em"
-      textTransform="uppercase"
-    >
-      PREMIUM CODE
-    </ModalHeader>
+    {/* Separate Premium Code box */}
+    <Box {...modalShell} position="relative">
+      <ModalCloseButton
+        color="rgba(255,255,255,0.5)"
+        top={4}
+        right={4}
+      />
 
-    <ModalBody pb={6} pt={4}>
-      <VStack spacing={4}>
-        <Input
-          type="password"
-          placeholder="Enter the code here"
-          value={passcodeInput}
-          onChange={(e) => setPasscodeInput(e.target.value)}
-          onKeyDown={(e) =>
-            e.key === "Enter" && handlePasscodeSubmit()
-          }
-          bg="rgba(255,255,255,0.05)"
-          borderColor="rgba(255,255,255,0.1)"
-          borderRadius="12px"
-          color="white"
-          _placeholder={{ color: "rgba(255,255,255,0.3)" }}
-          _focus={{
-            borderColor: "#8b5cf6",
-            boxShadow: "0 0 0 1px #8b5cf6",
-          }}
-          data-testid="input-find-passcode"
-          autoFocus
-        />
+      <ModalHeader
+        pt={6}
+        pb={0}
+        textAlign="center"
+        color="#8b5cf6"
+        fontSize="lg"
+        fontWeight="800"
+        letterSpacing="0.12em"
+        textTransform="uppercase"
+      >
+        PREMIUM CODE
+      </ModalHeader>
 
-        {passcodeError && (
-          <Text
-            color="#e50914"
-            fontSize="sm"
-            textAlign="center"
+      <ModalBody pb={6} pt={4}>
+        <VStack spacing={4}>
+          <Input
+            type="password"
+            placeholder="Enter the code here"
+            value={passcodeInput}
+            onChange={(e) => setPasscodeInput(e.target.value)}
+            onKeyDown={(e) =>
+              e.key === "Enter" && handlePasscodeSubmit()
+            }
+            bg="rgba(255,255,255,0.05)"
+            borderColor="rgba(255,255,255,0.1)"
+            borderRadius="12px"
+            color="white"
+            _placeholder={{ color: "rgba(255,255,255,0.3)" }}
+            _focus={{
+              borderColor: "#8b5cf6",
+              boxShadow: "0 0 0 1px #8b5cf6",
+            }}
+            data-testid="input-find-passcode"
+            autoFocus
+          />
+
+          {passcodeError && (
+            <Text
+              color="#e50914"
+              fontSize="sm"
+              textAlign="center"
+              w="full"
+            >
+              {passcodeError}
+            </Text>
+          )}
+
+          <Button
+            {...primaryBtn}
             w="full"
+            onClick={handlePasscodeSubmit}
+            isLoading={passcodeLoading}
+            isDisabled={!passcodeInput.trim()}
+            data-testid="button-unlock-find-account"
           >
-            {passcodeError}
-          </Text>
-        )}
-
-        <Button
-          {...primaryBtn}
-          w="full"
-          onClick={handlePasscodeSubmit}
-          isLoading={passcodeLoading}
-          isDisabled={!passcodeInput.trim()}
-          data-testid="button-unlock-find-account"
-        >
-          Find Account
-        </Button>
-      </VStack>
-    </ModalBody>
-  </ModalContent>
+            Find Account
+          </Button>
+        </VStack>
+      </ModalBody>
+    </Box>
+  </VStack>
+</ModalContent>
 </Modal>
 <Modal
   isOpen={isTrialModalOpen}
