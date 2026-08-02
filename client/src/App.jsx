@@ -1919,6 +1919,9 @@ if (!acceptedNotice) {
   
 return (
   <Flex direction="column" minH="100vh">
+
+    <PaymentConfirmationModal />
+    
     <Box flex="1">
       <Switch>
         <Route path="/admin">
