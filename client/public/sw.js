@@ -1,4 +1,5 @@
-const CACHE_NAME = "burn-horc-v2";
+const CACHE_NAME = "burn-horc-v3";
+
 const APP_SHELL = [
   "/",
   "/manifest.json",
@@ -6,13 +7,14 @@ const APP_SHELL = [
   "/apple-touch-icon.png",
   "/icon-192.png",
   "/icon-512.png",
-  "/offline.html"
+  "/offline.html",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
+
   self.skipWaiting();
 });
 
@@ -26,31 +28,69 @@ self.addEventListener("activate", (event) => {
       )
     )
   );
+
   self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
+  const request = event.request;
+  const url = new URL(request.url);
 
-  if (request.method !== "GET") return;
+  if (
+    request.method !== "GET" ||
+    url.origin !== self.location.origin ||
+    url.pathname.startsWith("/api/")
+  ) {
+    return;
+  }
+
+  if (request.mode === "navigate") {
+    const networkResponse = fetch(request).then(async (response) => {
+      if (response.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response.clone());
+      }
+
+      return response;
+    });
+
+    event.waitUntil(networkResponse.catch(() => undefined));
+
+    event.respondWith(
+      (async () => {
+        const cached =
+          (await caches.match(request)) ||
+          (await caches.match("/"));
+
+        if (cached) {
+          return cached;
+        }
+
+        try {
+          return await networkResponse;
+        } catch {
+          return caches.match("/offline.html");
+        }
+      })()
+    );
+
+    return;
+  }
 
   event.respondWith(
-    fetch(request)
-      .then((response) => {
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, responseClone);
-        });
-        return response;
-      })
-      .catch(() => {
-        return caches.match(request).then((cached) => {
-          if (cached) return cached;
+    caches.match(request).then(async (cached) => {
+      if (cached) {
+        return cached;
+      }
 
-          if (request.mode === "navigate") {
-            return caches.match("/offline.html");
-          }
-        });
-      })
+      const response = await fetch(request);
+
+      if (response.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response.clone());
+      }
+
+      return response;
+    })
   );
 });
