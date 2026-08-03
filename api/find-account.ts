@@ -207,8 +207,7 @@ export default async function handler(
 
     const passcode = String(req.body?.passcode ?? "")
       .trim()
-      .toUpperCase();
-
+      
     if (!passcode) {
       await recordFailure(ip);
 
