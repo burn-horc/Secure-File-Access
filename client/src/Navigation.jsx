@@ -2,13 +2,12 @@ import { Box, Button, HStack, Text, VStack, Input } from "@chakra-ui/react";
 import { Link } from "wouter";
 import { useState } from "react";
 
-export default function Navigation({ onClose, onPremiumClick, onRandomClick }) {
-   onClose,
+export default function Navigation({
+  onClose,
   onPremiumClick,
   onRandomClick,
   isAdminAccount,
 }) {
-
   const [showModal, setShowModal] = useState(false);
   const [passcode, setPasscode] = useState("");
 
