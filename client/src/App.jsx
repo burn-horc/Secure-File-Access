@@ -2226,6 +2226,7 @@ return (
 
         <Route path="/">
           <CheckerPage
+            isAdminAccount={isAdminAccount}
             mode="free"
             input={input}
             uploadedInputBanner={uploadedInputBanner}
