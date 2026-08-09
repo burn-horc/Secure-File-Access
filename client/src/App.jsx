@@ -781,11 +781,11 @@ const isReturningFromPayment = [
 const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [isStartingPayment, setIsStartingPayment] = useState(false);
-  const [isAdminAccount, setIsAdminAccount] = useState(false);
+  const [isAdminAccount, setIsAdminAccount] = useState(null);
   const canAccessAdmin = isAdminAccount;
 
   const hasActivePremium =
-  isAdminAccount ||
+  isAdminAccount === true ||
   Boolean(
     profile?.premium &&
       (
@@ -796,35 +796,58 @@ const [session, setSession] = useState(null);
 
 useEffect(() => {
   let cancelled = false;
+  let retryTimer = null;
 
-  const loadAdminStatus = async () => {
-    if (!session?.access_token) {
-      if (!cancelled) {
-        setIsAdminAccount(false);
-      }
-
-      return;
+  const loadAdminStatus = async (attempt = 0) => {
+    if (attempt === 0 && !cancelled) {
+      setIsAdminAccount(null);
     }
 
     try {
+      const {
+        data: { session: latestSession },
+      } = await supabase.auth.getSession();
+
+      const accessToken =
+        latestSession?.access_token || session?.access_token;
+
+      if (!accessToken) {
+        return;
+      }
+
       const response = await fetch("/api/account-status", {
         method: "GET",
         cache: "no-store",
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
       const data = await response.json().catch(() => ({}));
 
-      if (!cancelled) {
-        setIsAdminAccount(
-          response.ok && data?.is_admin === true
-        );
+      if (cancelled) return;
+
+      if (response.ok) {
+        setIsAdminAccount(data?.is_admin === true);
+        return;
       }
-    } catch {
-      if (!cancelled) {
-        setIsAdminAccount(false);
+
+      if (response.status === 401 && attempt === 0) {
+        await supabase.auth.refreshSession();
+      }
+
+      throw new Error(
+        data?.error || `Account check failed: ${response.status}`
+      );
+    } catch (error) {
+      if (cancelled) return;
+
+      console.error("Admin status check error:", error);
+
+      if (attempt < 4) {
+        retryTimer = window.setTimeout(() => {
+          loadAdminStatus(attempt + 1);
+        }, 1000 * (attempt + 1));
       }
     }
   };
@@ -833,6 +856,10 @@ useEffect(() => {
 
   return () => {
     cancelled = true;
+
+    if (retryTimer) {
+      window.clearTimeout(retryTimer);
+    }
   };
 }, [session?.access_token]);
 
