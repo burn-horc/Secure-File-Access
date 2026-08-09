@@ -1788,18 +1788,22 @@ if (!acceptedNotice) {
   <Text
   fontSize="sm"
   color={
-    isAdminAccount
+    isAdminAccount === null || profile === null
+      ? "gray.400"
+      : isAdminAccount
       ? "purple.300"
       : hasActivePremium
-        ? "green.300"
-        : "gray.400"
+      ? "green.300"
+      : "gray.400"
   }
 >
-  {isAdminAccount
+  {isAdminAccount === null || profile === null
+    ? "Checking account..."
+    : isAdminAccount
     ? "Admin Account"
     : hasActivePremium
-      ? "Premium Account"
-      : "Free Account"}
+    ? "Premium Account"
+    : "Free Account"}
 </Text>
         
 </VStack>
