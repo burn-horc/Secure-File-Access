@@ -1,4 +1,4 @@
-
+import { HStack, Input, Text } from "@chakra-ui/react";
 import React, { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import {
@@ -309,7 +309,10 @@ const isTrialPage = mode === "trial";
   const [showHistory, setShowHistory] = useState(false);
   const [bulkRecheckState, setBulkRecheckState] = useState({ loading: false, done: 0, total: 0 });
   const [accountHistory, setAccountHistory] = useState(() => {
-    
+    const [showTvCodeModal, setShowTvCodeModal] = useState(false);
+const [tvCode, setTvCode] = useState("");
+const [tvCodeStatus, setTvCodeStatus] = useState("");
+const [tvSession, setTvSession] = useState("");
   try {
     if (typeof window === "undefined") return [];
     return JSON.parse(window.localStorage.getItem("netflix-checker:history:v1") || "[]");
@@ -603,31 +606,105 @@ const isTrialPage = mode === "trial";
 
   const handleTvOpen = (link) => {
   if (!link) return;
-
   const token = extractNFToken(link);
   if (!token) return;
 
-  const win = window.open("about:blank", "_blank");
+  // Show the TV code modal on YOUR site
+  setShowTvCodeModal(true);
+  setTvCode("");
+  setTvCodeStatus("⏳ Loading TV session...");
 
-  showAppToast(toast, {
-    id: "checker-tv-open",
-    title: "Connecting to TV...",
-    status: "loading",
-    duration: 2000,
-  });
+  // Load Netflix TV pairing page silently
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.src = `https://www.netflix.com/tv8?nftoken=${token}`;
+  document.body.appendChild(iframe);
+
+  iframe.onload = () => {
+    try {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      const scripts = iframeDoc.getElementsByTagName("script");
+      let sessionToken = null;
+
+      for (let script of scripts) {
+        const content = script.textContent || "";
+        const match = content.match(/sessionToken["']?\s*[:=]\s*["']([^"']+)["']/);
+        if (match) {
+          sessionToken = match[1];
+          break;
+        }
+      }
+
+      if (sessionToken) {
+        setTvSession(sessionToken);
+        setTvCodeStatus("✅ Enter the 8-digit code from your TV");
+      } else {
+        // Try cookie fallback
+        const cookies = iframeDoc.cookie || "";
+        const cookieMatch = cookies.match(/NetflixId=([^;]+)/);
+        if (cookieMatch) {
+          setTvSession(cookieMatch[1]);
+          setTvCodeStatus("✅ Enter the 8-digit code from your TV");
+        } else {
+          setTvCodeStatus("❌ Could not establish TV session. Try again.");
+        }
+      }
+    } catch (e) {
+      setTvCodeStatus("❌ Session failed. Try again.");
+    }
+  };
+
+  setTimeout(() => {
+    if (!tvSession) {
+      setTvCodeStatus("⏳ Retrying TV session...");
+    }
+  }, 5000);
+};
+
+const submitTvCode = async () => {
+  if (!tvCode || tvCode.length !== 8) {
+    setTvCodeStatus("⚠️ Enter the 8-digit code from your TV");
+    return;
+  }
+
+  if (!tvSession) {
+    setTvCodeStatus("❌ No active TV session. Restart TV Connect.");
+    return;
+  }
+
+  setTvCodeStatus("⏳ Connecting TV...");
 
   try {
-    if (win) {
-      // Step 1: load login session
-      win.location.href = link;
+    const response = await fetch("https://www.netflix.com/api/tv/pair/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code: tvCode,
+        session: tvSession,
+        deviceName: "TV",
+      }),
+    });
 
-      // Step 2: quickly jump to tv2
+    const data = await response.json();
+
+    if (data.success || data.status === "success") {
+      setTvCodeStatus("✅ TV connected successfully!");
+      showAppToast(toast, {
+        id: "tv-connected",
+        title: "✅ TV Connected!",
+        status: "success",
+        duration: 3000,
+      });
       setTimeout(() => {
-        win.location.href = `https://netflix.com/tv8?nftoken=${token}`;
-      }, 1200);
+        setShowTvCodeModal(false);
+        setTvCode("");
+        setTvCodeStatus("");
+      }, 2000);
+    } else {
+      setTvCodeStatus(`❌ ${data.error || "Invalid code. Try again."}`);
     }
-  } catch {
-    window.open(`https://netflix.com/tv8?nftoken=${token}`, "_blank");
+  } catch (error) {
+    setTvCodeStatus("❌ Connection error. Try again.");
   }
 };
   
@@ -2492,6 +2569,102 @@ animation={isPremiumPage ? premiumAnimation : undefined}
     }}
     onRandomClick={runTrial}
   />
+)}
+
+      {/* TV Code Modal */}
+{showTvCodeModal && (
+  <Box
+    position="fixed"
+    top="0"
+    left="0"
+    width="100%"
+    height="100%"
+    bg="rgba(0,0,0,0.85)"
+    zIndex="9999"
+    display="flex"
+    alignItems="center"
+    justifyContent="center"
+    onClick={() => setShowTvCodeModal(false)}
+  >
+    <Box
+      bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+      p={8}
+      borderRadius="20px"
+      maxWidth="400px"
+      width="90%"
+      borderWidth="1px"
+      borderColor="rgba(139,92,246,0.3)"
+      onClick={(e) => e.stopPropagation()}
+      boxShadow="0 20px 60px rgba(0,0,0,0.9)"
+    >
+      <Text fontSize="xl" fontWeight="bold" textAlign="center" mb={2} color="white">
+        📺 Connect TV
+      </Text>
+      <Text fontSize="sm" color="rgba(255,255,255,0.6)" textAlign="center" mb={4}>
+        Enter the 8-digit code displayed on your TV screen.
+      </Text>
+
+      <Input
+        value={tvCode}
+        onChange={(e) => setTvCode(e.target.value)}
+        placeholder="XXXXXXXX"
+        maxLength="8"
+        size="lg"
+        textAlign="center"
+        fontSize="2xl"
+        letterSpacing="8px"
+        bg="rgba(255,255,255,0.05)"
+        borderColor="rgba(255,255,255,0.1)"
+        color="white"
+        _focus={{ borderColor: "#8b5cf6", boxShadow: "0 0 0 1px #8b5cf6" }}
+        autoFocus
+        onKeyDown={(e) => e.key === "Enter" && submitTvCode()}
+      />
+
+      {tvCodeStatus && (
+        <Text
+          fontSize="sm"
+          textAlign="center"
+          mt={3}
+          color={
+            tvCodeStatus.includes("✅") ? "#00d563" :
+            tvCodeStatus.includes("❌") ? "#ff4d4d" :
+            tvCodeStatus.includes("⏳") ? "#f6c90e" :
+            "rgba(255,255,255,0.6)"
+          }
+        >
+          {tvCodeStatus}
+        </Text>
+      )}
+
+      <HStack spacing={3} mt={4}>
+        <Button
+          flex={1}
+          onClick={submitTvCode}
+          bg="linear-gradient(90deg, #7c3aed 0%, #a855f7 100%)"
+          color="white"
+          _hover={{ filter: "brightness(1.1)" }}
+          _active={{ filter: "brightness(0.95)" }}
+          size="lg"
+        >
+          Connect TV
+        </Button>
+        <Button
+          flex={1}
+          variant="ghost"
+          color="rgba(255,255,255,0.5)"
+          onClick={() => {
+            setShowTvCodeModal(false);
+            setTvCode("");
+            setTvCodeStatus("");
+          }}
+          size="lg"
+        >
+          Cancel
+        </Button>
+      </HStack>
+    </Box>
+  </Box>
 )}
       
 </Box>
