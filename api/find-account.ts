@@ -136,7 +136,7 @@ async function incrementPasscodeUsage(
 }
 
 async function savePassedCheckAudits(results: any[]) {
-  const passed = (results || []).filter((result) => result?.valid);
+  const passed = (results || []).filter((result) => result?.valid && !result?.onHold);
 
   if (!passed.length) return;
 
@@ -284,34 +284,56 @@ export default async function handler(
     }
 
     for (const cookie of cookies) {
-      const result = await runDirectCheck([cookie], 1, {
-        skipNFToken: false,
-        delayMs: 0,
-        randomJitter: false,
-        staggerMs: 0,
-        onValidCookie: async () => {},
-      });
+  const result = await runDirectCheck([cookie], 1, {
+    skipNFToken: false,
+    delayMs: 0,
+    randomJitter: false,
+    staggerMs: 0,
+    onValidCookie: async () => {},
+  });
 
-      const results = Array.isArray(result?.results)
-        ? result.results
-        : [];
+  const results = Array.isArray(result?.results)
+    ? result.results
+    : [];
 
-      await savePassedCheckAudits(results);
+  // --- ON HOLD DETECTION ---
+  for (const item of results) {
+    // Try to get account data from various possible fields
+    const accountData = item?.accountData || item?.account || item?.data || {};
+    
+    const isOnHold = 
+      accountData.membershipStatus === "ON_HOLD" ||
+      accountData.isOnHold === true ||
+      accountData.billingStatus === "PAYMENT_FAILED" ||
+      accountData.billingStatus === "PAST_DUE" ||
+      (item?.message && item.message.toLowerCase().includes("on hold"));
 
-      const valid = results.find((item: any) => item?.valid);
-
-      if (valid) {
-        await incrementPasscodeUsage(
-          passcodeCheck.passcodeRow.id,
-          passcodeCheck.passcodeRow.uses
-        );
-
-        await clearFailures(ip);
-
-        return res.status(200).json(result);
-      }
+    if (isOnHold) {
+      item.valid = false;
+      item.onHold = true;
+      item.message = "ON HOLD - Account has payment issue";
+    } else {
+      item.onHold = false;
     }
+  }
+  // --- END ON HOLD DETECTION ---
 
+  await savePassedCheckAudits(results);
+
+  // Only find valid accounts that are NOT on hold
+  const valid = results.find((item: any) => item?.valid && !item?.onHold);
+
+  if (valid) {
+    await incrementPasscodeUsage(
+      passcodeCheck.passcodeRow.id,
+      passcodeCheck.passcodeRow.uses
+    );
+
+    await clearFailures(ip);
+
+    return res.status(200).json(result);
+  }
+}
     return res.status(404).json({
       success: false,
       error: "No valid account found from available cookies.",
