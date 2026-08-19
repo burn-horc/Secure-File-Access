@@ -1877,7 +1877,6 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       </Badge>
     </HStack>
   </HStack>
-</HStack>
 
             <Box borderBottomWidth="1px" borderBottomColor="rgba(255,255,255,0.1)" />
           </Box>
