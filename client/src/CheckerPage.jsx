@@ -1767,12 +1767,12 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         >
           <Box px={4} pt={4} pb={2}>
             <HStack spacing={2} mb={2} justify="space-between" flexWrap="wrap">
-              <HStack spacing={2}>
-                <Text fontSize="xs" color="rgba(255,255,255,0.35)" fontFamily="mono" fontWeight="700">
-                  #{index + 1}
-                </Text>
+  <HStack spacing={2}>
+    <Text fontSize="xs" color="rgba(255,255,255,0.35)" fontFamily="mono" fontWeight="700">
+      #{index + 1}
+    </Text>
 
-               {isLive && (
+    {isLive && (
       <HStack spacing={1} align="center">
         <Box as="span" animation={pulseRedAnim} fontSize="9px" lineHeight="1" display="inline-block">
           🔴
@@ -1800,85 +1800,70 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       </HStack>
     ) : (
       <HStack spacing={2}>
-        {result.onHold ? (
-  <>
-    <Text fontSize="lg" color="#f6c90e" lineHeight="1" fontWeight="900">
-      ⛔
-    </Text>
-    <Text
-      fontWeight="700"
-      fontSize="sm"
-      letterSpacing="0.1em"
-      textTransform="uppercase"
-      color="#f6c90e"
+        <Text fontSize="lg" color={theme.accent} lineHeight="1" fontWeight="900">
+          ✓
+        </Text>
+        <Text
+          fontWeight="700"
+          fontSize="sm"
+          letterSpacing="0.1em"
+          textTransform="uppercase"
+          color={theme.accent}
+        >
+          VALID ACCOUNT
+        </Text>
+      </HStack>
+    )}
+  </HStack>
+
+  <HStack spacing={1} flexWrap="wrap">
+    <Badge
+      bg={grade.bg}
+      color={grade.color}
+      fontSize="9px"
+      fontWeight="900"
+      borderRadius="full"
+      px={2}
+      py={0.5}
+      borderWidth="1px"
+      borderColor={grade.color}
+      letterSpacing="0.05em"
     >
-      ON HOLD
-    </Text>
-  </>
-) : (
-  <>
-    <Text fontSize="lg" color="#8b5cf6" lineHeight="1" fontWeight="900">
-      ✓
-    </Text>
-    <Text
-      fontWeight="700"
-      fontSize="sm"
-      letterSpacing="0.1em"
-      textTransform="uppercase"
-      color="#8b5cf6"
-    >
-      VALID ACCOUNT
-    </Text>
-  </>
-)}
-    <HStack spacing={1} flexWrap="wrap">
+      {grade.grade}
+    </Badge>
+
+    {expiryBadge && (
       <Badge
-        bg={grade.bg}
-        color={grade.color}
+        bg={expiryBadge.bg}
+        color={expiryBadge.color}
         fontSize="9px"
-        fontWeight="900"
+        fontWeight="800"
         borderRadius="full"
         px={2}
         py={0.5}
         borderWidth="1px"
-        borderColor={grade.color}
-        letterSpacing="0.05em"
+        borderColor={expiryBadge.color}
       >
-        {grade.grade}
+        {expiryBadge.label}
       </Badge>
+    )}
 
-      {expiryBadge && (
-        <Badge
-          bg={expiryBadge.bg}
-          color={expiryBadge.color}
-          fontSize="9px"
-          fontWeight="800"
-          borderRadius="full"
-          px={2}
-          py={0.5}
-          borderWidth="1px"
-          borderColor={expiryBadge.color}
-        >
-          {expiryBadge.label}
-        </Badge>
-      )}
-
-      <Badge
-        bg={theme.badgeColor}
-        color="white"
-        fontSize="9px"
-        fontWeight="800"
-        letterSpacing="0.1em"
-        borderRadius="full"
-        px={2}
-        py={0.5}
-      >
-        {theme.badgeText}
-      </Badge>
-    </HStack>
+    <Badge
+      bg={theme.badgeColor}
+      color="white"
+      fontSize="9px"
+      fontWeight="800"
+      letterSpacing="0.1em"
+      borderRadius="full"
+      px={2}
+      py={0.5}
+    >
+      {theme.badgeText}
+    </Badge>
   </HStack>
+</HStack>
 
-            <Box borderBottomWidth="1px" borderBottomColor="rgba(255,255,255,0.1)" />
+<Box borderBottomWidth="1px" borderBottomColor="rgba(255,255,255,0.1)" />
           </Box>
 
           <Box px={4} pb={2} pt={2}>
