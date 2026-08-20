@@ -1649,6 +1649,14 @@ account.paymentHold =
 
     let html = res.data;
 
+    const holdValueMatch = String(html || '').match(
+  /"isUserOnHold"\s*:\s*(true|false)/i
+);
+
+console.log('[HOLD VALUE DEBUG]', {
+  rawIsUserOnHold: holdValueMatch ? holdValueMatch[1] : null,
+});
+
 const holdDebugSource = String(html || '').toLowerCase();
 
 console.log('[HOLD MARKER DEBUG]', {
