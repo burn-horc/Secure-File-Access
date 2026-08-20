@@ -1637,22 +1637,44 @@ const profileNames = Array.isArray(profilesList)
     return account;
   }
 
-  async checkCookie(cookieString, options = {}) {
-    try {
-      let res = await this.fetchAccountHtml(cookieString);
-      let finalUrl = this.getFinalResponseUrl(res);
+ async checkCookie(cookieString, options = {}) {
+  try {
+    let res = await this.fetchAccountHtml(cookieString);
+    let finalUrl = this.getFinalResponseUrl(res);
 
-      if (res.status !== 200) return { valid: false, reason: `HTTP ${res.status}` };
+    if (res.status !== 200) {
+      return { valid: false, reason: `HTTP ${res.status}` };
+    }
 
-      let html = res.data;
-      let account = this.extractAccountData(html);
-      let isLoggedIn = this.isLoggedIn(html, finalUrl);
-      let hasSignals = this.hasRealAccountSignals(account);
+    let html = res.data;
+    let account = this.extractAccountData(html);
 
-      if (!isLoggedIn && !hasSignals) {
-        const targetUrl = finalUrl || 'unknown-url';
-        return { valid: false, reason: `Not logged in (${targetUrl})` };
-      }
+    console.log('[ACCOUNT STATUS DEBUG]', {
+      membershipStatus: account.membershipStatus,
+      normalizedMembershipStatus:
+        this.toEnglishMembershipStatus(account.membershipStatus),
+
+      isUserOnHold: account.isUserOnHold,
+      paymentHold: account.paymentHold,
+
+      daysUntilExpiration: account.daysUntilExpiration,
+      nextBillingRaw: account.nextBillingRaw,
+      nextBilling: account.nextBilling,
+      membershipEndRaw: account.membershipEndRaw,
+      membershipEndDate: account.membershipEndDate,
+    });
+
+    let isLoggedIn = this.isLoggedIn(html, finalUrl);
+    let hasSignals = this.hasRealAccountSignals(account);
+
+    if (!isLoggedIn && !hasSignals) {
+      const targetUrl = finalUrl || 'unknown-url';
+
+      return {
+        valid: false,
+        reason: `Not logged in (${targetUrl})`,
+      };
+    }
 
       const membershipStatus = String(account.membershipStatus || '').trim().toUpperCase();
       if (membershipStatus === 'ANONYMOUS') {
