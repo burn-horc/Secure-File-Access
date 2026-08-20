@@ -181,7 +181,7 @@ if (!checkLimit) {
 console.log("Body keys:", Object.keys(body || {}));
 
 // TEST ONLY: lets us force an ON HOLD result through the classifier
-const testOnHold = normalizeBoolean(body.testOnHold);
+const testOnHold = true;
 
 console.log("Test ON HOLD:", testOnHold);
 
