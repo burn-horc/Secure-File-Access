@@ -997,29 +997,25 @@ const profileNames = Array.isArray(profilesList)
   const normalizedMembershipStatus =
     this.toEnglishMembershipStatus(account.membershipStatus);
 
+  const status =
+    normalizedMembershipStatus
+      ? normalizedMembershipStatus.trim().toLowerCase()
+      : '';
+
   const isBasicPlan =
     normalizedPlan &&
     normalizedPlan.trim().toLowerCase() === 'basic';
 
-  const isFormerMember =
-    normalizedMembershipStatus &&
-    normalizedMembershipStatus.trim().toLowerCase() === 'former member';
+  const isFormerMember = status === 'former member';
+  const isCanceled = status === 'canceled';
+  const isPastDue = status === 'past due';
 
-  const isCanceled =
-    normalizedMembershipStatus &&
-    normalizedMembershipStatus.trim().toLowerCase() === 'canceled';
-
-  const isPastDue =
-    normalizedMembershipStatus &&
-    normalizedMembershipStatus.trim().toLowerCase() === 'past due';
-
+  // IMPORTANT:
+  // Any ON HOLD signal always makes the account INVALID.
   const isOnHold =
     account.isUserOnHold === true ||
     account.paymentHold === true ||
-    (
-      normalizedMembershipStatus &&
-      normalizedMembershipStatus.trim().toLowerCase() === 'on hold'
-    );
+    status === 'on hold';
 
   const daysUntilExpirationRaw = Number.parseInt(
     String(account.daysUntilExpiration ?? ''),
@@ -1030,6 +1026,7 @@ const profileNames = Array.isArray(profilesList)
     Number.isFinite(daysUntilExpirationRaw) &&
     daysUntilExpirationRaw < 0;
 
+  // Check ON HOLD first.
   if (isOnHold) {
     reasons.push('On Hold');
   }
