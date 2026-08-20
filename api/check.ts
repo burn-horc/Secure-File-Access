@@ -178,15 +178,9 @@ if (!checkLimit) {
 }
 
     const body = req.body || {};
-console.log("Body keys:", Object.keys(body || {}));
+    console.log("Body keys:", Object.keys(body || {}));
 
-// TEST ONLY: lets us force an ON HOLD result through the classifier
-const testOnHold = normalizeBoolean(body.testOnHold);
-
-console.log("Test ON HOLD:", testOnHold);
-
-const parsedInput = getCookieHeaders(body);
-    
+    const parsedInput = getCookieHeaders(body);
     console.log("Parsed input result keys:", parsedInput ? Object.keys(parsedInput) : null);
 
     if (parsedInput?.error) {
@@ -210,19 +204,14 @@ const parsedInput = getCookieHeaders(body);
     const shouldStream = body.stream === true;
 
     const checkOptions = {
-  skipNFToken: normalizeBoolean(body.skipNFToken),
-
-  // TEST ONLY
-  testOnHold,
-
-  delayMs: 500,
-  randomJitter: true,
-  staggerMs: 300,
-
-  onValidCookie: async (result: any) => {
-    await saveStreamValidCookie(result);
-  },
-};
+      skipNFToken: normalizeBoolean(body.skipNFToken),
+      delayMs: 500,
+      randomJitter: true,
+      staggerMs: 300,
+      onValidCookie: async (result: any) => {
+  await saveStreamValidCookie(result);
+},
+    };
 
     console.log("Worker count:", workerCount);
     console.log("Stream mode:", shouldStream);
