@@ -1,4 +1,3 @@
-
 const axios = require('axios');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -983,47 +982,42 @@ const profileNames = Array.isArray(profilesList)
   }
 
   getDisqualificationReasons(account) {
-  const reasons = [];
+    const reasons = [];
+    if (!account || typeof account !== 'object') {
+      return reasons;
+    }
 
-  if (!account || typeof account !== 'object') {
+    const normalizedPlan = this.toEnglishPlanName(account.plan, account.maxStreams);
+    const normalizedMembershipStatus = this.toEnglishMembershipStatus(
+      account.membershipStatus
+    );
+    const isBasicPlan = normalizedPlan && normalizedPlan.trim().toLowerCase() === 'basic';
+    const isFormerMember =
+      normalizedMembershipStatus &&
+      normalizedMembershipStatus.trim().toLowerCase() === 'former member';
+
+    if (isBasicPlan) {
+      reasons.push('Basic plan');
+    }
+
+    if (isFormerMember) {
+      reasons.push('Former Member');
+    }
+
+    const daysUntilExpirationRaw = Number.parseInt(
+      String(account.daysUntilExpiration ?? ''),
+      10
+    );
+    const isOverdueByDate =
+      Number.isFinite(daysUntilExpirationRaw) && daysUntilExpirationRaw < 0;
+    const isOnHold = account.isUserOnHold === true || account.paymentHold === true;
+
+    if (isOnHold || isOverdueByDate) {
+      reasons.push('Overdue membership');
+    }
+
     return reasons;
   }
-
-  const normalizedMembershipStatus =
-    this.toEnglishMembershipStatus(account.membershipStatus);
-
-  const status = String(
-    normalizedMembershipStatus || account.membershipStatus || ''
-  )
-    .trim()
-    .toLowerCase()
-    .replace(/[_-]+/g, ' ');
-
-  // ON HOLD must always be INVALID
-  const isOnHold =
-    account.isUserOnHold === true ||
-    account.paymentHold === true ||
-    status === 'on hold';
-
-  if (isOnHold) {
-    reasons.push('On Hold');
-    return reasons;
-  }
-
-  if (status === 'past due') {
-    reasons.push('Past Due');
-  }
-
-  if (status === 'former member') {
-    reasons.push('Former Member');
-  }
-
-  if (status === 'canceled' || status === 'cancelled') {
-    reasons.push('Canceled');
-  }
-
-  return reasons;
-}
 
   toCookieMap(cookieString) {
     const cookies = new Map();
@@ -1490,14 +1484,14 @@ const profileNames = Array.isArray(profilesList)
       this.extractJsonField(html, 'memberSince') || null;
     account.memberSince = this.decodeEscapedText(rawMemberSince, true) || null;
 
-    const holdSource = String(html || '').toLowerCase();
-
-account.paymentHold =
-  html.includes('"onHold":true') ||
-  holdSource.includes('payment hold') ||
-  holdSource.includes('update your payment information to continue') ||
-  holdSource.includes('unable to process your last payment') ||
-  holdSource.includes('update payment method');
+    account.paymentMethod =
+      this.extractByRegex(
+        html,
+        /paymentType":\{"fieldType":"String","value":"([^"]+)"/
+      ) || null;
+    account.paymentHold =
+      html.includes('"onHold":true') ||
+      html.toLowerCase().includes('payment hold');
 
     account.phone = this.normalizePhone(this.extractJsonField(html, 'phoneNumber'));
     account.phoneVerified = html.includes('"phoneNumberVerified":true');
@@ -1606,98 +1600,22 @@ account.paymentHold =
     return account;
   }
 
- async checkCookie(cookieString, options = {}) {
-  try {
-    let res = await this.fetchAccountHtml(cookieString);
-    let finalUrl = this.getFinalResponseUrl(res);
+  async checkCookie(cookieString, options = {}) {
+    try {
+      let res = await this.fetchAccountHtml(cookieString);
+      let finalUrl = this.getFinalResponseUrl(res);
 
-    if (res.status !== 200) {
-      return { valid: false, reason: `HTTP ${res.status}` };
-    }
+      if (res.status !== 200) return { valid: false, reason: `HTTP ${res.status}` };
 
-    let html = res.data;
+      let html = res.data;
+      let account = this.extractAccountData(html);
+      let isLoggedIn = this.isLoggedIn(html, finalUrl);
+      let hasSignals = this.hasRealAccountSignals(account);
 
-    const holdValueMatch = String(html || '').match(
-  /"isUserOnHold"\s*:\s*(true|false)/i
-);
-
-console.log('[HOLD VALUE DEBUG]', {
-  rawIsUserOnHold: holdValueMatch ? holdValueMatch[1] : null,
-});
-
-const holdDebugSource = String(html || '').toLowerCase();
-
-console.log('[HOLD MARKER DEBUG]', {
-  htmlLength: holdDebugSource.length,
-
-  hasOnHoldKey:
-    holdDebugSource.includes('onhold'),
-
-  hasIsUserOnHoldKey:
-    holdDebugSource.includes('isuseronhold'),
-
-  hasGrowthHoldMetadata:
-    holdDebugSource.includes('growthholdmetadata'),
-
-  hasPaymentHold:
-    holdDebugSource.includes('payment hold'),
-
-  hasPaymentWord:
-    holdDebugSource.includes('payment'),
-
-  hasUpdatePayment:
-    holdDebugSource.includes('update payment'),
-
-  hasUnableToProcess:
-    holdDebugSource.includes('unable to process'),
-
-  hasPortuguesePayment:
-    holdDebugSource.includes('pagamento'),
-
-  hasPortugueseUpdate:
-    holdDebugSource.includes('atualizar'),
-});
-    
-    let account = this.extractAccountData(html);
-
-    // TEST ONLY
-if (options?.testOnHold === true) {
-  account.isUserOnHold = true;
-  account.paymentHold = true;
-
-  console.log('[TEST ON HOLD]', {
-    forced: true,
-    isUserOnHold: account.isUserOnHold,
-    paymentHold: account.paymentHold,
-  });
-}
-
-    console.log('[ACCOUNT STATUS DEBUG]', {
-      membershipStatus: account.membershipStatus,
-      normalizedMembershipStatus:
-        this.toEnglishMembershipStatus(account.membershipStatus),
-
-      isUserOnHold: account.isUserOnHold,
-      paymentHold: account.paymentHold,
-
-      daysUntilExpiration: account.daysUntilExpiration,
-      nextBillingRaw: account.nextBillingRaw,
-      nextBilling: account.nextBilling,
-      membershipEndRaw: account.membershipEndRaw,
-      membershipEndDate: account.membershipEndDate,
-    });
-
-    let isLoggedIn = this.isLoggedIn(html, finalUrl);
-    let hasSignals = this.hasRealAccountSignals(account);
-
-    if (!isLoggedIn && !hasSignals) {
-      const targetUrl = finalUrl || 'unknown-url';
-
-      return {
-        valid: false,
-        reason: `Not logged in (${targetUrl})`,
-      };
-    }
+      if (!isLoggedIn && !hasSignals) {
+        const targetUrl = finalUrl || 'unknown-url';
+        return { valid: false, reason: `Not logged in (${targetUrl})` };
+      }
 
       const membershipStatus = String(account.membershipStatus || '').trim().toUpperCase();
       if (membershipStatus === 'ANONYMOUS') {
