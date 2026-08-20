@@ -443,17 +443,13 @@ async function runCheckPayloads(requestPayloads, handlers = {}, abortSignal) {
     const chunkOffset = globalOffset;
     let chunkSize = Array.isArray(requestPayload.cookies) ? requestPayload.cookies.length : 0;
 
-    const response = await fetch("/api/check", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      signal: abortSignal,
-      body: JSON.stringify({
-  ...requestPayload,
-  testOnHold: true,
-}),
-      
-    });
+   const response = await fetch("/api/check", {
+  method: "POST",
+  credentials: "include",
+  headers: { "Content-Type": "application/json" },
+  signal: abortSignal,
+  body: JSON.stringify(requestPayload),
+});
 
     const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
     const isStream = contentType.includes("text/event-stream");
