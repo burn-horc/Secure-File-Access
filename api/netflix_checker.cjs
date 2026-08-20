@@ -989,66 +989,37 @@ const profileNames = Array.isArray(profilesList)
     return reasons;
   }
 
-  const normalizedPlan = this.toEnglishPlanName(
-    account.plan,
-    account.maxStreams
-  );
-
   const normalizedMembershipStatus =
     this.toEnglishMembershipStatus(account.membershipStatus);
 
-  const status =
-    normalizedMembershipStatus
-      ? normalizedMembershipStatus.trim().toLowerCase()
-      : '';
+  const status = String(
+    normalizedMembershipStatus || account.membershipStatus || ''
+  )
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, ' ');
 
-  const isBasicPlan =
-    normalizedPlan &&
-    normalizedPlan.trim().toLowerCase() === 'basic';
-
-  const isFormerMember = status === 'former member';
-  const isCanceled = status === 'canceled';
-  const isPastDue = status === 'past due';
-
-  // IMPORTANT:
-  // Any ON HOLD signal always makes the account INVALID.
+  // ON HOLD must always be INVALID
   const isOnHold =
     account.isUserOnHold === true ||
     account.paymentHold === true ||
     status === 'on hold';
 
-  const daysUntilExpirationRaw = Number.parseInt(
-    String(account.daysUntilExpiration ?? ''),
-    10
-  );
-
-  const isOverdueByDate =
-    Number.isFinite(daysUntilExpirationRaw) &&
-    daysUntilExpirationRaw < 0;
-
-  // Check ON HOLD first.
   if (isOnHold) {
     reasons.push('On Hold');
+    return reasons;
   }
 
-  if (isPastDue) {
+  if (status === 'past due') {
     reasons.push('Past Due');
   }
 
-  if (isFormerMember) {
+  if (status === 'former member') {
     reasons.push('Former Member');
   }
 
-  if (isCanceled) {
+  if (status === 'canceled' || status === 'cancelled') {
     reasons.push('Canceled');
-  }
-
-  if (isBasicPlan) {
-    reasons.push('Basic plan');
-  }
-
-  if (isOverdueByDate && !isOnHold) {
-    reasons.push('Overdue membership');
   }
 
   return reasons;
