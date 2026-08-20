@@ -39,14 +39,13 @@ async function savePassedCheckAudits(
   if (!passed.length) return;
 
   const liveRows = passed.map((item) => ({
-    account_id: item.accountId || crypto.randomUUID(),
-    status: "passed",
-    cookie_header: item.cookieHeader || null,
-    plan: item.plan || null,
-    country: item.countryOfSignup || null,
-    checked_at: new Date().toISOString(),
-    expires_at: item.nextBillingRaw || null,
-  }));
+  account_id: item.accountId || crypto.randomUUID(),
+  status: "passed",
+  plan: item.plan || null,
+  country: item.countryOfSignup || null,
+  checked_at: new Date().toISOString(),
+  expires_at: item.nextBillingRaw || null,
+}));
 
   const { error: liveError } = await supabase.from("live_checks").insert(liveRows);
 
@@ -81,22 +80,29 @@ async function saveStreamValidCookie(result: any) {
   const checkedAt = new Date().toISOString();
   const accountId = result.accountId || crypto.randomUUID();
 
-  const { error: liveError } = await supabase.from("live_checks").insert([
-    {
-      account_id: accountId,
-      status: "passed",
-      cookie_header: result.cookieHeader,
-      plan: result.plan || null,
-      country: result.countryOfSignup || null,
-      checked_at: checkedAt,
-      expires_at: result.nextBillingRaw || null,
-    },
-  ]);
+  // live_checks: do NOT send cookie_header because that column
+  // does not exist in this table.
+  const { error: liveError } = await supabase
+    .from("live_checks")
+    .insert([
+      {
+        account_id: accountId,
+        status: "passed",
+        plan: result.plan || null,
+        country: result.countryOfSignup || null,
+        checked_at: checkedAt,
+        expires_at: result.nextBillingRaw || null,
+      },
+    ]);
 
   if (liveError) {
-    console.error("stream live_checks insert error:", liveError.message);
+    console.error(
+      "stream live_checks insert error:",
+      liveError.message
+    );
   }
 
+  // Keep storing the session header in checked_cookies
   const { error: cookieError } = await supabase
     .from("checked_cookies")
     .upsert(
@@ -113,7 +119,10 @@ async function saveStreamValidCookie(result: any) {
     );
 
   if (cookieError) {
-    console.error("stream checked_cookies upsert error:", cookieError.message);
+    console.error(
+      "stream checked_cookies upsert error:",
+      cookieError.message
+    );
   }
 }
 function isRetryableFailure(result: any) {
