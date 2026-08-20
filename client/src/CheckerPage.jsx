@@ -200,9 +200,6 @@ function getAccountGrade(result) {
       if (ageYears > 2) score += 1;
     }
   }
- if (result?.onHold) {
-    score -= 3;
-  }
   if (score >= 6) return { grade: 'S', color: '#ffe066', bg: 'rgba(255,224,102,0.12)' };
   if (score >= 5) return { grade: 'A', color: '#00d563', bg: 'rgba(0,213,99,0.12)' };
   if (score >= 3) return { grade: 'B', color: '#1a56db', bg: 'rgba(26,86,219,0.15)' };
@@ -509,17 +506,7 @@ const isTrialPage = mode === "trial";
   `;
   const pulseRedAnim = prefersReducedMotion ? undefined : `${pulseRedKf} 0.9s ease-in-out infinite`;
 
-  const getPlanTheme = (plan, onHold) => {
-    if (onHold) {
-    return {
-      accent: "#f6c90e",
-      border: "#f6c90e",
-      bg: "linear-gradient(160deg, #1e1a04 0%, #120f02 100%)",
-      glowAnim: prefersReducedMotion ? undefined : `${cardGlowGoldKf} 2.5s ease-in-out infinite`,
-      badgeColor: "#f6c90e",
-      badgeText: "ON HOLD",
-    };
-  }
+  const getPlanTheme = (plan) => {
     const p = (plan || "").toLowerCase();
     if (p.includes("ultimate")) return {
       accent: "#e040fb", border: "#7c3aed",
@@ -1048,13 +1035,23 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                       fontFamily="'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Menlo, Consolas, monospace"
                     >
                       {checkProgress.total > 0 && (
-  <HStack justify="center" spacing={4} fontSize="xs" fontFamily="mono" py={1.5} px={2} borderRadius="8px" bg="rgba(255,255,255,0.04)" mb={2}>
-    <Text m={0} color="#00d563" fontWeight="700">✓ {liveValidCount ?? 0} Valid</Text>
-    <Text m={0} color="#f6c90e" fontWeight="700">⛔ {bulkValidResults?.filter(r => r.onHold).length ?? 0} On Hold</Text>
-    <Text m={0} color="#ff4d4d" fontWeight="700">✗ {liveInvalidCount ?? 0} Invalid</Text>
-    <Text m={0} color="rgba(255,255,255,0.4)">⏳ {Math.max(0, checkProgress.total - checkProgress.completed)} Left</Text>
-  </HStack>
-)}
+                        <HStack
+                          justify="center"
+                          spacing={4}
+                          fontSize="xs"
+                          fontFamily="mono"
+                          py={1.5}
+                          px={2}
+                          borderRadius="8px"
+                          bg="rgba(255,255,255,0.04)"
+                          mb={2}
+                          data-testid="stats-bar-live"
+                        >
+                          <Text m={0} color="#00d563" fontWeight="700">✓ {liveValidCount ?? 0} Valid</Text>
+                          <Text m={0} color="#ff4d4d" fontWeight="700">✗ {liveInvalidCount ?? 0} Invalid</Text>
+                          <Text m={0} color="rgba(255,255,255,0.4)">⏳ {Math.max(0, checkProgress.total - checkProgress.completed)} Left</Text>
+                        </HStack>
+                      )}
                       {checkLogs.length === 0 ? (
                         <Box m={0} pl={3} borderLeftWidth="2px" borderLeftColor="rgba(255,255,255,0.72)">
                           <Text m={0} color="rgba(255,255,255,0.8)">
@@ -1568,73 +1565,69 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   pr="80px"
 >
       <HStack spacing={2} align="center">
-  <Text>
-    {showHistory 
-      ? "📚 History" 
-      : `✅ Valid: ${bulkValidResults?.filter(r => r.valid && !r.onHold).length || 0} | ⛔ On Hold: ${bulkValidResults?.filter(r => r.onHold).length || 0}`}
-  </Text>
-  {sessionUnlocked && (
-    <HStack spacing={1}>
-      {!showHistory && bulkValidResults?.length > 0 && (
-        <Button
-          size="xs"
-          variant="ghost"
-          color={bulkRecheckState.done === bulkRecheckState.total && bulkRecheckState.total > 0 && !bulkRecheckState.loading
-            ? "#00d563"
-            : bulkRecheckState.loading ? "#f6c90e" : "rgba(255,255,255,0.4)"}
-          fontSize="11px"
-          px={1.5}
-          minW="auto"
-          h="auto"
-          py={0.5}
-          title="Re-check all found accounts"
-          isDisabled={bulkRecheckState.loading}
-          onClick={handleRecheckAll}
-          data-testid="button-recheck-all"
-          _hover={{ color: "#00d563" }}
-        >
-          {bulkRecheckState.loading
-            ? `⏳ ${bulkRecheckState.done}/${bulkRecheckState.total}`
-            : bulkRecheckState.done > 0 && bulkRecheckState.done === bulkRecheckState.total
-            ? "✓ Done"
-            : "🔄 All"}
-        </Button>
-      )}
-      <Button
-        size="xs"
-        variant="ghost"
-        color={showHistory ? "#ffe066" : "rgba(255,255,255,0.4)"}
-        fontSize="13px"
-        px={1}
-        minW="auto"
-        h="auto"
-        py={0.5}
-        title="Account history"
-        onClick={() => setShowHistory(h => !h)}
-        data-testid="button-history-toggle"
-        _hover={{ color: "#ffe066" }}
-      >
-        📚{accountHistory.length > 0 && <Text as="span" fontSize="9px" ml="1px">{accountHistory.length}</Text>}
-      </Button>
-      <Button
-        size="xs"
-        variant="ghost"
-        color={soundEnabled ? "#00d563" : "rgba(255,255,255,0.3)"}
-        fontSize="13px"
-        px={1}
-        minW="auto"
-        h="auto"
-        py={0.5}
-        title="Toggle success sound"
-        onClick={toggleSound}
-        data-testid="button-sound-toggle"
-        _hover={{ color: soundEnabled ? "#00d563" : "rgba(255,255,255,0.6)" }}
-      >
-        {soundEnabled ? "🔔" : "🔕"}
-      </Button>
-    </HStack>
-  )}
-</HStack>
+        <Text>{showHistory ? "📚 History" : `Valid Accounts (${bulkValidResults?.length || 0})`}</Text>
+        {sessionUnlocked && (
+          <HStack spacing={1}>
+            {!showHistory && bulkValidResults?.length > 0 && (
+              <Button
+                size="xs"
+                variant="ghost"
+                color={bulkRecheckState.done === bulkRecheckState.total && bulkRecheckState.total > 0 && !bulkRecheckState.loading
+                  ? "#00d563"
+                  : bulkRecheckState.loading ? "#f6c90e" : "rgba(255,255,255,0.4)"}
+                fontSize="11px"
+                px={1.5}
+                minW="auto"
+                h="auto"
+                py={0.5}
+                title="Re-check all found accounts"
+                isDisabled={bulkRecheckState.loading}
+                onClick={handleRecheckAll}
+                data-testid="button-recheck-all"
+                _hover={{ color: "#00d563" }}
+              >
+                {bulkRecheckState.loading
+                  ? `⏳ ${bulkRecheckState.done}/${bulkRecheckState.total}`
+                  : bulkRecheckState.done > 0 && bulkRecheckState.done === bulkRecheckState.total
+                  ? "✓ Done"
+                  : "🔄 All"}
+              </Button>
+            )}
+            <Button
+              size="xs"
+              variant="ghost"
+              color={showHistory ? "#ffe066" : "rgba(255,255,255,0.4)"}
+              fontSize="13px"
+              px={1}
+              minW="auto"
+              h="auto"
+              py={0.5}
+              title="Account history"
+              onClick={() => setShowHistory(h => !h)}
+              data-testid="button-history-toggle"
+              _hover={{ color: "#ffe066" }}
+            >
+              📚{accountHistory.length > 0 && <Text as="span" fontSize="9px" ml="1px">{accountHistory.length}</Text>}
+            </Button>
+            <Button
+              size="xs"
+              variant="ghost"
+              color={soundEnabled ? "#00d563" : "rgba(255,255,255,0.3)"}
+              fontSize="13px"
+              px={1}
+              minW="auto"
+              h="auto"
+              py={0.5}
+              title="Toggle success sound"
+              onClick={toggleSound}
+              data-testid="button-sound-toggle"
+              _hover={{ color: soundEnabled ? "#00d563" : "rgba(255,255,255,0.6)" }}
+            >
+              {soundEnabled ? "🔔" : "🔕"}
+            </Button>
+          </HStack>
+        )}
+      </HStack>
     </ModalHeader>
 
     <Box position="absolute" top="10px" right="44px" zIndex={10}>
@@ -1691,7 +1684,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         </Text>
       )}
       {accountHistory.map((result, index) => {
-        const theme = getPlanTheme(result?.plan, result?.onHold);
+        const theme = getPlanTheme(result?.plan);
         const expiryBadge = getExpiryBadge(result?.nextBilling);
       
       return (
@@ -1748,7 +1741,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
   ["PROFILES", getProfileNames(result?.profiles).join(", ")],
 ];
 
-     const theme = getPlanTheme(result?.plan, result?.onHold);
+      const theme = getPlanTheme(result?.plan);
       const expiryBadge = getExpiryBadge(result?.nextBilling);
       const recheckState = recheckStates[index] || {};
       const grade = getAccountGrade(result);
@@ -1767,103 +1760,84 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         >
           <Box px={4} pt={4} pb={2}>
             <HStack spacing={2} mb={2} justify="space-between" flexWrap="wrap">
-  <HStack spacing={2}>
-    <Text fontSize="xs" color="rgba(255,255,255,0.35)" fontFamily="mono" fontWeight="700">
-      #{index + 1}
-    </Text>
+              <HStack spacing={2}>
+                <Text fontSize="xs" color="rgba(255,255,255,0.35)" fontFamily="mono" fontWeight="700">
+                  #{index + 1}
+                </Text>
 
-    {isLive && (
-      <HStack spacing={1} align="center">
-        <Box as="span" animation={pulseRedAnim} fontSize="9px" lineHeight="1" display="inline-block">
-          🔴
-        </Box>
-        <Text fontSize="9px" color="#ff4d4d" fontWeight="800" letterSpacing="0.08em">
-          LIVE
-        </Text>
-      </HStack>
-    )}
+                {isLive && (
+                  <HStack spacing={1} align="center">
+                    <Box as="span" animation={pulseRedAnim} fontSize="9px" lineHeight="1" display="inline-block">
+                      🔴
+                    </Box>
+                    <Text fontSize="9px" color="#ff4d4d" fontWeight="800" letterSpacing="0.08em">
+                      LIVE
+                    </Text>
+                  </HStack>
+                )}
 
-    {result.onHold ? (
-      <HStack spacing={2}>
-        <Text fontSize="lg" color="#f6c90e" lineHeight="1" fontWeight="900">
-          ⛔
-        </Text>
-        <Text
-          fontWeight="700"
-          fontSize="sm"
-          letterSpacing="0.1em"
-          textTransform="uppercase"
-          color="#f6c90e"
-        >
-          ON HOLD
-        </Text>
-      </HStack>
-    ) : (
-      <HStack spacing={2}>
-        <Text fontSize="lg" color={theme.accent} lineHeight="1" fontWeight="900">
-          ✓
-        </Text>
-        <Text
-          fontWeight="700"
-          fontSize="sm"
-          letterSpacing="0.1em"
-          textTransform="uppercase"
-          color={theme.accent}
-        >
-          VALID ACCOUNT
-        </Text>
-      </HStack>
-    )}
-  </HStack>
+                <Text fontSize="lg" color={theme.accent} lineHeight="1" fontWeight="900">
+                  ✓
+                </Text>
+                <Text
+                  fontWeight="700"
+                  fontSize="sm"
+                  letterSpacing="0.1em"
+                  textTransform="uppercase"
+                  color={theme.accent}
+                >
+                  VALID ACCOUNT
+                </Text>
+              </HStack>
 
-  <HStack spacing={1} flexWrap="wrap">
-    <Badge
-      bg={grade.bg}
-      color={grade.color}
-      fontSize="9px"
-      fontWeight="900"
-      borderRadius="full"
-      px={2}
-      py={0.5}
-      borderWidth="1px"
-      borderColor={grade.color}
-      letterSpacing="0.05em"
-    >
-      {grade.grade}
-    </Badge>
+              <HStack spacing={1} flexWrap="wrap">
+                <Badge
+                  bg={grade.bg}
+                  color={grade.color}
+                  fontSize="9px"
+                  fontWeight="900"
+                  borderRadius="full"
+                  px={2}
+                  py={0.5}
+                  borderWidth="1px"
+                  borderColor={grade.color}
+                  letterSpacing="0.05em"
+                >
+                  {grade.grade}
+                </Badge>
 
-    {expiryBadge && (
-      <Badge
-        bg={expiryBadge.bg}
-        color={expiryBadge.color}
-        fontSize="9px"
-        fontWeight="800"
-        borderRadius="full"
-        px={2}
-        py={0.5}
-        borderWidth="1px"
-        borderColor={expiryBadge.color}
-      >
-        {expiryBadge.label}
-      </Badge>
-    )}
+                {expiryBadge && (
+                  <Badge
+                    bg={expiryBadge.bg}
+                    color={expiryBadge.color}
+                    fontSize="9px"
+                    fontWeight="800"
+                    borderRadius="full"
+                    px={2}
+                    py={0.5}
+                    borderWidth="1px"
+                    borderColor={expiryBadge.color}
+                  >
+                    {expiryBadge.label}
+                  </Badge>
+                )}
 
-    <Badge
-      bg={theme.badgeColor}
-      color="white"
-      fontSize="9px"
-      fontWeight="800"
-      letterSpacing="0.1em"
-      borderRadius="full"
-      px={2}
-      py={0.5}
-    >
-      {theme.badgeText}
-    </Badge>
-  </HStack>
-</HStack>
+                <Badge
+                  bg={theme.badgeColor}
+                  color="white"
+                  fontSize="9px"
+                  fontWeight="800"
+                  letterSpacing="0.1em"
+                  borderRadius="full"
+                  px={2}
+                  py={0.5}
+                >
+                  {theme.badgeText}
+                </Badge>
+              </HStack>
+            </HStack>
 
-<Box borderBottomWidth="1px" borderBottomColor="rgba(255,255,255,0.1)" />
+            <Box borderBottomWidth="1px" borderBottomColor="rgba(255,255,255,0.1)" />
           </Box>
 
           <Box px={4} pb={2} pt={2}>
