@@ -1648,6 +1648,40 @@ account.paymentHold =
     }
 
     let html = res.data;
+
+const holdDebugSource = String(html || '').toLowerCase();
+
+console.log('[HOLD MARKER DEBUG]', {
+  htmlLength: holdDebugSource.length,
+
+  hasOnHoldKey:
+    holdDebugSource.includes('onhold'),
+
+  hasIsUserOnHoldKey:
+    holdDebugSource.includes('isuseronhold'),
+
+  hasGrowthHoldMetadata:
+    holdDebugSource.includes('growthholdmetadata'),
+
+  hasPaymentHold:
+    holdDebugSource.includes('payment hold'),
+
+  hasPaymentWord:
+    holdDebugSource.includes('payment'),
+
+  hasUpdatePayment:
+    holdDebugSource.includes('update payment'),
+
+  hasUnableToProcess:
+    holdDebugSource.includes('unable to process'),
+
+  hasPortuguesePayment:
+    holdDebugSource.includes('pagamento'),
+
+  hasPortugueseUpdate:
+    holdDebugSource.includes('atualizar'),
+});
+    
     let account = this.extractAccountData(html);
 
     console.log('[ACCOUNT STATUS DEBUG]', {
