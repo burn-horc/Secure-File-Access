@@ -1521,14 +1521,14 @@ const profileNames = Array.isArray(profilesList)
       this.extractJsonField(html, 'memberSince') || null;
     account.memberSince = this.decodeEscapedText(rawMemberSince, true) || null;
 
-    account.paymentMethod =
-      this.extractByRegex(
-        html,
-        /paymentType":\{"fieldType":"String","value":"([^"]+)"/
-      ) || null;
-    account.paymentHold =
-      html.includes('"onHold":true') ||
-      html.toLowerCase().includes('payment hold');
+    const holdSource = String(html || '').toLowerCase();
+
+account.paymentHold =
+  html.includes('"onHold":true') ||
+  holdSource.includes('payment hold') ||
+  holdSource.includes('update your payment information to continue') ||
+  holdSource.includes('unable to process your last payment') ||
+  holdSource.includes('update payment method');
 
     account.phone = this.normalizePhone(this.extractJsonField(html, 'phoneNumber'));
     account.phoneVerified = html.includes('"phoneNumberVerified":true');
