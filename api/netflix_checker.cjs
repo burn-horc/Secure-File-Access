@@ -982,42 +982,79 @@ const profileNames = Array.isArray(profilesList)
   }
 
   getDisqualificationReasons(account) {
-    const reasons = [];
-    if (!account || typeof account !== 'object') {
-      return reasons;
-    }
+  const reasons = [];
 
-    const normalizedPlan = this.toEnglishPlanName(account.plan, account.maxStreams);
-    const normalizedMembershipStatus = this.toEnglishMembershipStatus(
-      account.membershipStatus
-    );
-    const isBasicPlan = normalizedPlan && normalizedPlan.trim().toLowerCase() === 'basic';
-    const isFormerMember =
-      normalizedMembershipStatus &&
-      normalizedMembershipStatus.trim().toLowerCase() === 'former member';
-
-    if (isBasicPlan) {
-      reasons.push('Basic plan');
-    }
-
-    if (isFormerMember) {
-      reasons.push('Former Member');
-    }
-
-    const daysUntilExpirationRaw = Number.parseInt(
-      String(account.daysUntilExpiration ?? ''),
-      10
-    );
-    const isOverdueByDate =
-      Number.isFinite(daysUntilExpirationRaw) && daysUntilExpirationRaw < 0;
-    const isOnHold = account.isUserOnHold === true || account.paymentHold === true;
-
-    if (isOnHold || isOverdueByDate) {
-      reasons.push('Overdue membership');
-    }
-
+  if (!account || typeof account !== 'object') {
     return reasons;
   }
+
+  const normalizedPlan = this.toEnglishPlanName(
+    account.plan,
+    account.maxStreams
+  );
+
+  const normalizedMembershipStatus =
+    this.toEnglishMembershipStatus(account.membershipStatus);
+
+  const isBasicPlan =
+    normalizedPlan &&
+    normalizedPlan.trim().toLowerCase() === 'basic';
+
+  const isFormerMember =
+    normalizedMembershipStatus &&
+    normalizedMembershipStatus.trim().toLowerCase() === 'former member';
+
+  const isCanceled =
+    normalizedMembershipStatus &&
+    normalizedMembershipStatus.trim().toLowerCase() === 'canceled';
+
+  const isPastDue =
+    normalizedMembershipStatus &&
+    normalizedMembershipStatus.trim().toLowerCase() === 'past due';
+
+  const isOnHold =
+    account.isUserOnHold === true ||
+    account.paymentHold === true ||
+    (
+      normalizedMembershipStatus &&
+      normalizedMembershipStatus.trim().toLowerCase() === 'on hold'
+    );
+
+  const daysUntilExpirationRaw = Number.parseInt(
+    String(account.daysUntilExpiration ?? ''),
+    10
+  );
+
+  const isOverdueByDate =
+    Number.isFinite(daysUntilExpirationRaw) &&
+    daysUntilExpirationRaw < 0;
+
+  if (isOnHold) {
+    reasons.push('On Hold');
+  }
+
+  if (isPastDue) {
+    reasons.push('Past Due');
+  }
+
+  if (isFormerMember) {
+    reasons.push('Former Member');
+  }
+
+  if (isCanceled) {
+    reasons.push('Canceled');
+  }
+
+  if (isBasicPlan) {
+    reasons.push('Basic plan');
+  }
+
+  if (isOverdueByDate && !isOnHold) {
+    reasons.push('Overdue membership');
+  }
+
+  return reasons;
+}
 
   toCookieMap(cookieString) {
     const cookies = new Map();
