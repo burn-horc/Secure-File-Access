@@ -1660,6 +1660,18 @@ console.log('[HOLD MARKER DEBUG]', {
     
     let account = this.extractAccountData(html);
 
+    // TEST ONLY
+if (options?.testOnHold === true) {
+  account.isUserOnHold = true;
+  account.paymentHold = true;
+
+  console.log('[TEST ON HOLD]', {
+    forced: true,
+    isUserOnHold: account.isUserOnHold,
+    paymentHold: account.paymentHold,
+  });
+}
+
     console.log('[ACCOUNT STATUS DEBUG]', {
       membershipStatus: account.membershipStatus,
       normalizedMembershipStatus:
