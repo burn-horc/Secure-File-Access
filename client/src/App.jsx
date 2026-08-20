@@ -448,7 +448,10 @@ async function runCheckPayloads(requestPayloads, handlers = {}, abortSignal) {
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       signal: abortSignal,
-      body: JSON.stringify(requestPayload),
+      body: JSON.stringify({
+  ...requestPayload,
+  testOnHold: true,
+}),
       
     });
 
