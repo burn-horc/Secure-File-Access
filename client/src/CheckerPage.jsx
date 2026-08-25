@@ -1045,7 +1045,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                       fontSize="sm"
                       fontFamily="'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Menlo, Consolas, monospace"
                     >
-                      {/* ✅ SHOW UNTIL A VALID ACCOUNT IS FOUND OR SCAN COMPLETES */}
+                     {/* ✅ WAITING MESSAGE – Shows until a valid account is found */}
 {isLoading && bulkValidResults.length === 0 && (
   <Box
     bg="rgba(255,255,255,0.03)"
