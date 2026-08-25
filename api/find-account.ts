@@ -87,7 +87,7 @@ async function fetchPremiumCookies() {
   
   const { data, error } = await supabase
     .from("checked_cookies")
-    .select("id, text, plan, country, status, checked_at, cookie_header, account_id, email")
+    .select("cookie_header")
     .eq("plan", "Premium")
     .neq("status", "expired")
     .not("text", "is", null)
