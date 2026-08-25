@@ -887,7 +887,7 @@ const guideTvBtn = {
         textTransform="uppercase"
         mb={2}
       >
-        🔍 Finding Valid NETFLIX Account
+        🔍 Hunting for Valid NETFLIX Account
       </Text>
       <Text
         fontSize="sm"
@@ -895,13 +895,13 @@ const guideTvBtn = {
         lineHeight="1.6"
         mb={4}
       >
-        Scanning Premium Netflix at high speed...
+        Scanning thousands of Premium accounts
         <br />
-         Finding a valid account in seconds
+        Locking onto a valid account in seconds
       </Text>
       <Box borderTop="1px solid rgba(139,92,246,0.15)" pt={3}>
         <Text fontSize="xs" color="rgba(255,255,255,0.35)">
-          ⏳ Please wait while we find a valid account
+          ⏳ Please wait...
         </Text>
       </Box>
     </Box>
