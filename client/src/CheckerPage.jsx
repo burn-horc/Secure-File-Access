@@ -1045,8 +1045,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                       fontSize="sm"
                       fontFamily="'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Menlo, Consolas, monospace"
                     >
-                       {/* ✅ SIMPLE VERSION – Only uses isLoading */}
-{isLoading && (
+                      {/* ✅ SHOW UNTIL A VALID ACCOUNT IS FOUND OR SCAN COMPLETES */}
+{isLoading && bulkValidResults.length === 0 && (
   <Box
     bg="rgba(255,255,255,0.03)"
     border="1px solid rgba(139,92,246,0.25)"
