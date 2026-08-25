@@ -763,7 +763,6 @@ export default function App() {
   const [vpnBlocked, setVpnBlocked] = useState(false);
   const [verifiedPasscode, setVerifiedPasscode] = useState("");
   const [location, setLocation] = useLocation();
-  const [isWaitingForAccount, setIsWaitingForAccount] = useState(false);
 
 
   const paymentReturnState =
@@ -1306,8 +1305,6 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
   const runFindAccountScan = async (passcodeArg = verifiedPasscode) => {
   if (isLoading) return;
 
-    setIsWaitingForAccount(true);
-
   const abortController = new AbortController();
   activeCheckAbortControllerRef.current = abortController;
   nextCheckLogIdRef.current = 1;
@@ -1332,7 +1329,6 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     }
 
     appendCheckLog("info", "Finding Valid NETFLIX Account...");
-    setIsWaitingForAccount(false);
 
 // timeout if nothing happens
 const noResultTimer = setTimeout(() => {
@@ -1454,12 +1450,9 @@ appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`
       caughtError instanceof Error ? caughtError.message : "Unexpected client error";
     appendCheckLog("invalid", `Error: ${message}`);
     showToast(message);
-
-    setIsWaitingForAccount(false);
   } finally {
     activeCheckAbortControllerRef.current = null;
     setIsLoading(false);
-    setIsWaitingForAccount(false);
   }
 };
   
