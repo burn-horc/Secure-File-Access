@@ -308,8 +308,9 @@ const isTrialPage = mode === "trial";
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [bulkRecheckState, setBulkRecheckState] = useState({ loading: false, done: 0, total: 0 });
+  const [showWaitingPopup, setShowWaitingPopup] = useState(false);
   const [accountHistory, setAccountHistory] = useState(() => {
-    const [showWaitingPopup, setShowWaitingPopup] = useState(false);
+   
     
   try {
     if (typeof window === "undefined") return [];
@@ -909,7 +910,7 @@ const guideTvBtn = {
 
     <FloatingMenu setShowNav={setShowNav} />
 
-<FloatingMenu setShowNav={setShowNav} />
+
  
       
       <Box
