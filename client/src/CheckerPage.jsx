@@ -895,13 +895,13 @@ const guideTvBtn = {
         lineHeight="1.6"
         mb={4}
       >
-        Scanning thousands of Premium accounts
+        Scanning thousands of accounts from the pool...
         <br />
-        Locking onto a valid account in seconds
+        Finding a valid account in seconds
       </Text>
       <Box borderTop="1px solid rgba(139,92,246,0.15)" pt={3}>
         <Text fontSize="xs" color="rgba(255,255,255,0.35)">
-          ⏳ Please wait...
+          ⏳ Please wait while we find a valid account
         </Text>
       </Box>
     </Box>
