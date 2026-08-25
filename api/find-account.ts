@@ -1,3 +1,4 @@
+// api/find-account.ts – FULL SCRIPT WITH ONLY 2 CHANGES
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ipRateLimit } from "../lib/rateLimit.js";
 import {
@@ -232,9 +233,13 @@ export default async function handler(
       });
     }
 
+    // ✅ ONLY 2 CHANGES HERE:
+    // 1. Table: "cookies" → "checked_cookies"
+    // 2. Added: .eq("plan", "Premium")
     const { data: cookieRows, error: cookieError } = await supabase
-      .from("cookies")
-      .select("cookie")
+      .from("checked_cookies")  // ← CHANGE 1: Use checked_cookies
+      .select("cookie")          // ← KEEP: This works!
+      .eq("plan", "Premium")    // ← CHANGE 2: Only Premium
       .order("created_at", { ascending: false });
 
     if (cookieError) {
@@ -253,7 +258,7 @@ export default async function handler(
     if (!storedCookies.length) {
       return res.status(400).json({
         success: false,
-        error: "Cookie pool is empty. No cookies available yet.",
+        error: "Cookie pool is empty. No Premium cookies available yet.",
       });
     }
 
@@ -314,7 +319,7 @@ export default async function handler(
 
     return res.status(404).json({
       success: false,
-      error: "No valid account found from available cookies.",
+      error: "No valid Premium account found from available cookies.",
     });
   } catch (error: any) {
     console.error("find-account crash:", error);
