@@ -1,8 +1,4 @@
-// api/find-account.ts – RELENTLESS SCANNER
-// ✅ Checks EVERY available cookie until it finds a valid one
-// ✅ 10-minute cooldown per cookie
-// ✅ Rechecks 'unknown' status cookies
-// ✅ No schema changes
+
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ipRateLimit } from "../lib/rateLimit.js";
@@ -32,11 +28,9 @@ const { getCookieHeaders, runDirectCheck } =
   originalServerHelpers.default ?? originalServerHelpers;
 
 // ============ IN-MEMORY COOLDOWN TRACKING ============
-// ✅ NO DATABASE CHANGES – everything stays in memory
-const recentlyChecked = new Map<string, number>(); // cookie_id -> timestamp
+const recentlyChecked = new Map<string, number>();
 const COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
 
-// Cleanup old entries every 5 minutes
 setInterval(() => {
   const now = Date.now();
   let removed = 0;
@@ -159,7 +153,6 @@ async function savePassedCheckAudits(results: any[]) {
   }
 }
 
-// ✅ Only mark as 'expired' on definitive failures, keep 'unknown' for retry
 async function updateCookieStatus(
   cookieId: string,
   isValid: boolean,
@@ -176,7 +169,6 @@ async function updateCookieStatus(
     if (plan) updateData.plan = plan;
     if (country) updateData.country = country;
   } else {
-    // ✅ KEEP UNKNOWN – will be retried
     if (isNetworkError) {
       updateData.status = "unknown";
     } else {
@@ -273,14 +265,14 @@ export default async function handler(
     }
     console.log("✅ Passcode validated");
 
-    // 5. FETCH ALL AVAILABLE PREMIUM COOKIES
-    console.log("🔍 Fetching ALL available Premium cookies...");
+    // 5. FETCH ALL PREMIUM COOKIES – INCLUDING UNKNOWN STATUS
+    console.log("🔍 Fetching Premium cookies from checked_cookies...");
 
     const { data: allCookies, error: cookieError } = await supabase
       .from("checked_cookies")
       .select("id, cookie_header, plan, country, status")
       .eq("plan", "Premium")
-      .or('status.eq.unknown,status.is.null,status.eq.active,status.eq.') // Include unknown and null
+      .or('status.eq.unknown,status.is.null,status.eq.active,status.eq.')
       .not("cookie_header", "is", null)
       .not("cookie_header", "eq", "");
 
@@ -299,9 +291,7 @@ export default async function handler(
       return res.status(404).json({
         success: false,
         error: "No Premium cookies available in the pool.",
-        debug: {
-          totalCookies: 0,
-        },
+        debug: { totalCookies: 0 },
       });
     }
 
