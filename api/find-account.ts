@@ -1,4 +1,9 @@
-// api/find-account.ts – NO SCHEMA CHANGES, IN-MEMORY COOLDOWN
+// api/find-account.ts – FINAL PRODUCTION READY
+// ✅ Random selection with 10-minute cooldown
+// ✅ Rechecks 'unknown' status cookies
+// ✅ No schema changes
+// ✅ In-memory tracking only
+
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ipRateLimit } from "../lib/rateLimit.js";
 import {
@@ -154,19 +159,30 @@ async function savePassedCheckAudits(results: any[]) {
   }
 }
 
+// ✅ Only mark as 'expired' on definitive failures, keep 'unknown' for retry
 async function updateCookieStatus(
   cookieId: string,
   isValid: boolean,
   plan?: string,
-  country?: string
+  country?: string,
+  isNetworkError: boolean = false
 ) {
   const updateData: any = {
-    status: isValid ? "active" : "expired",
     checked_at: new Date().toISOString(),
   };
 
-  if (plan) updateData.plan = plan;
-  if (country) updateData.country = country;
+  if (isValid) {
+    updateData.status = "active";
+    if (plan) updateData.plan = plan;
+    if (country) updateData.country = country;
+  } else {
+    // ✅ KEEP UNKNOWN – will be retried
+    if (isNetworkError) {
+      updateData.status = "unknown";
+    } else {
+      updateData.status = "expired";
+    }
+  }
 
   const { error } = await supabase
     .from("checked_cookies")
@@ -257,13 +273,14 @@ export default async function handler(
     }
     console.log("✅ Passcode validated");
 
-    // 5. FETCH ALL PREMIUM COOKIES
-    console.log("🔍 Fetching Premium cookies from checked_cookies...");
+    // 5. FETCH ALL PREMIUM COOKIES – INCLUDING UNKNOWN STATUS
+    console.log("🔍 Fetching Premium cookies (including unknown status)...");
 
     const { data: allCookies, error: cookieError } = await supabase
       .from("checked_cookies")
       .select("id, cookie_header, plan, country, status")
       .eq("plan", "Premium")
+      .or('status.eq.unknown,status.is.null,status.eq.active,status.eq.') // Recheck unknowns
       .not("cookie_header", "is", null)
       .not("cookie_header", "eq", "");
 
@@ -276,23 +293,26 @@ export default async function handler(
       });
     }
 
-    console.log(`✅ Found ${allCookies?.length || 0} total Premium cookies`);
+    console.log(`✅ Found ${allCookies?.length || 0} total Premium cookies (including unknown)`);
 
     if (!allCookies || allCookies.length === 0) {
       return res.status(404).json({
         success: false,
         error: "No Premium cookies available in the pool.",
+        debug: {
+          totalCookies: 0,
+        },
       });
     }
 
-    // 6. FILTER OUT RECENTLY CHECKED COOKIES (IN-MEMORY COOLDOWN)
+    // 6. FILTER OUT COOKIES IN COOLDOWN (10 minutes)
     const now = Date.now();
     const availableCookies = allCookies.filter((row: any) => {
       const lastChecked = recentlyChecked.get(row.id);
       if (lastChecked) {
         const timeSince = now - lastChecked;
         if (timeSince < COOLDOWN_MS) {
-          console.log(`⏳ Skipping cookie ${row.id} - checked ${Math.round(timeSince / 1000)}s ago`);
+          console.log(`⏳ Skipping cookie ${row.id} - in cooldown (${Math.round(timeSince / 1000)}s ago)`);
           return false;
         }
       }
@@ -323,12 +343,12 @@ export default async function handler(
     const selectedCookies = shuffled.slice(0, Math.min(10, shuffled.length));
     console.log(`🎲 Selected ${selectedCookies.length} random cookies to check`);
 
-    // 8. MARK AS CHECKED (IN-MEMORY)
+    // 8. MARK AS CHECKED (IN-MEMORY COOLDOWN)
     for (const row of selectedCookies) {
       recentlyChecked.set(row.id, now);
     }
 
-    // 9. CHECK COOKIES
+    // 9. CHECK COOKIES ONE BY ONE
     let checkedCount = 0;
 
     for (const item of selectedCookies) {
@@ -336,7 +356,7 @@ export default async function handler(
       console.log(`🔍 Checking cookie ${checkedCount}/${selectedCookies.length} (ID: ${item.id})`);
 
       try {
-        const cookieArray = [{ cookie: item.cookie_header }];
+        const cookieArray = [item.cookie_header];
 
         const result = await runDirectCheck(cookieArray, 1, {
           skipNFToken: false,
@@ -354,7 +374,8 @@ export default async function handler(
           item.id,
           !!valid,
           valid?.plan || item.plan || "Premium",
-          valid?.countryOfSignup || item.country || null
+          valid?.countryOfSignup || item.country || null,
+          false // No network error
         );
 
         if (valid) {
@@ -384,7 +405,14 @@ export default async function handler(
         }
       } catch (checkError: any) {
         console.error(`⚠️ Error checking cookie ${item.id}:`, checkError.message);
-        await updateCookieStatus(item.id, false, item.plan || "Premium", item.country || null);
+        // ✅ Keep as unknown on network errors
+        await updateCookieStatus(
+          item.id,
+          false,
+          item.plan || "Premium",
+          item.country || null,
+          true // Network error – keep as unknown
+        );
       }
     }
 
