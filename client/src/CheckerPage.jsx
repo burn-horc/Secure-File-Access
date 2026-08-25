@@ -833,6 +833,73 @@ const guideTvBtn = {
   pb={{ base: "140px", md: "180px" }}
 >
 
+       {/* ✅ PASTE THE POPUP RIGHT HERE, BEFORE FloatingMenu */}
+    {isLoading && bulkValidResults.length === 0 && (
+      <Box
+        position="fixed"
+        top="0"
+        left="0"
+        right="0"
+        bottom="0"
+        zIndex="9999"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        bg="rgba(0,0,0,0.75)"
+        backdropFilter="blur(4px)"
+      >
+        <Box
+          maxW="420px"
+          w="90%"
+          borderRadius="20px"
+          borderWidth="1px"
+          borderColor="rgba(139,92,246,0.28)"
+          bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+          boxShadow="0 0 0 1px rgba(139,92,246,0.08), 0 20px 60px rgba(0,0,0,0.9)"
+          p={6}
+          textAlign="center"
+        >
+          <Box
+            w="48px"
+            h="48px"
+            border="4px solid #1a1a2e"
+            borderTop="4px solid #8b5cf6"
+            borderRadius="50%"
+            animation={spinAnimation}
+            mx="auto"
+            mb={4}
+          />
+          <Text
+            fontSize="lg"
+            fontWeight="800"
+            color="#c4b5fd"
+            letterSpacing="0.1em"
+            textTransform="uppercase"
+            mb={2}
+          >
+            🔍 Finding Valid NETFLIX Account
+          </Text>
+          <Text
+            fontSize="sm"
+            color="rgba(255,255,255,0.65)"
+            lineHeight="1.6"
+            mb={4}
+          >
+            This may take 30-60 seconds.
+            <br />
+            Checking Premium cookies...
+          </Text>
+          <Box borderTop="1px solid rgba(139,92,246,0.15)" pt={3}>
+            <Text fontSize="xs" color="rgba(255,255,255,0.35)">
+              ⏳ Please wait while we find a valid account
+            </Text>
+          </Box>
+        </Box>
+      </Box>
+    )}
+
+    <FloatingMenu setShowNav={setShowNav} />
+
 <FloatingMenu setShowNav={setShowNav} />
  
       
