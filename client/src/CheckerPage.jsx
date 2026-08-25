@@ -309,6 +309,7 @@ const isTrialPage = mode === "trial";
   const [showHistory, setShowHistory] = useState(false);
   const [bulkRecheckState, setBulkRecheckState] = useState({ loading: false, done: 0, total: 0 });
   const [accountHistory, setAccountHistory] = useState(() => {
+    const [showWaitingPopup, setShowWaitingPopup] = useState(false);
     
   try {
     if (typeof window === "undefined") return [];
@@ -341,6 +342,14 @@ const isTrialPage = mode === "trial";
       return updated;
     });
   }, [bulkValidResults, sessionUnlocked]);
+
+  useEffect(() => {
+  if (isLoading && bulkValidResults.length === 0) {
+    setShowWaitingPopup(true);
+  } else {
+    setShowWaitingPopup(false);
+  }
+}, [isLoading, bulkValidResults]);
 
   const handleRecheck = async (index, cookieHeader) => {
     setRecheckStates(prev => ({ ...prev, [index]: { loading: true, result: null, error: null } }));
