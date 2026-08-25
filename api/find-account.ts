@@ -233,15 +233,16 @@ export default async function handler(
       });
     }
 
-    // ✅ ONLY 2 CHANGES HERE:
-    // 1. Table: "cookies" → "checked_cookies"
-    // 2. Added: .eq("plan", "Premium")
-    const { data: cookieRows, error: cookieError } = await supabase
-      .from("checked_cookies")  // ← CHANGE 1: Use checked_cookies
-      .select("cookie_header")          // ← KEEP: This works!
-      .eq("plan", "Premium")    // ← CHANGE 2: Only Premium
-      .order("created_at", { ascending: false });
-
+  const { data: cookieRows, error: cookieError } = await supabase
+  .from("checked_cookies")
+  .select("cookie_header")
+  .eq("plan", "Premium")
+  .neq("status", "expired")
+  .not("cookie_header", "is", null)
+  .not("cookie_header", "eq", "")
+  .order("checked_at", { ascending: true, nullsFirst: true })
+  .limit(50);
+    
     if (cookieError) {
       console.error("Cookie pool lookup error:", cookieError);
 
