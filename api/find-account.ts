@@ -238,7 +238,7 @@ export default async function handler(
     // 2. Added: .eq("plan", "Premium")
     const { data: cookieRows, error: cookieError } = await supabase
       .from("checked_cookies")  // ← CHANGE 1: Use checked_cookies
-      .select("cookie")          // ← KEEP: This works!
+      .select("cookie_header")          // ← KEEP: This works!
       .eq("plan", "Premium")    // ← CHANGE 2: Only Premium
       .order("created_at", { ascending: false });
 
