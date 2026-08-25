@@ -534,6 +534,14 @@ const isTrialPage = mode === "trial";
     };
   };
 
+  // Add this with your other keyframes
+const spinKeyframes = keyframes`
+  to { transform: rotate(360deg); }
+`;
+const spinAnimation = prefersReducedMotion
+  ? undefined
+  : `${spinKeyframes} 0.8s linear infinite`;
+
   const [showGuide, setShowGuide] = useState(false);
   const [showNav, setShowNav] = useState(false);
   const [copiedStates, setCopiedStates] = useState({});
@@ -1034,6 +1042,36 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                       fontSize="sm"
                       fontFamily="'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Menlo, Consolas, monospace"
                     >
+                       {/* ✅ 👇 PASTE THIS RIGHT HERE 👇 */}
+  {isLoading && checkLogs.length === 0 && (
+  <Box
+    bg="rgba(255,255,255,0.03)"
+    border="1px solid rgba(139,92,246,0.25)"
+    borderRadius="12px"
+    p={4}
+    mb={3}
+    textAlign="center"
+  >
+    <Flex align="center" justify="center" gap={3}>
+      <Box
+        w="24px"
+        h="24px"
+        border="3px solid #1a1a2e"
+        borderTop="3px solid #8b5cf6"
+        borderRadius="50%"
+        animation={spinAnimation}  // ✅ Uses Chakra keyframes
+      />
+      <Box>
+        <Text fontWeight="bold" color="#c4b5fd" fontSize="md">
+          🔍 Finding Valid NETFLIX Account...
+        </Text>
+        <Text fontSize="sm" color="rgba(255,255,255,0.5)" mt={1}>
+          This may take 30-60 seconds • Checking Premium cookies
+        </Text>
+      </Box>
+    </Flex>
+  </Box>
+)}           
                       {checkProgress.total > 0 && (
                         <HStack
                           justify="center"
