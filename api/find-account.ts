@@ -233,13 +233,14 @@ export default async function handler(
       });
     }
 
-  const { data: cookieRows, error: cookieError } = await supabase
+  // ✅ CORRECT – Use the 'text' column (or whatever column actually has cookies)
+const { data: cookieRows, error: cookieError } = await supabase
   .from("checked_cookies")
-  .select("cookie_header")
+  .select("text")  // ← Use 'text' column, NOT 'cookie_header'!
   .eq("plan", "Premium")
   .neq("status", "expired")
-  .not("cookie_header", "is", null)
-  .not("cookie_header", "eq", "")
+  .not("text", "is", null)
+  .not("text", "eq", "")
   .order("checked_at", { ascending: true, nullsFirst: true })
   .limit(50);
     
