@@ -310,8 +310,6 @@ const isTrialPage = mode === "trial";
   const [bulkRecheckState, setBulkRecheckState] = useState({ loading: false, done: 0, total: 0 });
   const [accountHistory, setAccountHistory] = useState(() => {
     
-const [isWaitingForAccount, setIsWaitingForAccount] = useState(false);
-    
   try {
     if (typeof window === "undefined") return [];
     return JSON.parse(window.localStorage.getItem("netflix-checker:history:v1") || "[]");
@@ -1047,8 +1045,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                       fontSize="sm"
                       fontFamily="'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Menlo, Consolas, monospace"
                     >
-                     {/* ✅ UPDATED – Uses isWaitingForAccount OR isLoading */}
-{(isWaitingForAccount || (isLoading && checkLogs.length === 0)) && (
+                       {/* ✅ SIMPLE VERSION – Only uses isLoading */}
+{isLoading && (
   <Box
     bg="rgba(255,255,255,0.03)"
     border="1px solid rgba(139,92,246,0.25)"
