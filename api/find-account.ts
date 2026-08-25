@@ -1,8 +1,8 @@
-// api/find-account.ts – FINAL PRODUCTION READY
-// ✅ Random selection with 10-minute cooldown
+// api/find-account.ts – RELENTLESS SCANNER
+// ✅ Checks EVERY available cookie until it finds a valid one
+// ✅ 10-minute cooldown per cookie
 // ✅ Rechecks 'unknown' status cookies
 // ✅ No schema changes
-// ✅ In-memory tracking only
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ipRateLimit } from "../lib/rateLimit.js";
@@ -273,14 +273,14 @@ export default async function handler(
     }
     console.log("✅ Passcode validated");
 
-    // 5. FETCH ALL PREMIUM COOKIES – INCLUDING UNKNOWN STATUS
-    console.log("🔍 Fetching Premium cookies (including unknown status)...");
+    // 5. FETCH ALL AVAILABLE PREMIUM COOKIES
+    console.log("🔍 Fetching ALL available Premium cookies...");
 
     const { data: allCookies, error: cookieError } = await supabase
       .from("checked_cookies")
       .select("id, cookie_header, plan, country, status")
       .eq("plan", "Premium")
-      .or('status.eq.unknown,status.is.null,status.eq.active,status.eq.') // Recheck unknowns
+      .or('status.eq.unknown,status.is.null,status.eq.active,status.eq.') // Include unknown and null
       .not("cookie_header", "is", null)
       .not("cookie_header", "eq", "");
 
@@ -293,7 +293,7 @@ export default async function handler(
       });
     }
 
-    console.log(`✅ Found ${allCookies?.length || 0} total Premium cookies (including unknown)`);
+    console.log(`✅ Found ${allCookies?.length || 0} total Premium cookies`);
 
     if (!allCookies || allCookies.length === 0) {
       return res.status(404).json({
@@ -305,7 +305,7 @@ export default async function handler(
       });
     }
 
-    // 6. FILTER OUT COOKIES IN COOLDOWN (10 minutes)
+    // 6. FILTER OUT COOKIES IN COOLDOWN AND SHUFFLE
     const now = Date.now();
     const availableCookies = allCookies.filter((row: any) => {
       const lastChecked = recentlyChecked.get(row.id);
@@ -333,27 +333,24 @@ export default async function handler(
       });
     }
 
-    // 7. PICK RANDOM SUBSET (up to 10)
-    const shuffled = [...availableCookies];
-    for (let i = shuffled.length - 1; i > 0; i--) {
+    // 7. SHUFFLE FOR TRUE RANDOMNESS
+    console.log("🔀 Shuffling cookies for random order...");
+    for (let i = availableCookies.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      [availableCookies[i], availableCookies[j]] = [availableCookies[j], availableCookies[i]];
     }
 
-    const selectedCookies = shuffled.slice(0, Math.min(10, shuffled.length));
-    console.log(`🎲 Selected ${selectedCookies.length} random cookies to check`);
+    console.log(`🎯 Will check ALL ${availableCookies.length} cookies until valid one is found`);
 
-    // 8. MARK AS CHECKED (IN-MEMORY COOLDOWN)
-    for (const row of selectedCookies) {
-      recentlyChecked.set(row.id, now);
-    }
-
-    // 9. CHECK COOKIES ONE BY ONE
+    // 8. CHECK COOKIES ONE BY ONE – UNTIL VALID FOUND
     let checkedCount = 0;
 
-    for (const item of selectedCookies) {
+    for (const item of availableCookies) {
       checkedCount++;
-      console.log(`🔍 Checking cookie ${checkedCount}/${selectedCookies.length} (ID: ${item.id})`);
+      console.log(`🔍 Checking cookie ${checkedCount}/${availableCookies.length} (ID: ${item.id})`);
+
+      // Mark as checked for cooldown
+      recentlyChecked.set(item.id, now);
 
       try {
         const cookieArray = [item.cookie_header];
@@ -380,7 +377,7 @@ export default async function handler(
 
         if (valid) {
           await savePassedCheckAudits(results);
-          console.log(`✅ VALID cookie found!`);
+          console.log(`✅✅✅ VALID Premium cookie FOUND after checking ${checkedCount} cookies!`);
           await incrementPasscodeUsage(
             passcodeCheck.passcodeRow.id,
             passcodeCheck.passcodeRow.uses
@@ -416,8 +413,8 @@ export default async function handler(
       }
     }
 
-    // 10. NO VALID COOKIES FOUND
-    console.log(`❌ No valid Premium cookies found after checking ${checkedCount} cookies`);
+    // 9. NO VALID COOKIES FOUND – Checked ALL available cookies
+    console.log(`❌❌❌ NO valid Premium cookies found after checking ALL ${checkedCount} available cookies`);
 
     return res.status(404).json({
       success: false,
@@ -425,7 +422,9 @@ export default async function handler(
       debug: {
         totalChecked: checkedCount,
         totalAvailable: availableCookies.length,
+        totalInPool: allCookies.length,
         cooldownMinutes: 10,
+        message: "All available cookies have been checked. Please try again later.",
       },
     });
   } catch (error: any) {
