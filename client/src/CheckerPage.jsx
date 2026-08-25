@@ -431,6 +431,15 @@ const isTrialPage = mode === "trial";
 
   const toast = useToast();
   const prefersReducedMotion = usePrefersReducedMotion();
+
+// ✅ ADD THIS – The spin animation for the loading spinner
+const spinKeyframes = keyframes`
+  to { transform: rotate(360deg); }
+`;
+const spinAnimation = prefersReducedMotion
+  ? undefined
+  : `${spinKeyframes} 0.8s linear infinite`;
+  
   const showUploadedFileMarker = Boolean(uploadedInputBanner);
 
   const premiumColorCycle = keyframes`
@@ -534,13 +543,7 @@ const isTrialPage = mode === "trial";
     };
   };
 
-  // Add this with your other keyframes
-const spinKeyframes = keyframes`
-  to { transform: rotate(360deg); }
-`;
-const spinAnimation = prefersReducedMotion
-  ? undefined
-  : `${spinKeyframes} 0.8s linear infinite`;
+ 
 
   const [showGuide, setShowGuide] = useState(false);
   const [showNav, setShowNav] = useState(false);
