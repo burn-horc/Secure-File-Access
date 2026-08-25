@@ -310,6 +310,8 @@ const isTrialPage = mode === "trial";
   const [bulkRecheckState, setBulkRecheckState] = useState({ loading: false, done: 0, total: 0 });
   const [accountHistory, setAccountHistory] = useState(() => {
     
+const [isWaitingForAccount, setIsWaitingForAccount] = useState(false);
+    
   try {
     if (typeof window === "undefined") return [];
     return JSON.parse(window.localStorage.getItem("netflix-checker:history:v1") || "[]");
@@ -1045,8 +1047,8 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                       fontSize="sm"
                       fontFamily="'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Menlo, Consolas, monospace"
                     >
-                       {/* ✅ 👇 PASTE THIS RIGHT HERE 👇 */}
-  {isLoading && checkLogs.length === 0 && (
+                     {/* ✅ UPDATED – Uses isWaitingForAccount OR isLoading */}
+{(isWaitingForAccount || (isLoading && checkLogs.length === 0)) && (
   <Box
     bg="rgba(255,255,255,0.03)"
     border="1px solid rgba(139,92,246,0.25)"
@@ -1062,7 +1064,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         border="3px solid #1a1a2e"
         borderTop="3px solid #8b5cf6"
         borderRadius="50%"
-        animation={spinAnimation}  // ✅ Uses Chakra keyframes
+        animation={spinAnimation}
       />
       <Box>
         <Text fontWeight="bold" color="#c4b5fd" fontSize="md">
@@ -1074,7 +1076,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
       </Box>
     </Flex>
   </Box>
-)}           
+)}
                       {checkProgress.total > 0 && (
                         <HStack
                           justify="center"
