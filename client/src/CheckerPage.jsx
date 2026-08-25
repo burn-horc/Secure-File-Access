@@ -895,9 +895,9 @@ const guideTvBtn = {
         lineHeight="1.6"
         mb={4}
       >
-        This may take 30-60 seconds.
+        Scanning Premium Netflix at high speed...
         <br />
-        Checking Premium Netflix...
+         Finding a valid account in seconds
       </Text>
       <Box borderTop="1px solid rgba(139,92,246,0.15)" pt={3}>
         <Text fontSize="xs" color="rgba(255,255,255,0.35)">
@@ -1146,7 +1146,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
           🔍 Finding Valid NETFLIX Account...
         </Text>
         <Text fontSize="sm" color="rgba(255,255,255,0.5)" mt={1}>
-          This may take 30-60 seconds • Checking Premium cookies
+         Scanning Premium Netlix at high speed...
         </Text>
       </Box>
     </Flex>
