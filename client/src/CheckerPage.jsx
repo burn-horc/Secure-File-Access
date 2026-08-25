@@ -897,7 +897,7 @@ const guideTvBtn = {
       >
         This may take 30-60 seconds.
         <br />
-        Checking Premium cookies...
+        Fetching Premium Netflix...
       </Text>
       <Box borderTop="1px solid rgba(139,92,246,0.15)" pt={3}>
         <Text fontSize="xs" color="rgba(255,255,255,0.35)">
