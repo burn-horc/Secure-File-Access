@@ -887,7 +887,7 @@ const guideTvBtn = {
         textTransform="uppercase"
         mb={2}
       >
-        🔍 Hunting for Valid NETFLIX Account
+        🔍 Finding Premium
       </Text>
       <Text
         fontSize="sm"
@@ -901,7 +901,7 @@ const guideTvBtn = {
       </Text>
       <Box borderTop="1px solid rgba(139,92,246,0.15)" pt={3}>
         <Text fontSize="xs" color="rgba(255,255,255,0.35)">
-          ⏳ Please wait while we find a valid account
+          ⏳ Please wait.
         </Text>
       </Box>
     </Box>
