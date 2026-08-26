@@ -1122,11 +1122,12 @@ animation={isPremiumPage ? premiumAnimation : undefined}
                       fontSize="sm"
                       fontFamily="'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Menlo, Consolas, monospace"
                     >
-                     {/* ✅ WAITING MESSAGE – Shows until a valid account is found */}
-{isLoading && bulkValidResults.length === 0 && (
+                    
+{/* ✅ TRIAL WAITING MESSAGE – Only shows on Trial page */}
+{isLoading && bulkValidResults.length === 0 && isTrialPage && (
   <Box
     bg="rgba(255,255,255,0.03)"
-    border="1px solid rgba(139,92,246,0.25)"
+    border="1px solid rgba(56,189,248,0.25)"
     borderRadius="12px"
     p={4}
     mb={3}
@@ -1137,16 +1138,19 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         w="24px"
         h="24px"
         border="3px solid #1a1a2e"
-        borderTop="3px solid #8b5cf6"
+        borderTop="3px solid #38bdf8"
         borderRadius="50%"
         animation={spinAnimation}
       />
       <Box>
-        <Text fontWeight="bold" color="#c4b5fd" fontSize="md">
-          🔍 Finding Valid NETFLIX Account...
+        <Text fontWeight="bold" color="#38bdf8" fontSize="md">
+          🔍 FINDING RANDOM ACCOUNT
         </Text>
         <Text fontSize="sm" color="rgba(255,255,255,0.5)" mt={1}>
-         Scanning Premium Netlix at high speed...
+          Scanning thousands of accounts from the pool...
+        </Text>
+        <Text fontSize="xs" color="rgba(255,255,255,0.35)" mt={0.5}>
+          Finding a valid account in seconds
         </Text>
       </Box>
     </Flex>
