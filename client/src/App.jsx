@@ -1665,14 +1665,7 @@ const handleTrialSubmit = async () => {
       body: JSON.stringify({ passcode: code }),
     });
 
-    const response = await fetch("/api/trial/create", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      signal: abortController.signal,
-      body: JSON.stringify({ passcode: code }),
-    });
-
+   
     const data = await response.json().catch(() => ({}));
 
     if (response.status === 404) {
