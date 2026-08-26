@@ -1,4 +1,4 @@
-// api/recheck-unknowns.ts – ONE-TIME SCRIPT
+// api/recheck-unknowns.ts – FIXED VERSION (uses relative URL)
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
 
@@ -44,8 +44,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 2. Check each cookie
     for (const cookie of cookies) {
       try {
-        // Call your existing check API
-        const checkRes = await fetch(`${process.env.VERCEL_URL}/api/check`, {
+        // ✅ FIXED – Use relative URL (same server)
+        const checkRes = await fetch(`/api/check`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
