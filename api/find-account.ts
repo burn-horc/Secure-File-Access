@@ -261,20 +261,20 @@ if (!passcode) {
   });
 }
 
-// ✅ FIXED – Passcode validation with proper type handling
+// ✅ PASCODE VALIDATION – FIXED
 const passcodeCheck = await isPasscodeValid(passcode, user.id);
 
 if (!passcodeCheck.ok) {
   await recordFailure(ip);
   return res.status(401).json({
     success: false,
-    error: passcodeCheck.error,
+    error: passcodeCheck.error, // ✅ This is only accessed when ok is false
   });
 }
 
-// ✅ If we get here, the passcode is valid
+// ✅ If we get here, passcode is valid. Safe to access passcodeRow.
 const { passcodeRow } = passcodeCheck;
-console.log("✅ Passcode validated, ID:", passcodeRow.id);
+console.log("✅ Passcode validated");
 
 // 5. FETCH PREMIUM COOKIES
 console.log("🔍 Fetching ONLY Premium cookies from checked_cookies...");
