@@ -72,7 +72,7 @@ async function getPasscodeAdminStatus(passcode: string) {
   if (!passcode) return false;
 
   const { data, error } = await supabase
-    .from("passcodes")
+    .from("trial_codes")
     .select("id, code, is_admin, is_active, expires_at")
     .eq("code", passcode)
     .eq("is_active", true)
