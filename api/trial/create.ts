@@ -1,3 +1,4 @@
+// api/trial/create.ts – WITH USER-BASED ADMIN BYPASS
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
 
@@ -68,24 +69,22 @@ async function incrementDailyGenerateUsage(ip: string) {
   return current + 1;
 }
 
-async function getPasscodeAdminStatus(passcode: string) {
-  if (!passcode) return false;
+// ✅ NEW: Check if USER is admin (from profiles table)
+async function getUserAdminStatus(userId: string) {
+  if (!userId) return false;
 
   const { data, error } = await supabase
-    .from("passcodes")
-    .select("id, code, is_admin, is_active, expires_at")
-    .eq("code", passcode)
-    .eq("is_active", true)
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", userId)
     .maybeSingle();
 
-  if (error) throw new Error(error.message);
-  if (!data) return false;
-
-  if (data.expires_at && new Date(data.expires_at) <= new Date()) {
+  if (error) {
+    console.error("Admin check error:", error);
     return false;
   }
 
-  return data.is_admin === true;
+  return data?.is_admin === true;
 }
 
 async function isVPN(ip: string) {
@@ -107,7 +106,6 @@ async function isVPN(ip: string) {
   }
 }
 
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
@@ -116,34 +114,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const ip = getClientIp(req);
 
-// Check VPN before doing anything else
+    // Check VPN before doing anything else
+    if (await isVPN(ip)) {
+      return res.status(403).json({
+        success: false,
+        error: "VPN or proxy connections are not allowed.",
+      });
+    }
 
-if (await isVPN(ip)) {
+    // ✅ Get the authenticated user from the session
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.replace("Bearer ", "").trim();
 
-  return res.status(403).json({
+    if (!token) {
+      return res.status(401).json({ success: false, error: "Unauthorized" });
+    }
 
-    success: false,
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
-    error: "VPN or proxy connections are not allowed.",
+    if (userError || !user) {
+      return res.status(401).json({ success: false, error: "Invalid session" });
+    }
 
-  });
+    // ✅ Check if USER is admin (from profiles table)
+    const isAdmin = await getUserAdminStatus(user.id);
 
-}
-    
-    const passcode = String(req.body?.passcode ?? "").trim();
-    const isAdmin = await getPasscodeAdminStatus(passcode);
-
+    // ✅ Only check daily limit for NON-ADMINS
     if (!isAdmin) {
       const todayUsage = await getDailyGenerateUsage(ip);
 
       if (todayUsage >= GENERATE_ACCOUNT_DAILY_LIMIT) {
         return res.status(429).json({
           success: false,
-          error: "You have reached the 2 daily limit for Random Account. Try again tomorrow.",
+          error: "You have reached the 3 daily limit for Random Account. Try again tomorrow.",
         });
       }
 
       await incrementDailyGenerateUsage(ip);
+    } else {
+      console.log(`👑 Admin bypass: ${user.email} has unlimited trial access`);
     }
 
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
