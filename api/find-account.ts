@@ -251,7 +251,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     console.log(`👤 User authenticated: ${user.email}`);
 
-   // 4. PASSCODE CHECK
+ // 4. PASSCODE CHECK
 const passcode = String(req.body?.passcode ?? "").trim();
 if (!passcode) {
   await recordFailure(ip);
@@ -261,24 +261,23 @@ if (!passcode) {
   });
 }
 
-// ✅ PASCODE VALIDATION – FIXED
+// ✅ CHECK PASSCODE – FIXED
 const passcodeCheck = await isPasscodeValid(passcode, user.id);
 
 if (!passcodeCheck.ok) {
   await recordFailure(ip);
   return res.status(401).json({
     success: false,
-    error: passcodeCheck.error, // ✅ This is only accessed when ok is false
+    error: passcodeCheck.error,
   });
 }
 
-// ✅ If we get here, passcode is valid. Safe to access passcodeRow.
-const { passcodeRow } = passcodeCheck;
+// ✅ If we get here, passcode is valid
 console.log("✅ Passcode validated");
+const { passcodeRow } = passcodeCheck;
 
 // 5. FETCH PREMIUM COOKIES
 console.log("🔍 Fetching ONLY Premium cookies from checked_cookies...");
-// ... rest of your code
 
     const { data: allCookies, error: cookieError } = await supabase
       .from("checked_cookies")
