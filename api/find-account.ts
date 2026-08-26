@@ -251,22 +251,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     console.log(`👤 User authenticated: ${user.email}`);
 
-    // 4. PASSCODE CHECK
-    const passcode = String(req.body?.passcode ?? "").trim();
-    if (!passcode) {
-      await recordFailure(ip);
-      return res.status(400).json({ success: false, error: "Passcode is required." });
-    }
+   // 4. PASSCODE CHECK
+const passcode = String(req.body?.passcode ?? "").trim();
+if (!passcode) {
+  await recordFailure(ip);
+  return res.status(400).json({
+    success: false,
+    error: "Passcode is required.",
+  });
+}
 
-    const passcodeCheck = await isPasscodeValid(passcode, user.id);
-    if (!passcodeCheck.ok) {
-      await recordFailure(ip);
-      return res.status(401).json({ success: false, error: passcodeCheck.error });
-    }
-    console.log("✅ Passcode validated");
+// ✅ FIXED – Passcode validation with proper type handling
+const passcodeCheck = await isPasscodeValid(passcode, user.id);
 
-    // 5. FETCH ONLY PREMIUM COOKIES
-    console.log("🔍 Fetching ONLY Premium cookies from checked_cookies...");
+if (!passcodeCheck.ok) {
+  await recordFailure(ip);
+  return res.status(401).json({
+    success: false,
+    error: passcodeCheck.error,
+  });
+}
+
+// ✅ If we get here, the passcode is valid
+const { passcodeRow } = passcodeCheck;
+console.log("✅ Passcode validated, ID:", passcodeRow.id);
+
+// 5. FETCH PREMIUM COOKIES
+console.log("🔍 Fetching ONLY Premium cookies from checked_cookies...");
+// ... rest of your code
 
     const { data: allCookies, error: cookieError } = await supabase
       .from("checked_cookies")
