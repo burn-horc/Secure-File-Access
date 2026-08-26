@@ -1598,12 +1598,15 @@ const handleTrialSubmit = async () => {
   setTrialCodeError("");
 
   try {
-    const verifyRes = await fetch("/api/trial/verify-code", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
-    });
+   const verifyRes = await fetch("/api/trial/verify-code", {
+  method: "POST",
+  credentials: "include",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session?.access_token || ""}`, // ✅ ADD THIS
+  },
+  body: JSON.stringify({ code }),
+});
 
     const verifyData = await verifyRes.json().catch(() => ({}));
 
@@ -1649,6 +1652,18 @@ const handleTrialSubmit = async () => {
     }
 
     appendCheckLog("info", "Finding available resource...");
+
+     // ✅ UPDATED – Added Authorization header
+    const response = await fetch("/api/trial/create", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.access_token || ""}`, // ✅ ADD THIS
+      },
+      signal: abortController.signal,
+      body: JSON.stringify({ passcode: code }),
+    });
 
     const response = await fetch("/api/trial/create", {
       method: "POST",
