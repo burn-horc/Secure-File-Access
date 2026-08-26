@@ -843,8 +843,8 @@ const guideTvBtn = {
   pb={{ base: "140px", md: "180px" }}
 >
 
-     {/* ✅ WAITING POPUP – Now controlled by state */}
-{showWaitingPopup && (
+     {/* ✅ PREMIUM POPUP – Only shows on Premium page */}
+{showWaitingPopup && isPremiumPage && (
   <Box
     position="fixed"
     top="0"
@@ -900,6 +900,71 @@ const guideTvBtn = {
         Finding a valid account in seconds
       </Text>
       <Box borderTop="1px solid rgba(139,92,246,0.15)" pt={3}>
+        <Text fontSize="xs" color="rgba(255,255,255,0.35)">
+          ⏳ Please wait...
+        </Text>
+      </Box>
+    </Box>
+  </Box>
+)}
+
+{/* ✅ TRIAL POPUP – Only shows on Trial page */}
+{showWaitingPopup && isTrialPage && (
+  <Box
+    position="fixed"
+    top="0"
+    left="0"
+    right="0"
+    bottom="0"
+    zIndex="9999"
+    display="flex"
+    alignItems="center"
+    justifyContent="center"
+    bg="rgba(0,0,0,0.75)"
+    backdropFilter="blur(4px)"
+  >
+    <Box
+      maxW="420px"
+      w="90%"
+      borderRadius="20px"
+      borderWidth="1px"
+      borderColor="rgba(56,189,248,0.28)"
+      bg="linear-gradient(160deg, #181e35 0%, #0f1220 100%)"
+      boxShadow="0 0 0 1px rgba(56,189,248,0.08), 0 20px 60px rgba(0,0,0,0.9)"
+      p={6}
+      textAlign="center"
+    >
+      <Box
+        w="48px"
+        h="48px"
+        border="4px solid #1a1a2e"
+        borderTop="4px solid #38bdf8"
+        borderRadius="50%"
+        animation={spinAnimation}
+        mx="auto"
+        mb={4}
+      />
+      <Text
+        fontSize="lg"
+        fontWeight="800"
+        color="#38bdf8"
+        letterSpacing="0.1em"
+        textTransform="uppercase"
+        mb={2}
+      >
+        🔍 FINDING RANDOM ACCOUNT
+      </Text>
+      <Text
+        fontSize="sm"
+        color="rgba(255,255,255,0.65)"
+        lineHeight="1.6"
+        mb={4}
+      >
+        Scanning thousands of accounts from the pool...
+        <br />
+        Finding a valid account in seconds
+      </Text>
+      <Box borderTop="1px solid rgba(56,189,248,0.15)" pt={3}>
         <Text fontSize="xs" color="rgba(255,255,255,0.35)">
           ⏳ Please wait.
         </Text>
