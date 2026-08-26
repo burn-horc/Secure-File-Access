@@ -1,4 +1,5 @@
-// api/find-account.ts – COMPLETE FIXED VERSION
+// api/find-account.ts – WITH PARALLEL BATCH CHECKING
+
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ipRateLimit } from "../lib/rateLimit.js";
 import {
@@ -154,7 +155,7 @@ async function updateCookieStatus(
   };
 
   if (isValid) {
-    const isPremium = plan?.toLowerCase() === "premium" || plan?.toLowerCase().includes("premium");
+    const isPremium = plan?.toLowerCase() === 'premium' || plan?.toLowerCase().includes('premium');
     updateData.status = isPremium ? "active" : "expired";
     if (plan) updateData.plan = plan;
     if (country) updateData.country = country;
@@ -176,7 +177,7 @@ async function updateCookieStatus(
   }
 }
 
-// ============ PARALLEL BATCH CHECKING ============
+// ============ ⚡ PARALLEL BATCH CHECKING ============
 
 async function checkCookiesBatch(cookies: any[]) {
   const promises = cookies.map(async (item) => {
@@ -257,19 +258,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ success: false, error: "Passcode is required." });
     }
 
-    // ✅ FIXED – Passcode validation
     const passcodeCheck = await isPasscodeValid(passcode, user.id);
-
     if (!passcodeCheck.ok) {
       await recordFailure(ip);
-      return res.status(401).json({
-        success: false,
-        error: passcodeCheck.error,
-      });
+      return res.status(401).json({ success: false, error: passcodeCheck.error });
     }
-
-    // ✅ If we get here, passcode is valid
-    const { passcodeRow } = passcodeCheck;
     console.log("✅ Passcode validated");
 
     // 5. FETCH ONLY PREMIUM COOKIES
@@ -279,7 +272,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .from("checked_cookies")
       .select("id, cookie_header, plan, country, status")
       .eq("plan", "Premium")
-      .or("status.eq.unknown,status.is.null,status.eq.active,status.eq.")
+      .or('status.eq.unknown,status.is.null,status.eq.active')
       .not("cookie_header", "is", null)
       .not("cookie_header", "eq", "");
 
@@ -335,9 +328,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     console.log(`🎯 Will check ALL ${availableCookies.length} Premium cookies until valid one is found`);
 
-    // 8. CHECK COOKIES IN BATCHES
-    const BATCH_SIZE = 5;
-    const BATCH_DELAY = 500;
+    // 8. ⚡ CHECK COOKIES IN BATCHES (PARALLEL)
+    const BATCH_SIZE = 5; // Check 5 cookies at a time
+    const BATCH_DELAY = 500; // 0.5 second delay between batches
 
     let checkedCount = 0;
     let foundValid = null;
@@ -346,16 +339,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const batch = availableCookies.slice(i, i + BATCH_SIZE);
       console.log(`📦 Checking batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(availableCookies.length / BATCH_SIZE)} (${batch.length} cookies)`);
 
+      // ⚡ Check cookies in parallel
       const results = await checkCookiesBatch(batch);
 
+      // Process results
       for (const item of results) {
         checkedCount++;
         recentlyChecked.set(item.id, now);
 
+        // Check if the account is actually Premium
         if (item.valid) {
-          const isPremium = item.results?.[0]?.plan?.toLowerCase() === "premium" ||
-                            item.results?.[0]?.plan?.toLowerCase().includes("premium") ||
-                            item.results?.[0]?.tier?.toLowerCase() === "premium";
+          const isPremium = item.results?.[0]?.plan?.toLowerCase() === 'premium' || 
+                            item.results?.[0]?.plan?.toLowerCase().includes('premium') ||
+                            item.results?.[0]?.tier?.toLowerCase() === 'premium';
 
           if (!isPremium) {
             console.log(`❌ Account found but NOT Premium (${item.results?.[0]?.plan}), marking as expired...`);
@@ -363,9 +359,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             continue;
           }
 
+          // ✅ VALID PREMIUM ACCOUNT FOUND
           await savePassedCheckAudits(item.results || []);
           await updateCookieStatus(item.id, true, item.results?.[0]?.plan || "Premium", item.results?.[0]?.countryOfSignup || item.country || null);
-
+          
           console.log(`✅✅✅ VALID PREMIUM cookie FOUND after checking ${checkedCount} cookies!`);
           foundValid = item;
           break;
@@ -375,14 +372,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
 
+      // Early exit if we found a valid one
       if (foundValid) break;
 
+      // Small delay between batches to avoid rate limiting
       if (i + BATCH_SIZE < availableCookies.length) {
         console.log(`⏳ Waiting ${BATCH_DELAY}ms before next batch...`);
-        await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY));
+        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
       }
     }
 
+    // 9. NO VALID COOKIES FOUND
     if (!foundValid) {
       console.log(`❌❌❌ NO valid Premium cookies found after checking ALL ${checkedCount} available cookies`);
       return res.status(404).json({
@@ -397,10 +397,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // 10. RETURN VALID ACCOUNT
     const responseTime = Date.now() - startTime;
     console.log(`⏱️ Response time: ${responseTime}ms`);
 
-    await incrementPasscodeUsage(passcodeRow.id, passcodeRow.uses);
+    await incrementPasscodeUsage(
+      passcodeCheck.passcodeRow.id,
+      passcodeCheck.passcodeRow.uses
+    );
     await clearFailures(ip);
 
     return res.status(200).json({
