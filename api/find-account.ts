@@ -1,4 +1,5 @@
-// api/find-account.ts – SEQUENTIAL CHECKING (NO PARALLEL)
+// api/find-account.ts – WITH PARALLEL BATCH CHECKING
+
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ipRateLimit } from "../lib/rateLimit.js";
 import {
@@ -176,6 +177,43 @@ async function updateCookieStatus(
   }
 }
 
+// ============ ⚡ PARALLEL BATCH CHECKING ============
+
+async function checkCookiesBatch(cookies: any[]) {
+  const promises = cookies.map(async (item) => {
+    try {
+      const result = await runDirectCheck([item.cookie_header], 1, {
+        skipNFToken: false,
+        delayMs: 0,
+        randomJitter: false,
+        staggerMs: 0,
+        onValidCookie: async () => {},
+      });
+
+      const results = Array.isArray(result?.results) ? result.results : [];
+      const valid = results.find((r: any) => r?.valid);
+
+      return {
+        ...item,
+        result,
+        valid: !!valid,
+        results,
+        error: null,
+      };
+    } catch (err: any) {
+      return {
+        ...item,
+        result: null,
+        valid: false,
+        results: [],
+        error: err.message,
+      };
+    }
+  });
+
+  return Promise.all(promises);
+}
+
 // ============ MAIN HANDLER ============
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -234,7 +272,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .from("checked_cookies")
       .select("id, cookie_header, plan, country, status")
       .eq("plan", "Premium")
-      .or('status.eq.unknown,status.is.null,status.eq.active,status.eq.')
+      .or('status.eq.unknown,status.is.null,status.eq.active')
       .not("cookie_header", "is", null)
       .not("cookie_header", "eq", "");
 
@@ -290,90 +328,93 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     console.log(`🎯 Will check ALL ${availableCookies.length} Premium cookies until valid one is found`);
 
-    // 8. ✅ SEQUENTIAL CHECKING – ONE BY ONE (NO PARALLEL)
+    // 8. ⚡ CHECK COOKIES IN BATCHES (PARALLEL)
+    const BATCH_SIZE = 5; // Check 5 cookies at a time
+    const BATCH_DELAY = 500; // 0.5 second delay between batches
+
     let checkedCount = 0;
+    let foundValid = null;
 
-    for (const item of availableCookies) {
-      checkedCount++;
-      console.log(`🔍 Checking cookie ${checkedCount}/${availableCookies.length} (ID: ${item.id})`);
+    for (let i = 0; i < availableCookies.length; i += BATCH_SIZE) {
+      const batch = availableCookies.slice(i, i + BATCH_SIZE);
+      console.log(`📦 Checking batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(availableCookies.length / BATCH_SIZE)} (${batch.length} cookies)`);
 
-      // Mark as checked for cooldown
-      recentlyChecked.set(item.id, now);
+      // ⚡ Check cookies in parallel
+      const results = await checkCookiesBatch(batch);
 
-      try {
-        const cookieArray = [item.cookie_header];
-
-        const result = await runDirectCheck(cookieArray, 1, {
-          skipNFToken: false,
-          delayMs: 0,
-          randomJitter: false,
-          staggerMs: 0,
-          onValidCookie: async () => {},
-        });
-
-        const results = Array.isArray(result?.results) ? result.results : [];
-        const valid = results.find((r: any) => r?.valid);
+      // Process results
+      for (const item of results) {
+        checkedCount++;
+        recentlyChecked.set(item.id, now);
 
         // Check if the account is actually Premium
-        if (valid) {
-          const isPremium = valid?.plan?.toLowerCase() === 'premium' || 
-                            valid?.plan?.toLowerCase().includes('premium') ||
-                            valid?.tier?.toLowerCase() === 'premium';
+        if (item.valid) {
+          const isPremium = item.results?.[0]?.plan?.toLowerCase() === 'premium' || 
+                            item.results?.[0]?.plan?.toLowerCase().includes('premium') ||
+                            item.results?.[0]?.tier?.toLowerCase() === 'premium';
 
           if (!isPremium) {
-            console.log(`❌ Account found but NOT Premium (${valid?.plan}), marking as expired...`);
-            await updateCookieStatus(item.id, false, valid?.plan || item.plan || "Standard", valid?.countryOfSignup || item.country || null);
+            console.log(`❌ Account found but NOT Premium (${item.results?.[0]?.plan}), marking as expired...`);
+            await updateCookieStatus(item.id, false, item.results?.[0]?.plan || item.plan || "Standard", item.results?.[0]?.countryOfSignup || item.country || null);
             continue;
           }
 
           // ✅ VALID PREMIUM ACCOUNT FOUND
-          await savePassedCheckAudits(results);
-          await updateCookieStatus(item.id, true, valid?.plan || "Premium", valid?.countryOfSignup || item.country || null);
+          await savePassedCheckAudits(item.results || []);
+          await updateCookieStatus(item.id, true, item.results?.[0]?.plan || "Premium", item.results?.[0]?.countryOfSignup || item.country || null);
           
           console.log(`✅✅✅ VALID PREMIUM cookie FOUND after checking ${checkedCount} cookies!`);
-          await incrementPasscodeUsage(passcodeCheck.passcodeRow.id, passcodeCheck.passcodeRow.uses);
-          await clearFailures(ip);
-
-          const responseTime = Date.now() - startTime;
-          console.log(`⏱️ Response time: ${responseTime}ms`);
-
-          return res.status(200).json({
-            success: true,
-            ...result,
-            debug: {
-              totalCookiesChecked: checkedCount,
-              totalAvailable: availableCookies.length,
-              responseTime: `${responseTime}ms`,
-              cookieId: item.id,
-            },
-          });
+          foundValid = item;
+          break;
         } else {
           console.log(`❌ Cookie ${checkedCount} invalid or expired`);
-          await updateCookieStatus(item.id, false, item.plan || "Premium", item.country || null, false);
+          await updateCookieStatus(item.id, false, item.plan || "Premium", item.country || null, !!item.error);
         }
-      } catch (checkError: any) {
-        console.error(`⚠️ Error checking cookie ${item.id}:`, checkError.message);
-        await updateCookieStatus(item.id, false, item.plan || "Premium", item.country || null, true);
       }
 
-      // ✅ ADD DELAY BETWEEN EACH COOKIE – Prevents rate limiting
-      const DELAY_MS = 500; // 0.5 seconds
-      console.log(`⏳ Waiting ${DELAY_MS}ms before next cookie...`);
-      await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+      // Early exit if we found a valid one
+      if (foundValid) break;
+
+      // Small delay between batches to avoid rate limiting
+      if (i + BATCH_SIZE < availableCookies.length) {
+        console.log(`⏳ Waiting ${BATCH_DELAY}ms before next batch...`);
+        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
+      }
     }
 
-    // 9. NO VALID COOKIES FOUND – Checked ALL available cookies
-    console.log(`❌❌❌ NO valid Premium cookies found after checking ALL ${checkedCount} available cookies`);
+    // 9. NO VALID COOKIES FOUND
+    if (!foundValid) {
+      console.log(`❌❌❌ NO valid Premium cookies found after checking ALL ${checkedCount} available cookies`);
+      return res.status(404).json({
+        success: false,
+        error: "No valid Premium accounts found. All checked cookies are expired or invalid.",
+        debug: {
+          totalChecked: checkedCount,
+          totalAvailable: availableCookies.length,
+          totalInPool: allCookies.length,
+          cooldownMinutes: 10,
+        },
+      });
+    }
 
-    return res.status(404).json({
-      success: false,
-      error: "No valid Premium accounts found. All checked cookies are expired or invalid.",
+    // 10. RETURN VALID ACCOUNT
+    const responseTime = Date.now() - startTime;
+    console.log(`⏱️ Response time: ${responseTime}ms`);
+
+    await incrementPasscodeUsage(
+      passcodeCheck.passcodeRow.id,
+      passcodeCheck.passcodeRow.uses
+    );
+    await clearFailures(ip);
+
+    return res.status(200).json({
+      success: true,
+      ...foundValid.result,
       debug: {
-        totalChecked: checkedCount,
+        totalCookiesChecked: checkedCount,
         totalAvailable: availableCookies.length,
-        totalInPool: allCookies.length,
-        cooldownMinutes: 10,
-        message: "All available cookies have been checked. Please try again later.",
+        responseTime: `${responseTime}ms`,
+        cookieId: foundValid.id,
       },
     });
   } catch (error: any) {
