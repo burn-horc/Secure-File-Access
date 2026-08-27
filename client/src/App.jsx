@@ -763,6 +763,7 @@ export default function App() {
   const [vpnBlocked, setVpnBlocked] = useState(false);
   const [verifiedPasscode, setVerifiedPasscode] = useState("");
   const [location, setLocation] = useLocation();
+  const [isFetchingAccount, setIsFetchingAccount] = useState(false);
 
 
   const paymentReturnState =
@@ -1284,6 +1285,7 @@ const requestPayloads = buildCheckRequestPayloads(normalizedInput, normalizedWor
     } finally {
       activeCheckAbortControllerRef.current = null;
       setIsLoading(false);
+      setIsFetchingAccount(false);
     }
   };
 
@@ -1453,6 +1455,7 @@ appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`
   } finally {
     activeCheckAbortControllerRef.current = null;
     setIsLoading(false);
+    setIsFetchingAccount(false);
   }
 };
   
@@ -1475,7 +1478,9 @@ appendCheckLog("invalid", `INVALID - ${planLabel} - ${countryLabel} - ${reason}`
 
   const runFindAccount = () => {
   if (isLoading) return;
+    setIsFetchingAccount(true);
   findAccountRetryRef.current = 0;
+    
 
   if (sessionUnlocked) {
     if (!verifiedPasscode) {
@@ -1628,6 +1633,7 @@ const handleTrialSubmit = async () => {
 };
   const fetchTrialAccount = async (code) => {
   if (isLoading) return;
+    setIsFetchingAccount(true);
 
   const abortController = new AbortController();
   activeCheckAbortControllerRef.current = abortController;
@@ -1752,6 +1758,7 @@ if (usableResults.length > 0 && soundEnabled) {
   } finally {
     activeCheckAbortControllerRef.current = null;
     setIsLoading(false);
+    setIsFetchingAccount(false);
   }
 };
 
