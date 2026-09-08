@@ -1526,7 +1526,7 @@ animation={isPremiumPage ? premiumAnimation : undefined}
         <Text textAlign="center" lineHeight="1.8">
           Make sure you have the Netflix app installed.
           <br />
-          Ensure there is no other Netflix account logged in on your app or browser.
+          Ensure there is no other Netflix account logged in on your app and browser.
           <br />
           Paste the provided link into your main browser (Chrome/Safari).
           <br />
