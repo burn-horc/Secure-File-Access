@@ -525,63 +525,89 @@ export default function AdminPage({ session }) {
           </HStack>
         </Flex>
 
-        <SimpleGrid
-          columns={{
-            base: 1,
-            md: 2,
-          }}
-          spacing={4}
-          mb={5}
-        >
-          <Box
-            bg="#111525"
-            border="1px solid rgba(139,92,246,.2)"
-            borderRadius="16px"
-            p={5}
-          >
-            <Text
-              fontSize="xs"
-              color="gray.500"
-            >
-              ACCOUNTS LISTED
-            </Text>
+       <SimpleGrid
+  columns={{
+    base: 1,
+    md: 3,
+  }}
+  spacing={4}
+  mb={5}
+>
+  <Box
+    bg="#111525"
+    border="1px solid rgba(139,92,246,.2)"
+    borderRadius="16px"
+    p={5}
+  >
+    <Text
+      fontSize="xs"
+      color="gray.500"
+    >
+      ACCOUNTS LISTED
+    </Text>
 
-            <Text
-              fontSize="3xl"
-              fontWeight="800"
-            >
-              {users.length}
-            </Text>
-          </Box>
+    <Text
+      fontSize="3xl"
+      fontWeight="800"
+    >
+      {users.length}
+    </Text>
+  </Box>
 
-          <Box
-            bg="#111525"
-            border="1px solid rgba(34,197,94,.18)"
-            borderRadius="16px"
-            p={5}
-          >
-            <Text
-              fontSize="xs"
-              color="gray.500"
-            >
-              ACTIVE PREMIUM
-            </Text>
+  <Box
+    bg="#111525"
+    border="1px solid rgba(34,197,94,.18)"
+    borderRadius="16px"
+    p={5}
+  >
+    <Text
+      fontSize="xs"
+      color="gray.500"
+    >
+      ACTIVE PREMIUM
+    </Text>
 
-            <Text
-              fontSize="3xl"
-              fontWeight="800"
-              color="#4ade80"
-            >
-              {
-                users.filter(
-                  (user) =>
-                    user.is_admin ||
-                    user.status === "active"
-                ).length
-              }
-            </Text>
-          </Box>
-        </SimpleGrid>
+    <Text
+      fontSize="3xl"
+      fontWeight="800"
+      color="#4ade80"
+    >
+      {
+        users.filter(
+          (user) =>
+            user.is_admin ||
+            user.status === "active"
+        ).length
+      }
+    </Text>
+  </Box>
+
+  <Box
+    bg="#111525"
+    border="1px solid rgba(59,130,246,.2)"
+    borderRadius="16px"
+    p={5}
+  >
+    <Text
+      fontSize="xs"
+      color="gray.500"
+    >
+      TOTAL SCANS
+    </Text>
+
+    <Text
+      fontSize="3xl"
+      fontWeight="800"
+      color="#93c5fd"
+    >
+      {users.reduce(
+        (sum, user) =>
+          sum + (user.total_scans ?? 0),
+        0
+      )}
+    </Text>
+  </Box>
+</SimpleGrid>
 
         <Box
           bg="#111525"
@@ -793,35 +819,45 @@ export default function AdminPage({ session }) {
                           flex="1"
                         >
                           <HStack
-                            flexWrap="wrap"
-                            mb={1}
-                          >
-                            <Text fontWeight="800">
-                              {user.name ||
-                                "Unnamed user"}
-                            </Text>
+  flexWrap="wrap"
+  mb={1}
+>
+  <Text fontWeight="800">
+    {user.name ||
+      "Unnamed user"}
+  </Text>
 
-                            <Badge
-                              bg={badge.bg}
-                              color={
-                                badge.color
-                              }
-                              borderRadius="full"
-                              px={2}
-                            >
-                              {badge.label}
-                            </Badge>
+  <Badge
+    bg={badge.bg}
+    color={
+      badge.color
+    }
+    borderRadius="full"
+    px={2}
+  >
+    {badge.label}
+  </Badge>
 
-                            <Badge
-                              bg="rgba(59,130,246,.12)"
-                              color="#93c5fd"
-                              borderRadius="full"
-                              px={2}
-                            >
-                              {user.source ||
-                                "none"}
-                            </Badge>
-                          </HStack>
+  <Badge
+    bg="rgba(59,130,246,.12)"
+    color="#93c5fd"
+    borderRadius="full"
+    px={2}
+  >
+    {user.source ||
+      "none"}
+  </Badge>
+
+  <Badge
+    bg="rgba(34,197,94,.15)"
+    color="#4ade80"
+    borderRadius="full"
+    px={2}
+    fontWeight="700"
+  >
+    {user.total_scans ?? 0} scans
+  </Badge>
+</HStack>
 
                           <Text
                             fontSize="sm"
@@ -840,45 +876,77 @@ export default function AdminPage({ session }) {
                             mt={3}
                           >
                             <Box>
-                              <Text
-                                fontSize="2xs"
-                                color="gray.600"
-                              >
-                                PASSCODE
-                              </Text>
+  <Text
+    fontSize="2xs"
+    color="gray.600"
+  >
+    PASSCODE
+  </Text>
 
-                              <HStack mt={1}>
-                                <Text
-                                  fontFamily="monospace"
-                                  color="#c4b5fd"
-                                  wordBreak="break-all"
-                                >
-                                  {user
-                                    .passcode
-                                    ?.code ||
-                                    "No active passcode"}
-                                </Text>
+  <HStack mt={1}>
+    <Text
+      fontFamily="monospace"
+      color="#c4b5fd"
+      wordBreak="break-all"
+    >
+      {user
+        .passcode
+        ?.code ||
+        "No active passcode"}
+    </Text>
 
-                                {user
-                                  .passcode
-                                  ?.code && (
-                                  <Button
-                                    size="xs"
-                                    variant="ghost"
-                                    color="#a78bfa"
-                                    onClick={() =>
-                                      copyCode(
-                                        user
-                                          .passcode
-                                          .code
-                                      )
-                                    }
-                                  >
-                                    Copy
-                                  </Button>
-                                )}
-                              </HStack>
-                            </Box>
+    {user
+      .passcode
+      ?.code && (
+      <Button
+        size="xs"
+        variant="ghost"
+        color="#a78bfa"
+        onClick={() =>
+          copyCode(
+            user
+              .passcode
+              .code
+          )
+        }
+      >
+        Copy
+      </Button>
+    )}
+  </HStack>
+
+  {user.passcode && (
+    <HStack mt={2} spacing={2}>
+      <Badge
+        bg="rgba(34,197,94,.15)"
+        color="#4ade80"
+        borderRadius="full"
+        px={2}
+        py={0.5}
+        fontSize="2xs"
+        fontWeight="700"
+      >
+        {user.passcode.uses ?? 0} scans
+      </Badge>
+
+      {user.passcode.max_uses != null ? (
+        <Text
+          fontSize="2xs"
+          color="gray.500"
+        >
+          / {user.passcode.max_uses} max
+        </Text>
+      ) : (
+        <Text
+          fontSize="2xs"
+          color="gray.500"
+        >
+          / unlimited
+        </Text>
+      )}
+    </HStack>
+  )}
+</Box>
 
                             <Box>
                               <Text
