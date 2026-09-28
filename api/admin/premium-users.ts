@@ -168,6 +168,7 @@ async function listPremiumUsers(
   const managedProfiles = (profiles ?? []).filter(
     (profile) =>
       profile.premium === true ||
+      profile.premium_until !== null ||
       adminIds.has(profile.id)
   );
 
@@ -260,6 +261,12 @@ async function listPremiumUsers(
       source = "paymongo";
     }
 
+    // Total scans across ALL passcodes belonging to this user
+    const totalScans = userPasscodes.reduce(
+      (sum, p) => sum + (p.uses ?? 0),
+      0
+    );
+
     return {
       user_id: profile.id,
       email: profile.email,
@@ -273,6 +280,16 @@ async function listPremiumUsers(
           ? "expired"
           : "inactive",
       source,
+      total_scans: totalScans,
+      passcodes: userPasscodes.map((p) => ({
+        id: p.id,
+        code: p.code,
+        is_active: p.is_active,
+        expires_at: p.expires_at,
+        max_uses: p.max_uses,
+        uses: p.uses ?? 0,
+        is_admin: p.is_admin,
+      })),
       passcode: currentPasscode
         ? {
             id: currentPasscode.id,
@@ -280,7 +297,7 @@ async function listPremiumUsers(
             is_active: currentPasscode.is_active,
             expires_at: currentPasscode.expires_at,
             max_uses: currentPasscode.max_uses,
-            uses: currentPasscode.uses,
+            uses: currentPasscode.uses ?? 0,
             is_admin: currentPasscode.is_admin,
           }
         : null,
