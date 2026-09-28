@@ -864,7 +864,6 @@ useEffect(() => {
 }, [session?.access_token]);
 
 
-  
 useEffect(() => {
   const ensureProfile = async (session) => {
     if (!session?.user) {
@@ -875,49 +874,54 @@ useEffect(() => {
 
     const user = session.user;
 
-    const { data: existing, error: existingError } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (existingError) {
-      console.error("Profile check error:", existingError);
-      return;
-    }
-
-    if (!existing) {
-      const { error: insertError } = await supabase
+    try {
+      const { data: existing, error: existingError } = await supabase
         .from("profiles")
-        .insert({
-          id: user.id,
-          email: user.email,
-          name: user.user_metadata?.full_name || "",
-          avatar_url: user.user_metadata?.avatar_url || "",
-          premium: false,
-          premium_until: null,
-          created_at: new Date().toISOString(),
-        });
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
 
-      if (insertError) {
-        console.error("Profile insert error:", insertError);
-        return;
+      if (existingError) throw existingError;
+
+      if (!existing) {
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            id: user.id,
+            email: user.email,
+            name: user.user_metadata?.full_name || "",
+            avatar_url: user.user_metadata?.avatar_url || "",
+            premium: false,
+            premium_until: null,
+            created_at: new Date().toISOString(),
+          });
+
+        if (insertError) throw insertError;
       }
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      setProfile(profileData);
+      setSession(session);
+    } catch (err) {
+      console.error("Profile load error:", err);
+
+      // FIX: Fallback profile so UI doesn't stay stuck
+      setProfile({
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.full_name || "",
+        premium: false,
+        premium_until: null,
+      });
+      setSession(session);
     }
-
-    const { data: profileData, error: profileError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError) {
-      console.error("Profile load error:", profileError);
-      return;
-    }
-
-    setProfile(profileData);
-    setSession(session);
   };
 
   supabase.auth.getSession().then(({ data }) => {
@@ -1785,10 +1789,10 @@ if (!acceptedNotice) {
     {profile?.name || session?.user?.email}
   </Text>
 
-  <Text
+ <Text
   fontSize="sm"
   color={
-    isAdminAccount === null || profile === null
+    isAdminAccount === null && profile === null
       ? "gray.400"
       : isAdminAccount
       ? "purple.300"
@@ -1797,7 +1801,7 @@ if (!acceptedNotice) {
       : "gray.400"
   }
 >
-  {isAdminAccount === null || profile === null
+  {isAdminAccount === null && profile === null
     ? "Checking account..."
     : isAdminAccount
     ? "Admin Account"
