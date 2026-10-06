@@ -134,28 +134,52 @@ async function findProfileByEmail(email: string) {
   );
 }
 
-async function listPremiumUsers(
-  res: VercelResponse
-) {
-  const [
-    { data: profiles, error: profilesError },
-    { data: adminRows, error: adminRowsError },
-  ] = await Promise.all([
-    supabaseAdmin
+// ✅ Paginated fetch of ALL premium/expired profiles
+// Bypasses Supabase's default 1000-row truncation
+async function fetchAllPremiumProfiles() {
+  const PAGE_SIZE = 1000;
+  let allProfiles: any[] = [];
+  let from = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabaseAdmin
       .from("profiles")
       .select(
         "id, email, name, premium, premium_until, created_at"
       )
-      .order("created_at", { ascending: false }),
+      .or("premium.eq.true,premium_until.not.is.null")
+      .order("created_at", { ascending: false })
+      .range(from, from + PAGE_SIZE - 1);
 
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (!data || data.length === 0) {
+      break;
+    }
+
+    allProfiles = allProfiles.concat(data);
+    hasMore = data.length === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
+
+  return allProfiles;
+}
+
+async function listPremiumUsers(
+  res: VercelResponse
+) {
+  const [
+    profiles,
+    { data: adminRows, error: adminRowsError },
+  ] = await Promise.all([
+    fetchAllPremiumProfiles(),
     supabaseAdmin
       .from("admin_users")
       .select("user_id"),
   ]);
-
-  if (profilesError) {
-    throw new Error(profilesError.message);
-  }
 
   if (adminRowsError) {
     throw new Error(adminRowsError.message);
@@ -165,11 +189,38 @@ async function listPremiumUsers(
     (adminRows ?? []).map((row) => row.user_id)
   );
 
-  const managedProfiles = (profiles ?? []).filter(
-    (profile) =>
-      profile.premium === true ||
-      profile.premium_until !== null ||
-      adminIds.has(profile.id)
+  // Merge premium profiles + admins (deduped)
+  const managedProfiles = profiles ?? [];
+
+  // Ensure every admin appears in the list, even if not premium
+  const adminProfilesNotInList = (adminRows ?? [])
+    .filter(
+      (row) =>
+        !managedProfiles.some((p) => p.id === row.user_id)
+    )
+    .map((row) => row.user_id);
+
+  if (adminProfilesNotInList.length > 0) {
+    const { data: extraAdmins, error: extraErr } =
+      await supabaseAdmin
+        .from("profiles")
+        .select(
+          "id, email, name, premium, premium_until, created_at"
+        )
+        .in("id", adminProfilesNotInList);
+
+    if (extraErr) {
+      throw new Error(extraErr.message);
+    }
+
+    managedProfiles.push(...(extraAdmins ?? []));
+  }
+
+  // Re-sort after merging
+  managedProfiles.sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() -
+      new Date(a.created_at).getTime()
   );
 
   const userIds = managedProfiles.map(
