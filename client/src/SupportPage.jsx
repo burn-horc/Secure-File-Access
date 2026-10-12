@@ -13,7 +13,6 @@ import { useLocation } from "wouter";
 export default function SupportPage() {
   const [, setLocation] = useLocation();
 
-  
   const showSocials = false;
 
   return (
@@ -83,7 +82,7 @@ export default function SupportPage() {
               <br />
 
               <Text as="span" fontWeight="600" color="white">
-                Email:
+                General Support:
               </Text>{" "}
               <Link
                 href="mailto:burnhorc@gmail.com?subject=Support Request"
@@ -91,6 +90,19 @@ export default function SupportPage() {
                 textDecoration="underline"
               >
                 burnhorc@gmail.com
+              </Link>
+
+              <br />
+
+              <Text as="span" fontWeight="600" color="white">
+                Premium Support:
+              </Text>{" "}
+              <Link
+                href="mailto:premium.support.net@gmail.com?subject=Premium Support Request"
+                color="#c4b5fd"
+                textDecoration="underline"
+              >
+                premium.support.net@gmail.com
               </Link>
 
               {showSocials && (
@@ -168,7 +180,19 @@ export default function SupportPage() {
               color="white"
               _hover={{ filter: "brightness(1.08)" }}
             >
-              Email Support
+              Email General Support
+            </Button>
+
+            <Button
+              as="a"
+              href="mailto:premium.support.net@gmail.com?subject=Premium Support Request"
+              w="full"
+              borderRadius="12px"
+              bg="linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%)"
+              color="white"
+              _hover={{ filter: "brightness(1.08)" }}
+            >
+              Email Premium Support
             </Button>
 
             {showSocials && (
